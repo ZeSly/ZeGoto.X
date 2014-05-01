@@ -445,6 +445,13 @@ static void InitializeBoard(void)
     AD1PCFGL = 0xFFFF;
 //    AD1PCFGLbits.PCFG10 = 0;    // Power sense on AN10
 
+    // Sleep mode for the 2 DRV8824
+    RA_SLEEP_TRIS = OUTPUT_PIN;
+    RA_SLEEP_IO = 0;
+    DEC_SLEEP_TRIS = OUTPUT_PIN;
+    DEC_SLEEP_IO = 0;
+
+
     // LEDs
     LED1_TRIS = 0;
     LED2_TRIS = 0;

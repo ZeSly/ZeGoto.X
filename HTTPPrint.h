@@ -110,9 +110,6 @@ void HTTPPrint(DWORD callbackID)
         case 0x0000000b:
 			HTTPPrint_led(2);
 			break;
-        case 0x00000011:
-			HTTPPrint_btn(0);
-			break;
         case 0x00000012:
 			HTTPPrint_btn(1);
 			break;
@@ -154,6 +151,18 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000020:
 			HTTPPrint_rebootaddr();
+			break;
+        case 0x0000003a:
+			HTTPPrint_btn(4);
+			break;
+        case 0x0000003b:
+			HTTPPrint_btn(5);
+			break;
+        case 0x0000003c:
+			HTTPPrint_btn(6);
+			break;
+        case 0x0000003d:
+			HTTPPrint_btn(7);
 			break;
 		default:
 			// Output notification for undefined values

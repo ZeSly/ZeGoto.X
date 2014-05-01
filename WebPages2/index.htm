@@ -8,13 +8,35 @@
 		<p>LEDs:<br /><span class="leds">
 		<a id="led2" onclick="newAJAXCommand('leds.cgi?led=2');">&bull;</a>
 		<a id="led1" onclick="newAJAXCommand('leds.cgi?led=1');">&bull;</a>
-		<a id="led0">&bull;</a>
 		</span></p>
-		<p>Buttons:<br />
-		<span id="btn3">?</span> &nbsp;
-		<span id="btn2">?</span> &nbsp;
-		<span id="btn1">?</span> &nbsp;
-		<span id="btn0">?</span></p>
+		<table>
+		<caption>Buttons:</caption>
+		<tr>
+			<th id="btn1">?</th>
+			<th></th>
+			<th id="btn2">?</th>
+		</tr>
+		<tr>
+			<th></th>
+			<th id="btn7">?</th>
+			<th></th>
+		</tr>
+		<tr>
+			<th></th>
+			<th id="btn5">?</th>
+			<th></th>
+		</tr>
+		<tr>
+			<th id="btn3">?</th>
+			<th></th>
+			<th id="btn4">?</th>
+		</tr>
+		<tr>
+			<th></th>
+			<th id="btn6">?</th>
+			<th></th>
+		</tr>
+		</table>
 	</div>
 </div>
 
@@ -84,14 +106,14 @@ function updateStatus(xmlData) {
 	loadstat = 'none';
 
 	// Loop over all the LEDs
-	for(i = 0; i < 8; i++)
-		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#090' : '#ddd';
+	for(i = 1; i <= 2; i++)
+		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#f00' : '#ddd';
 
 	// Loop over all the buttons
-	for(i = 0; i < 4; i++)
-		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '&Lambda;' : 'V';
+	for(i = 1; i <= 7; i++)
+		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '_' : 'O';
 
-
+}
 setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
 //-->
 </script>
