@@ -76,10 +76,11 @@
 #endif
 
 // Include functions specific to this stack application
-#include "MainDemo.h"
+#include "main.h"
 #include "inputs.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
+#include "lx200_protocol.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -360,9 +361,10 @@ static void ProcessIO(void)
     static BYTE nb_blink = 6;
     static DWORD t = 0;
     BYTE numBytesRead;
+    BYTE numBytesWrite;
 
-    // Blink LED0 (right most one) every second.
-    if(TickGet() - t >= TICK_SECOND/4ul && nb_blink)
+    // Blink LED2
+    if(TickGet() - t >= TICK_SECOND/2ul && nb_blink)
     {
         t = TickGet();
         LED2_IO ^= 1;
@@ -373,20 +375,19 @@ static void ProcessIO(void)
     {
         RADirection(0);
         RAAccelerate();
-        LED2_IO = 1;
+        nb_blink = 2;
 
     }
     else if (bPadState & PAD_S4)
     {
         RADirection(1);
         RAAccelerate();
-        LED2_IO = 1;
+        nb_blink = 2;
 
     }
     else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
     {
         RADecelerate();
-        LED2_IO = 0;
 
     }
 
@@ -395,19 +396,18 @@ static void ProcessIO(void)
     {
         DecDirection(0);
         DecStart();
-        LED1_IO = 1;
+        nb_blink = 2;
 
     }
     else if (bPadState & PAD_S6)
     {
         DecDirection(1);
         DecStart();
-        LED1_IO = 1;
+        nb_blink = 2;
     }
     else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
     {
         DecDecelerate();
-        LED1_IO = 0;
     }
 
     
@@ -416,6 +416,10 @@ static void ProcessIO(void)
 
     if (USBUSARTIsTxTrfReady())
     {
+        static char LX200Cmd[32];
+        static BYTE j = 0;
+
+        numBytesWrite = 0;
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
         if (numBytesRead != 0)
         {
@@ -423,20 +427,36 @@ static void ProcessIO(void)
 
             for (i = 0; i < numBytesRead; i++)
             {
-                switch (USB_Out_Buffer[i])
+                if (USB_Out_Buffer[i] == 6) // NACK
                 {
-                case 0x0A:
-                case 0x0D:
-                    USB_In_Buffer[i] = USB_Out_Buffer[i];
-                    break;
-                default:
-                    USB_In_Buffer[i] = USB_Out_Buffer[i] + 1;
-                    break;
+                    USB_In_Buffer[0] = 'P';
+                    numBytesWrite = 1;
+                }
+                else if (USB_Out_Buffer[i] == ':') // start of a LX200 commande
+                {
+                    j = 0;
+                }
+                else if (USB_Out_Buffer[i] == '#')  // end of a LX200 commande
+                {
+                    if (j > 0)
+                    {
+                        LX200Cmd[j] = '\0';
+                        LX200ProcessCommand(LX200Cmd);
+                        numBytesWrite = strlen(USB_In_Buffer);
+                    }
+                    j = 0;
+                }
+                else
+                {
+                    LX200Cmd[j++] = USB_Out_Buffer[i];
                 }
 
+                if (numBytesWrite)
+                {
+                    putUSBUSART(USB_In_Buffer, numBytesWrite);
+                }
             }
 
-            putUSBUSART(USB_In_Buffer, numBytesRead);
         }
     }
 
@@ -481,11 +501,12 @@ static void InitializeBoard(void)
     LED1_TRIS = 0;
     LED2_TRIS = 0;
 
-    // Button
-    InputsInit();
-
+    // Motors
     RAMotorInit();
     DecMotorInit();
+
+    // Button
+    InputsInit();
 
     // Deassert all chip select lines so there isn't any problem with
     // initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16,

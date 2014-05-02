@@ -25,19 +25,25 @@
 #include "ra_motor.h"
 #include "GenericTypeDefs.h"
 
-uint32_t SideralPeriod = 159563;
-uint32_t SideralHalfPeriod = 159563/2;
+/* Mount specific settings */
+int32_t NbStepMax = 8640000UL;
+uint32_t SideralPeriod = 159563UL;
+uint32_t SideralHalfPeriod = 159563UL / 2;
 uint16_t MaxSpeed = 120;
 
+/* Acceleration/decelation varibles and constant */
 int32_t AccelTime = 4; // seconds
 int32_t DecelTime = 1; // seconds
-
 int32_t AccelPeriod;
 int32_t DecelPeriod;
 
+/* Position variables */
+int32_t RAStepPosition = 0; // Set default position to north celestial pole
+uint8_t WestDirection = 0;
+uint8_t EastDirection = !WestDirection;
 
-motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
-
+/* static for RA motor */
+static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
 static uint16_t tmodulo;
@@ -77,8 +83,11 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            if (SideralPeriod & 1) RA_STEP_IO ^= 1; // if SideralHalfPeriod is odd
-            tint_cnt = tlap | RA_STEP_IO;
+            RA_STEP_IO ^= 1;
+
+            // if SideralHalfPeriod is odd
+            if (SideralPeriod & 1) tint_cnt = tlap | RA_STEP_IO;
+
             PR2 = 0xFFFF;
         }
     }
@@ -180,7 +189,9 @@ void RAMotorInit(void)
 
 void RAStart(void)
 {
+    LED2_IO = 0;
     RA_SLEEP_IO = 1;
+    RA_FAULT_CN = 1;
     CurrentSpeed = 1;
     T2CONbits.TON = 1;
 }
@@ -206,6 +217,7 @@ void RADecelerate(void)
 void RAStop(void)
 {
     T2CONbits.TON = 0;
+    RA_FAULT_CN = 0;
     RA_SLEEP_IO = 0;
 }
 

@@ -23,8 +23,13 @@
 #include "HardwareProfile.h"
 #include "ra_motor.h"
 
-motor_state_t DecState = MOTOR_STOP; // = sideral rate for Dec motor
+/* Position variables */
+int32_t DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
+uint8_t NorthDirection = 0;
+uint8_t SouthDirection = !NorthDirection;
 
+/* static for dec motor */
+static motor_state_t DecState = MOTOR_STOP;
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
 static uint16_t tmodulo;
@@ -64,7 +69,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            if (SideralPeriod & 1) DEC_STEP_IO ^= 1; // if SideralHalfPeriod is odd
+            DEC_STEP_IO ^= 1;
             tint_cnt = tlap | DEC_STEP_IO;
             PR3 = 0xFFFF;
         }
@@ -170,6 +175,7 @@ void DecStart(void)
     if (DecState == MOTOR_STOP)
     {
         DEC_SLEEP_IO = 1;
+        DEC_FAULT_CN = 1;
         CurrentSpeed = 1;
         accel_decel_cnt = AccelPeriod;
         DecState = MOTOR_ACCEL;
@@ -189,6 +195,7 @@ void DecDecelerate(void)
 void DecStop(void)
 {
     T3CONbits.TON = 0;
+    DEC_FAULT_CN = 0;
     DEC_SLEEP_IO = 0;
 }
 

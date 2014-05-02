@@ -65,17 +65,23 @@ void InputsInit(void)
     TRISBbits.TRISB14 = 1;  // RA-
     TRISBbits.TRISB15 = 1;  // DEC-
 
-//    if (!PORTBbits.RB6) bPadState |= PAD_S1;
-//    if (!PORTBbits.RB1) bPadState |= PAD_S2;
-//    if (!PORTBbits.RB8) bPadState |= PAD_S3;
-//    if (!PORTBbits.RB0) bPadState |= PAD_S4;
-//    if (!PORTBbits.RB3) bPadState |= PAD_S5;
-//    if (!PORTBbits.RB7) bPadState |= PAD_S6;
-//    if (PORTBbits.RB2) bPadState |= PAD_SWITCH;
 }
 
 void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void)
 {
+    if (RA_FAULT_IO == 0 && RA_SLEEP_IO == 1)
+    {
+        T2CONbits.TON = 0;
+        RA_SLEEP_IO = 0;
+        LED2_IO = 1;
+    }
+    if (DEC_FAULT_IO == 0 && DEC_SLEEP_IO == 1)
+    {
+        T3CONbits.TON = 0;
+        DEC_SLEEP_IO = 0;
+        LED2_IO = 1;
+    }
+
     static unsigned int dwLastCNTick = 0;
     unsigned int dwCNTick = TMR1;
     unsigned int dwCNInterval = dwLastCNTick < dwCNTick ? dwCNTick - dwLastCNTick : dwLastCNTick - dwCNTick;

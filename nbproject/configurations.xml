@@ -74,12 +74,13 @@
       </logicalFolder>
       <itemPath>HTTPPrint.h</itemPath>
       <itemPath>HardwareProfile.h</itemPath>
-      <itemPath>MainDemo.h</itemPath>
       <itemPath>TCPIPConfig.h</itemPath>
       <itemPath>usb_config.h</itemPath>
       <itemPath>inputs.h</itemPath>
       <itemPath>ra_motor.h</itemPath>
       <itemPath>dec_motor.h</itemPath>
+      <itemPath>main.h</itemPath>
+      <itemPath>lx200_protocol.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -154,6 +155,7 @@
       <itemPath>inputs.c</itemPath>
       <itemPath>ra_motor.c</itemPath>
       <itemPath>dec_motor.c</itemPath>
+      <itemPath>lx200_protocol.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

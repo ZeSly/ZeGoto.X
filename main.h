@@ -3,7 +3,7 @@
  *                  Headers for TCPIP Demo App
  *
  *********************************************************************
- * FileName:        MainDemo.h
+ * FileName:        main.h
  * Dependencies:    Compiler.h
  * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
  * Compiler:        Microchip C32 v1.05 or higher
@@ -48,8 +48,10 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * E. Wood				4/26/08 Copied from MainDemo.c
  ********************************************************************/
-#ifndef _MAINDEMO_H
-#define _MAINDEMO_H
+#ifndef _MAIN_H
+#define _MAIN_H
+
+#define VERSION "0.0.1"
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS) || defined(EEPROM_I2CCON)
 	void SaveAppConfig(const APP_CONFIG *AppConfig);
@@ -57,15 +59,15 @@
 	#define SaveAppConfig(a)
 #endif
 
-void SMTPDemo(void);
-void PingDemo(void);
-void SNMPTrapDemo(void);
-void SNMPV2TrapDemo(void);
-void GenericTCPClient(void);
+//void SMTPDemo(void);
+//void PingDemo(void);
+//void SNMPTrapDemo(void);
+//void SNMPV2TrapDemo(void);
+//void GenericTCPClient(void);
 void GenericTCPServer(void);
-void BerkeleyTCPClientDemo(void);
-void BerkeleyTCPServerDemo(void);
-void BerkeleyUDPClientDemo(void);
+//void BerkeleyTCPClientDemo(void);
+//void BerkeleyTCPServerDemo(void);
+//void BerkeleyUDPClientDemo(void);
 
 
 // Define a header structure for validating the AppConfig data structure in EEPROM/Flash
@@ -77,5 +79,6 @@ typedef struct
         unsigned short _align;
 } NVM_VALIDATION_STRUCT;
 
+extern char USB_In_Buffer[64];
 
-#endif // _MAINDEMO_H
+#endif // _MAIN_H

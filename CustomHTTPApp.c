@@ -58,7 +58,7 @@
 #if defined(STACK_USE_HTTP2_SERVER)
 
 #include "TCPIP Stack/TCPIP.h"
-#include "MainDemo.h"		// Needed for SaveAppConfig() prototype
+#include "main.h"		// Needed for SaveAppConfig() prototype
 
 /****************************************************************************
   Section:
@@ -1645,11 +1645,11 @@ static HTTP_IO_RESULT HTTPPostDDNSConfig(void)
 void HTTPPrint_builddate(void)
 {
     curHTTP.callbackPos = 0x01;
-    if (TCPIsPutReady(sktHTTP) < strlenpgm((ROM char*) __DATE__" ""00:08:00"))
+    if (TCPIsPutReady(sktHTTP) < strlenpgm((ROM char*) __DATE__" "__TIME__))
         return;
 
     curHTTP.callbackPos = 0x00;
-    TCPPutROMString(sktHTTP, (ROM void*) __DATE__" ""00:08:00");
+    TCPPutROMString(sktHTTP, (ROM void*) __DATE__" "__TIME__);
 }
 
 void HTTPPrint_version(void)

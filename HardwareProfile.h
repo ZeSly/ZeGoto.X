@@ -192,6 +192,7 @@
 #define RA_MODE_IO          (LATEbits.LATE3)
 #define RA_FAULT_TRIS       (TRISEbits.TRISE5)
 #define RA_FAULT_IO         (PORTEbits.RE5)
+#define RA_FAULT_CN         (CNEN4bits.CN63IE)
 
 /** Dec motor control ***********************************************/
 #define DEC_HOME_TRIS       (TRISDbits.TRISD1)
@@ -206,6 +207,7 @@
 #define DEC_MODE_IO         (LATDbits.LATD2)
 #define DEC_FAULT_TRIS      (TRISEbits.TRISE0)
 #define DEC_FAULT_IO        (PORTEbits.RE0)
+#define DEC_FAULT_CN        (CNEN4bits.CN58IE)
 
 #define TEST_PIN_TRIS       (TRISDbits.TRISD7)
 #define TEST_PIN_OUT        (LATDbits.LATD7);
