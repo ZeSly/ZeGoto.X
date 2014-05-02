@@ -78,10 +78,13 @@
       <itemPath>TCPIPConfig.h</itemPath>
       <itemPath>usb_config.h</itemPath>
       <itemPath>inputs.h</itemPath>
+      <itemPath>ra_motor.h</itemPath>
+      <itemPath>dec_motor.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
                    projectFiles="true">
+      <itemPath>Application linker files/app_hid_boot_p24FJ256GB106.gld</itemPath>
     </logicalFolder>
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
@@ -149,6 +152,8 @@
       <itemPath>main.c</itemPath>
       <itemPath>usb_descriptors.c</itemPath>
       <itemPath>inputs.c</itemPath>
+      <itemPath>ra_motor.c</itemPath>
+      <itemPath>dec_motor.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -161,6 +166,7 @@
     <Elem>Configs</Elem>
     <Elem>TCPIP Stack</Elem>
     <Elem>USB</Elem>
+    <Elem>Application linker files</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -352,6 +358,7 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="UCNFG1" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

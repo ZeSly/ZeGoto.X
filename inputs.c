@@ -1,15 +1,23 @@
+/*********************************************************************
+ *
+ *      ~ OpenGoto ~
+ *
+ *  Right Ascension motor setup and control
+ *
+ *********************************************************************
+ * FileName:        input.c
+ * Processor:       PIC24FJ256GB106
+ * Compiler:        Microchip XC16 v1.21 or higher
+ *
+ * Copyright © 2014 Sylvain Girard
+ *
+ * Author               Date        Comment
+ *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * Sylvain Girard   	01/05/2011  Creation
+ ********************************************************************/
+
 /* Device header file */
-#if defined(__XC16__)
 #include <xc.h>
-#elif defined(__C30__)
-#if defined(__PIC24E__)
-#include <p24Exxxx.h>
-#elif defined (__PIC24F__)||defined (__PIC24FK__)
-#include <p24Fxxxx.h>
-#elif defined(__PIC24H__)
-#include <p24Hxxxx.h>
-#endif
-#endif
 
 #include "HardwareProfile.h"
 #include "GenericTypeDefs.h"
@@ -49,7 +57,7 @@ void InputsInit(void)
     CNPU1bits.CN4PUE = 1; // pull-up
 
     IFS1bits.CNIF = 0;
-    IPC4bits.CNIP = 7;
+    IPC4bits.CNIP = 3;
     IEC1bits.CNIE = 1;
 
     TRISBbits.TRISB12 = 1;  // DEC+
@@ -74,7 +82,6 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void)
 
     if (dwCNInterval > 1000)
     {
-        LED2_IO ^= 1;
         bPadState = 0;
         if (!PORTBbits.RB6) bPadState |= PAD_S1;
         if (!PORTBbits.RB1) bPadState |= PAD_S2;

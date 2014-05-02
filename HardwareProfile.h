@@ -183,29 +183,34 @@
 #define RA_HOME_TRIS        (TRISEbits.TRISE4)
 #define RA_HOME_IO          (PORTEbits.RE4)
 #define RA_SLEEP_TRIS       (TRISEbits.TRISE6)
-#define RA_SLEEP_IO         (PORTEbits.RE6)
+#define RA_SLEEP_IO         (LATEbits.LATE6)
 #define RA_DIR_TRIS         (TRISEbits.TRISE1)
-#define RA_DIR_IO           (PORTEbits.RE1)
+#define RA_DIR_IO           (LATEbits.LATE1)
 #define RA_STEP_TRIS        (TRISEbits.TRISE2)
-#define RA_STEP_IO          (PORTEbits.RE2)
+#define RA_STEP_IO          (LATEbits.LATE2)
 #define RA_MODE_TRIS        (TRISEbits.TRISE3)
-#define RA_MODE_IO          (PORTEbits.RE3)
+#define RA_MODE_IO          (LATEbits.LATE3)
 #define RA_FAULT_TRIS       (TRISEbits.TRISE5)
 #define RA_FAULT_IO         (PORTEbits.RE5)
 
 /** Dec motor control ***********************************************/
-#define DEC_HOME_TRIS        (TRISDbits.TRISD1)
-#define DEC_HOME_IO          (PORTDbits.RD1)
-#define DEC_SLEEP_TRIS       (TRISDbits.TRISD6)
-#define DEC_SLEEP_IO         (PORTDbits.RD6)
-#define DEC_DIR_TRIS         (TRISDbits.TRISD4)
-#define DEC_DIR_IO           (PORTDbits.RD4)
-#define DEC_STEP_TRIS        (TRISDbits.TRISD3)
-#define DEC_STEP_IO          (PORTDbits.RD3)
-#define DEC_MODE_TRIS        (TRISDbits.TRISD2)
-#define DEC_MODE_IO          (PORTDbits.RD2)
-#define DEC_FAULT_TRIS       (TRISDbits.TRISD7)
-#define DEC_FAULT_IO         (PORTDbits.RD7)
+#define DEC_HOME_TRIS       (TRISDbits.TRISD1)
+#define DEC_HOME_IO         (PORTDbits.RD1)
+#define DEC_SLEEP_TRIS      (TRISFbits.TRISF1)
+#define DEC_SLEEP_IO        (LATFbits.LATF1)
+#define DEC_DIR_TRIS        (TRISDbits.TRISD4)
+#define DEC_DIR_IO          (LATDbits.LATD4)
+#define DEC_STEP_TRIS       (TRISDbits.TRISD3)
+#define DEC_STEP_IO         (LATDbits.LATD3)
+#define DEC_MODE_TRIS       (TRISDbits.TRISD2)
+#define DEC_MODE_IO         (LATDbits.LATD2)
+#define DEC_FAULT_TRIS      (TRISEbits.TRISE0)
+#define DEC_FAULT_IO        (PORTEbits.RE0)
+
+#define TEST_PIN_TRIS       (TRISDbits.TRISD7)
+#define TEST_PIN_OUT        (LATDbits.LATD7);
+#define TEST_PIN_IN         (PORTDbits.RD7);
+
 
 #endif //HARDWARE_PROFILE_H
 

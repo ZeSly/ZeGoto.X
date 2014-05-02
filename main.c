@@ -1,21 +1,17 @@
 /*********************************************************************
  *
- *  Main Application Entry Point and TCP/IP Stack Demo
- *  Module for Microchip TCP/IP Stack
- *   -Demonstrates how to call and use the Microchip TCP/IP stack
- *   -Reference: Microchip TCP/IP Stack Help (TCPIP Stack Help.chm)1150
-
+ * OpenGoto
+ *
+ *  Main Application Entry Point
  *
  *********************************************************************
- * FileName:        MainDemo.c
+ * FileName:        main.c
  * Dependencies:    TCPIP.h
- * Processor:       PIC18, PIC24F, PIC24H, dsPIC30F, dsPIC33F, PIC32
- * Compiler:        Microchip C32 v1.11b or higher
- *                  Microchip C30 v3.24 or higher
- *                  Microchip C18 v3.36 or higher
+ * Processor:       PIC24FJ256GB106
+ * Compiler:        Microchip XC16 v1.21 or higher
  * Company:         Microchip Technology, Inc.
  *
- * Software License Agreement
+ * Software License Agreement for USB and TCP/IP Stack
  *
  * Copyright (C) 2002-2010 Microchip Technology Inc.  All rights
  * reserved.
@@ -82,6 +78,8 @@
 // Include functions specific to this stack application
 #include "MainDemo.h"
 #include "inputs.h"
+#include "ra_motor.h"
+#include "dec_motor.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -94,10 +92,6 @@ static unsigned short wOriginalAppConfigChecksum; // Checksum of the ROM default
 
 char USB_In_Buffer[64];
 char USB_Out_Buffer[64];
-
-BOOL stringPrinted;
-volatile BOOL buttonPressed;
-volatile BYTE buttonCount;
 
 /** P R I V A T E  P R O T O T Y P E S ***************************************/
 void USBDeviceTasks(void);
@@ -131,6 +125,9 @@ int main(void)
     // Initialize core stack layers (MAC, ARP, TCP, UDP) and
     // application modules (HTTP, SNMP, etc.)
     StackInit();
+
+    // Start RA motor at sideral rate
+    RAStart();
 
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
     ZeroconfLLInitialize();
@@ -261,16 +258,16 @@ int main(void)
         {
             dwLastIP = AppConfig.MyIPAddr.Val;
 
-            if (mUSBUSARTIsTxTrfReady())
-            {
-                char sIP[128];
-                sprintf(sIP, (ROM char*) "IP ard: %d.%d.%d.%d\r\n",
-                        AppConfig.MyIPAddr.v[0],
-                        AppConfig.MyIPAddr.v[1],
-                        AppConfig.MyIPAddr.v[2],
-                        AppConfig.MyIPAddr.v[3]);
-                putrsUSBUSART(sIP);
-            }
+//            if (mUSBUSARTIsTxTrfReady())
+//            {
+//                char sIP[128];
+//                sprintf(sIP, (ROM char*) "IP ard: %d.%d.%d.%d\r\n",
+//                        AppConfig.MyIPAddr.v[0],
+//                        AppConfig.MyIPAddr.v[1],
+//                        AppConfig.MyIPAddr.v[2],
+//                        AppConfig.MyIPAddr.v[3]);
+//                putrsUSBUSART(sIP);
+//            }
 
 #if defined(STACK_USE_ANNOUNCE)
             AnnounceIP();
@@ -360,34 +357,63 @@ int main(void)
  *******************************************************************/
 static void ProcessIO(void)
 {
-//    static DWORD t = 0;
+    static BYTE nb_blink = 6;
+    static DWORD t = 0;
     BYTE numBytesRead;
 
     // Blink LED0 (right most one) every second.
-//    if(TickGet() - t >= TICK_SECOND/2ul)
-//    {
-//        t = TickGet();
-//        LED2_IO ^= 1;
-//    }
-
-    // User Application USB tasks
-    if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
-
-    if (bPadState & PAD_S1)
+    if(TickGet() - t >= TICK_SECOND/4ul && nb_blink)
     {
-        if (stringPrinted == FALSE)
-        {
-            if (mUSBUSARTIsTxTrfReady())
-            {
-                putrsUSBUSART("Button S1 Pressed -- \r\n");
-                stringPrinted = TRUE;
-            }
-        }
+        t = TickGet();
+        LED2_IO ^= 1;
+        nb_blink--;
     }
+
+    if (bPadState & PAD_S3)
+    {
+        RADirection(0);
+        RAAccelerate();
+        LED2_IO = 1;
+
+    }
+    else if (bPadState & PAD_S4)
+    {
+        RADirection(1);
+        RAAccelerate();
+        LED2_IO = 1;
+
+    }
+    else if (bPadState & PAD_S5)
+    {
+        DecDirection(0);
+        DecStart();
+        LED1_IO = 1;
+
+    }
+    else if (bPadState & PAD_S6)
+    {
+        DecDirection(1);
+        DecStart();
+        LED1_IO = 1;
+    }
+
     else
     {
-        stringPrinted = FALSE;
+        if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
+        {
+            RADecelerate();
+            LED2_IO = 0;
+
+        }
+        if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
+        {
+            DecDecelerate();
+            LED1_IO = 0;
+        }
     }
+    
+    // User Application USB tasks
+    if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
 
     if (USBUSARTIsTxTrfReady())
     {
@@ -459,6 +485,9 @@ static void InitializeBoard(void)
     // Button
     InputsInit();
 
+    RAMotorInit();
+    DecMotorInit();
+
     // Deassert all chip select lines so there isn't any problem with
     // initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16,
     // MAX3232 ROUT2 pin will drive RF12/U2CTS ENC28J60 CS line asserted,
@@ -520,12 +549,6 @@ static void InitializeBoard(void)
     //#endif
 
     USBDeviceInit(); //usb_device.c.  Initializes USB module SFRs and firmware
-    //variables to known states.
-    //Initialize all of the debouncing variables
-    buttonCount = 0;
-    buttonPressed = FALSE;
-    stringPrinted = TRUE;
-
 }
 
 /*********************************************************************
