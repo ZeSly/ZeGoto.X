@@ -36,19 +36,30 @@ void RADecelerate(void);
 void RAStop(void);
 void RADirection(uint8_t dir);
 
-#ifndef RA_MOTOR_C
+//#ifndef RA_MOTOR_C
+
+/* Mount specific settings */
+extern int32_t NbStepMax;
+extern int32_t RAStepPerSec;
 
 extern uint32_t SideralPeriod;
 extern uint32_t SideralHalfPeriod;
 extern uint16_t MaxSpeed;
 
+/* Acceleration/decelation varibles and constant */
 extern int32_t AccelTime;
 extern int32_t DecelTime;
-
 extern int32_t AccelPeriod;
 extern int32_t DecelPeriod;
 
-#endif
+/* Position variables */
+extern int32_t RAStepPosition;
+extern int32_t RAStepTarget;
+
+extern uint8_t WestDirection;
+extern uint8_t EastDirection;
+
+//#endif
 
 #endif	/* RA_MOTOR_H */
 

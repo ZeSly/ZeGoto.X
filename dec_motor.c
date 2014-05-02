@@ -2,7 +2,7 @@
  *
  *      ~ OpenGoto ~
  *
- *  TODO add description
+ *  Declination motor setup and control
  *
  *********************************************************************
  * FileName:        dec_motor.c
@@ -23,10 +23,17 @@
 #include "HardwareProfile.h"
 #include "ra_motor.h"
 
+/* Mount specific variables */
+int32_t DecStepPerDegree;
+int32_t DecStepPerMinute;
+int32_t DecStepPerSecond;
+
 /* Position variables */
-int32_t DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
+int32_t DecStepPosition;
+int32_t DecStepTarget;
+
 uint8_t NorthDirection = 0;
-uint8_t SouthDirection = !NorthDirection;
+uint8_t SouthDirection = 1;
 
 /* static for dec motor */
 static motor_state_t DecState = MOTOR_STOP;
@@ -166,6 +173,12 @@ void DecMotorInit(void)
     DEC_STEP_IO = 0;
 
     MotorTimerPeriod = SideralHalfPeriod;
+
+    DecStepPerDegree = NbStepMax / 360L;
+    DecStepPerMinute = DecStepPerDegree / 60L;
+    DecStepPerSecond = DecStepPerMinute / 60L;
+
+    DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
 
     Timer3Init();
 }

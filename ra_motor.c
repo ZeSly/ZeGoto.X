@@ -27,6 +27,8 @@
 
 /* Mount specific settings */
 int32_t NbStepMax = 8640000UL;
+int32_t RAStepPerSec;
+
 uint32_t SideralPeriod = 159563UL;
 uint32_t SideralHalfPeriod = 159563UL / 2;
 uint16_t MaxSpeed = 120;
@@ -39,8 +41,10 @@ int32_t DecelPeriod;
 
 /* Position variables */
 int32_t RAStepPosition = 0; // Set default position to north celestial pole
+int32_t RAStepTarget;
+
 uint8_t WestDirection = 0;
-uint8_t EastDirection = !WestDirection;
+uint8_t EastDirection = 1;
 
 /* static for RA motor */
 static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
@@ -183,6 +187,8 @@ void RAMotorInit(void)
     MotorTimerPeriod = SideralHalfPeriod;
     AccelPeriod = GetPeripheralClock() / MaxSpeed * AccelTime;
     DecelPeriod = GetPeripheralClock() / MaxSpeed * DecelTime;
+
+    RAStepPerSec = NbStepMax / (24L * 3600L);
 
     Timer2Init();
 }

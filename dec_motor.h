@@ -2,7 +2,7 @@
  *
  *      ~ OpenGoto ~
  *
- *  TODO add description
+ *  Declination motor setup and control
  *
  *********************************************************************
  * FileName:        dec_motor.h
@@ -24,5 +24,17 @@ void DecStart(void);
 void DecDecelerate(void);
 void DecStop(void);
 void DecDirection(uint8_t dir);
+
+/* Mount specific variables */
+extern int32_t DecStepPerDegree;
+extern int32_t DecStepPerMinute;
+extern int32_t DecStepPerSecond;
+
+/* Position variables */
+extern int32_t DecStepPosition;
+extern int32_t DecStepTarget;
+
+extern uint8_t NorthDirection;
+extern uint8_t SouthDirection;
 
 #endif	/* DEC_MOTOR_H */

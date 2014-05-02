@@ -23,6 +23,8 @@
 #include "Compiler.h"
 #include <string.h>
 
+#include "get_telescope_information.h"
+
 void GetTelescopeFirmwareDate()
 {
     strcpy(USB_In_Buffer, __DATE__"#");
@@ -52,17 +54,17 @@ typedef struct
 
 LX200Command LX200CommandTab[] =
 {
-//    { "GR", 2, GetTelescopeRA},
-//    { "Gr", 2, GetCurrentTargetRA},
-//    { "GD", 2, GetTelescopeDeclination},
-//    { "Gd", 2, GetCurrentTargetDeclination},
-//    { "GZ", 2, GetTelescopeAzimuth},
-//    { "GA", 2, GetTelescopeAltitude},
-//    { "GS", 2, GetSiderealTime},
-//
-//    { "U", 1, PrecisionToggle},
-//    { "P", 1, GetPrecision},
-//
+    { "GR", 2, GetTelescopeRA},
+    { "Gr", 2, GetCurrentTargetRA},
+    { "GD", 2, GetTelescopeDeclination},
+    { "Gd", 2, GetCurrentTargetDeclination},
+    { "GZ", 2, GetTelescopeAzimuth},
+    { "GA", 2, GetTelescopeAltitude},
+    { "GS", 2, GetSiderealTime},
+
+    { "U", 1, PrecisionToggle},
+    { "P", 1, GetPrecision},
+
 //    { "Sr", 2, SetTargetObjectRA},
 //    { "Sd", 2, SetTargetObjectDeclination},
 //

@@ -81,6 +81,7 @@
       <itemPath>dec_motor.h</itemPath>
       <itemPath>main.h</itemPath>
       <itemPath>lx200_protocol.h</itemPath>
+      <itemPath>get_telescope_information.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -156,6 +157,7 @@
       <itemPath>ra_motor.c</itemPath>
       <itemPath>dec_motor.c</itemPath>
       <itemPath>lx200_protocol.c</itemPath>
+      <itemPath>get_telescope_information.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
