@@ -26,96 +26,130 @@
 #include "GenericTypeDefs.h"
 
 uint32_t SideralPeriod = 159563;
+uint32_t SideralHalfPeriod = 159563/2;
 uint16_t MaxSpeed = 120;
-uint16_t MotorTimerPeriod;
 
-uint32_t AccelTime = 4; // seconds
-uint32_t DecelTime = 1; // seconds
+int32_t AccelTime = 4; // seconds
+int32_t DecelTime = 1; // seconds
 
-uint16_t AccelPeriod;
-uint16_t DecelPeriod;
+int32_t AccelPeriod;
+int32_t DecelPeriod;
+
 
 motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 
+static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
-static uint16_t t2modulo;
-static uint16_t t2int_cnt;
-static uint16_t accel_decel_cnt;
+static uint16_t tmodulo;
+static uint16_t tlap;
+static uint16_t tint_cnt;
+static int32_t accel_decel_cnt;
 
 void Timer2Init(void)
 {
-    t2modulo = SideralPeriod % MaxSpeed / 2;
-    t2int_cnt = MaxSpeed;
     T2CON = 0x0000; // 16 bit time, 1:1 prescale, internal clock
-    PR2 = MotorTimerPeriod;
-    IPC1bits.T2IP = 7; // Interrupt priority 7 (highest)
+    if (MotorTimerPeriod > 0xFFFF)
+    {
+        tlap = MotorTimerPeriod / 0xFFFF;
+        tint_cnt = tlap;
+        tmodulo = MotorTimerPeriod % 0xFFFF;
+        PR2 = 0xFFFF;
+    }
+    else
+    {
+        tint_cnt = 0;
+        tmodulo = 0;
+        PR2 = MotorTimerPeriod;
+    }
+    IPC1bits.T2IP = 6; // Interrupt priority 7 (highest)
     IFS0bits.T2IF = 0;
     IEC0bits.T2IE = 1;
 }
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
-    t2int_cnt--;
+    if (tmodulo != 0)
+    {
+        tint_cnt--;
+        if (tint_cnt == 0)
+        {
+            PR2 = tmodulo;
+        }
+        else if (tint_cnt == 0xFFFF)
+        {
+            if (SideralPeriod & 1) RA_STEP_IO ^= 1; // if SideralHalfPeriod is odd
+            tint_cnt = tlap | RA_STEP_IO;
+            PR2 = 0xFFFF;
+        }
+    }
+    else
+    {
+        RA_STEP_IO ^= 1;
+    }
 
     switch (RAState)
     {
     case MOTOR_STOP:
-        if (t2int_cnt == 0)
-        {
-            PR2 = t2modulo;
-        }
-        else if (t2int_cnt == 0xFFFF)
-        {
-            t2int_cnt = CurrentSpeed;
-            RA_STEP_IO ^= 1;
-            PR2 = MotorTimerPeriod;
-        }
         break;
 
     case MOTOR_ACCEL:
-        if (t2int_cnt == 0)
-        {
-            t2int_cnt = CurrentSpeed;
-            RA_STEP_IO ^= 1;
-        }
-
-        accel_decel_cnt--;
-        if (accel_decel_cnt == 0)
+        accel_decel_cnt -= PR2;
+        if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = AccelPeriod;
-            CurrentSpeed--;
-            if (CurrentSpeed == 4)
+            CurrentSpeed++;
+            if (CurrentSpeed >= MaxSpeed)
             {
                 RAState = MOTOR_NOACC;
             }
+
+            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+            if (MotorTimerPeriod > 0xFFFF)
+            {
+                tlap = MotorTimerPeriod / 0xFFFF;
+                tint_cnt = tlap;
+                tmodulo = MotorTimerPeriod % 0xFFFF;
+                PR2 = 0xFFFF;
+            }
+            else
+            {
+                tint_cnt = 0;
+                tmodulo = 0;
+                PR2 = MotorTimerPeriod;
+            }
+
         }
         break;
 
     case MOTOR_DECEL:
-        if (t2int_cnt == 0)
-        {
-            t2int_cnt = CurrentSpeed;
-            RA_STEP_IO ^= 1;
-        }
-
-        accel_decel_cnt--;
-        if (accel_decel_cnt == 0)
+        accel_decel_cnt -= PR2;
+        if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = DecelPeriod;
-            CurrentSpeed++;
-            if (CurrentSpeed == MaxSpeed)
+            CurrentSpeed--;
+            if (CurrentSpeed == 1)
             {
                 RAState = MOTOR_STOP;
+            }
+            
+            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+            if (MotorTimerPeriod > 0xFFFF)
+            {
+                tlap = MotorTimerPeriod / 0xFFFF;
+                tint_cnt = tlap;
+                tmodulo = MotorTimerPeriod % 0xFFFF;
+                PR2 = 0xFFFF;
+            }
+            else
+            {
+                tint_cnt = 0;
+                tmodulo = 0;
+                PR2 = MotorTimerPeriod;
             }
         }
         break;
 
     case MOTOR_NOACC:
-        if (t2int_cnt == 0)
-        {
-            t2int_cnt = CurrentSpeed;
-            RA_STEP_IO ^= 1;
-        }
         break;
     }
 
@@ -137,10 +171,9 @@ void RAMotorInit(void)
     RA_DIR_IO = 0;
     RA_STEP_IO = 0;
 
-    MotorTimerPeriod = SideralPeriod / MaxSpeed / 2;
-    AccelPeriod = GetPeripheralClock() / MotorTimerPeriod / MaxSpeed * AccelTime;
-    DecelPeriod = GetPeripheralClock() / MotorTimerPeriod / MaxSpeed * DecelTime;
-    CurrentSpeed = MaxSpeed;
+    MotorTimerPeriod = SideralHalfPeriod;
+    AccelPeriod = GetPeripheralClock() / MaxSpeed * AccelTime;
+    DecelPeriod = GetPeripheralClock() / MaxSpeed * DecelTime;
 
     Timer2Init();
 }
@@ -148,6 +181,7 @@ void RAMotorInit(void)
 void RAStart(void)
 {
     RA_SLEEP_IO = 1;
+    CurrentSpeed = 1;
     T2CONbits.TON = 1;
 }
 
@@ -155,8 +189,6 @@ void RAAccelerate(void)
 {
     if (RAState == MOTOR_STOP)
     {
-        CurrentSpeed = MaxSpeed;
-        t2int_cnt = CurrentSpeed;
         accel_decel_cnt = AccelPeriod;
         RAState = MOTOR_ACCEL;
     }
@@ -166,8 +198,6 @@ void RADecelerate(void)
 {
     if (RAState == MOTOR_ACCEL || RAState == MOTOR_NOACC)
     {
-        CurrentSpeed++;
-        t2int_cnt = CurrentSpeed;
         accel_decel_cnt = DecelPeriod;
         RAState = MOTOR_DECEL;
     }

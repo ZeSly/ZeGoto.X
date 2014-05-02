@@ -57,7 +57,7 @@ void InputsInit(void)
     CNPU1bits.CN4PUE = 1; // pull-up
 
     IFS1bits.CNIF = 0;
-    IPC4bits.CNIP = 3;
+    IPC4bits.CNIP = 7;
     IEC1bits.CNIE = 1;
 
     TRISBbits.TRISB12 = 1;  // DEC+

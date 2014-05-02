@@ -39,14 +39,14 @@ void RADirection(uint8_t dir);
 #ifndef RA_MOTOR_C
 
 extern uint32_t SideralPeriod;
+extern uint32_t SideralHalfPeriod;
 extern uint16_t MaxSpeed;
-extern uint16_t MotorTimerPeriod;
 
-extern uint32_t AccelTime;
-extern uint32_t DecelTime;
+extern int32_t AccelTime;
+extern int32_t DecelTime;
 
-extern uint16_t AccelPeriod;
-extern uint16_t DecelPeriod;
+extern int32_t AccelPeriod;
+extern int32_t DecelPeriod;
 
 #endif
 

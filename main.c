@@ -383,7 +383,15 @@ static void ProcessIO(void)
         LED2_IO = 1;
 
     }
-    else if (bPadState & PAD_S5)
+    else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
+    {
+        RADecelerate();
+        LED2_IO = 0;
+
+    }
+
+    
+    if (bPadState & PAD_S5)
     {
         DecDirection(0);
         DecStart();
@@ -396,21 +404,12 @@ static void ProcessIO(void)
         DecStart();
         LED1_IO = 1;
     }
-
-    else
+    else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
     {
-        if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
-        {
-            RADecelerate();
-            LED2_IO = 0;
-
-        }
-        if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
-        {
-            DecDecelerate();
-            LED1_IO = 0;
-        }
+        DecDecelerate();
+        LED1_IO = 0;
     }
+
     
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
