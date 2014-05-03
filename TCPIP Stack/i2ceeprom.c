@@ -8,7 +8,6 @@
 #include <i2c.h>
 
 #define EEPROM_CONTROL  0xA0
-#define FSCL    100000
 
 #define READ	(0x01)
 #define WRITE	(0x00)
@@ -84,9 +83,6 @@ void XEEInit(void)
 *                  User must close XEEClose() after this function
 *                  is called.
 ********************************************************************/
-DWORD WriteAddress;
-BYTE WriteCount;
-
 XEE_RESULT XEEBeginWrite(DWORD address)
 {
     do
@@ -108,9 +104,6 @@ XEE_RESULT XEEBeginWrite(DWORD address)
 
     if(I2CPut(((WORD_VAL*)&address)->v[0]))
         return !XEE_SUCCESS;
-
-    WriteAddress = address;
-    WriteCount = 32;
 
     return XEE_SUCCESS;
 }
@@ -159,21 +152,15 @@ XEE_RESULT XEEEndWrite(void)
     to call XEEEndWrite() after calling this function.  However, if you do
     so, no harm will be done.
   ***************************************************************************/
-void XEEWriteArray(BYTE *val, WORD wLen)
+void XEEWriteArray(DWORD address, BYTE *val, WORD wLen)
 {
     while(wLen--)
     {
+        XEEBeginWrite(address++);
         XEEWrite(*val++);
-        WriteCount--;
-        //if (WriteCount == 0)
-        {
-            XEEEndWrite();
-            WriteAddress += 1;
-            XEEBeginWrite(WriteAddress);
-        }
+        XEEEndWrite();
     }
 
-    XEEEndWrite();
 }
 
 /*********************************************************************

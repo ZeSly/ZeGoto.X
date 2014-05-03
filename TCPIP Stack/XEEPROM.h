@@ -60,7 +60,7 @@ typedef BOOL XEE_RESULT;
 	void XEEInit(void);
 	XEE_RESULT XEEBeginWrite(DWORD address);
 	XEE_RESULT XEEWrite(BYTE val);
-	void XEEWriteArray(BYTE *val, WORD wLen);
+	void XEEWriteArray(DWORD address, BYTE *val, WORD wLen);
 	XEE_RESULT XEEEndWrite(void);
 	XEE_RESULT XEEBeginRead(DWORD address);
 	BYTE XEERead(void);

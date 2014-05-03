@@ -21,6 +21,9 @@
 
 #include <stdint.h>
 
+#define RA_EI (IEC0bits.T2IE = 1)
+#define RA_DI (IEC0bits.T2IE = 0)
+
 typedef enum
 {
     MOTOR_STOP,
@@ -34,7 +37,8 @@ void RAStart(void);
 void RAAccelerate(void);
 void RADecelerate(void);
 void RAStop(void);
-void RADirection(uint8_t dir);
+void RASetDirection(uint8_t dir);
+void UpdateRAStepPosition();
 
 //#ifndef RA_MOTOR_C
 
@@ -54,6 +58,7 @@ extern int32_t DecelPeriod;
 
 /* Position variables */
 extern int32_t RAStepPosition;
+extern int32_t RAStepStart;
 extern int32_t RAStepTarget;
 
 extern uint8_t WestDirection;

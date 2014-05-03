@@ -24,6 +24,7 @@
 #include "HardwareProfile.h"
 #include "ra_motor.h"
 #include "GenericTypeDefs.h"
+#include "rtcc.h"
 
 /* Mount specific settings */
 int32_t NbStepMax = 8640000UL;
@@ -40,14 +41,19 @@ int32_t AccelPeriod;
 int32_t DecelPeriod;
 
 /* Position variables */
-int32_t RAStepPosition = 0; // Set default position to north celestial pole
+int32_t RAStepPosition;
+int32_t RAStepStart;
 int32_t RAStepTarget;
 
 uint8_t WestDirection = 0;
 uint8_t EastDirection = 1;
 
 /* static for RA motor */
+static int32_t RARelativeStepPosition;
+static uint8_t RADirection;
+
 static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
+
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
 static uint16_t tmodulo;
@@ -71,7 +77,7 @@ void Timer2Init(void)
         tmodulo = 0;
         PR2 = MotorTimerPeriod;
     }
-    IPC1bits.T2IP = 6; // Interrupt priority 7 (highest)
+    IPC1bits.T2IP = 6; // Interrupt priority 6 (high)
     IFS0bits.T2IF = 0;
     IEC0bits.T2IE = 1;
 }
@@ -88,6 +94,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         else if (tint_cnt == 0xFFFF)
         {
             RA_STEP_IO ^= 1;
+            if (RAState != MOTOR_STOP) RARelativeStepPosition++;
 
             // if SideralHalfPeriod is odd
             if (SideralPeriod & 1) tint_cnt = tlap | RA_STEP_IO;
@@ -98,6 +105,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     else
     {
         RA_STEP_IO ^= 1;
+        if (RAState != MOTOR_STOP) RARelativeStepPosition++;
     }
 
     switch (RAState)
@@ -188,7 +196,14 @@ void RAMotorInit(void)
     AccelPeriod = GetPeripheralClock() / MaxSpeed * AccelTime;
     DecelPeriod = GetPeripheralClock() / MaxSpeed * DecelTime;
 
+    RTCCReadArray(RTCC_RAM, (BYTE *)&RAStepPosition, sizeof (RAStepPosition));
+    if (RAStepPosition < 0 || RAStepPosition > NbStepMax)
+    {
+        RAStepPosition = 0; // Set default position to north celestial pole
+    }
+
     RAStepPerSec = NbStepMax / (24L * 3600L);
+    RAStepStart = RAStepPosition;
 
     Timer2Init();
 }
@@ -206,6 +221,8 @@ void RAAccelerate(void)
 {
     if (RAState == MOTOR_STOP)
     {
+        RAStepStart = RAStepPosition;
+        RARelativeStepPosition = 0;
         accel_decel_cnt = AccelPeriod;
         RAState = MOTOR_ACCEL;
     }
@@ -227,7 +244,48 @@ void RAStop(void)
     RA_SLEEP_IO = 0;
 }
 
-void RADirection(uint8_t dir)
+void RASetDirection(uint8_t dir)
 {
+    RADirection = dir;
     RA_DIR_IO = dir;
+}
+
+extern BOOL NorthPoleOVerflow;
+
+void UpdateRAStepPosition()
+{
+    static BOOL LastNorthPoleOVerflow = FALSE;
+    int32_t p;
+    static BOOL SavePosition = TRUE;
+
+    if (RAState != MOTOR_STOP || NorthPoleOVerflow == TRUE)
+    {
+        RA_DI;
+        p = RARelativeStepPosition;
+        RA_EI;
+
+        if (RADirection == WestDirection)
+        {
+            RAStepPosition = RAStepStart - p;
+            if (RAStepPosition < 0) RAStepPosition += NbStepMax;
+        }
+        else
+        {
+            RAStepPosition = RAStepStart + p;
+            if (RAStepPosition > NbStepMax) RAStepPosition -= NbStepMax;
+        }
+
+        if (LastNorthPoleOVerflow == FALSE && NorthPoleOVerflow == TRUE)
+        {
+            RAStepStart += NbStepMax / 2L;
+            RAStepStart %= NbStepMax;
+        }
+        LastNorthPoleOVerflow = NorthPoleOVerflow;
+        SavePosition = TRUE;
+    }
+    else if (SavePosition == TRUE)
+    {
+        RTCCWriteArray(RTCC_RAM, (BYTE*) &RAStepPosition, sizeof (RAStepPosition));
+        SavePosition = FALSE;
+    }
 }

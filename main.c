@@ -81,6 +81,7 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "lx200_protocol.h"
+#include "rtcc.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -364,25 +365,26 @@ static void ProcessIO(void)
     BYTE numBytesWrite;
 
     // Blink LED2
-    if(TickGet() - t >= TICK_SECOND/2ul && nb_blink)
+    if(TickGet() - t >= TICK_SECOND/4ul && nb_blink)
     {
         t = TickGet();
         LED2_IO ^= 1;
         nb_blink--;
     }
 
+    UpdateRAStepPosition();
+    UpdateDecStepPosition();
+
     if (bPadState & PAD_S3)
     {
-        RADirection(0);
+        RASetDirection(WestDirection);
         RAAccelerate();
-        nb_blink = 2;
 
     }
     else if (bPadState & PAD_S4)
     {
-        RADirection(1);
+        RASetDirection(EastDirection);
         RAAccelerate();
-        nb_blink = 2;
 
     }
     else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
@@ -394,16 +396,14 @@ static void ProcessIO(void)
     
     if (bPadState & PAD_S5)
     {
-        DecDirection(0);
+        DecSetDirection(NorthDirection);
         DecStart();
-        nb_blink = 2;
 
     }
     else if (bPadState & PAD_S6)
     {
-        DecDirection(1);
+        DecSetDirection(SouthDirection);
         DecStart();
-        nb_blink = 2;
     }
     else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
     {
@@ -442,6 +442,7 @@ static void ProcessIO(void)
                     {
                         LX200Cmd[j] = '\0';
                         LX200ProcessCommand(LX200Cmd);
+                        strcpy(USB_In_Buffer, LX200Response);
                         numBytesWrite = strlen(USB_In_Buffer);
                     }
                     j = 0;
@@ -501,6 +502,9 @@ static void InitializeBoard(void)
     LED1_TRIS = 0;
     LED2_TRIS = 0;
 
+    XEEInit();
+    RTCCInit();
+
     // Motors
     RAMotorInit();
     DecMotorInit();
@@ -553,9 +557,7 @@ static void InitializeBoard(void)
 #if defined(SPIRAM_CS_TRIS)
     SPIRAMInit();
 #endif
-#if defined(EEPROM_CS_TRIS) || defined(EEPROM_I2CCON)
-    XEEInit();
-#endif
+
 #if defined(SPIFLASH_CS_TRIS)
     SPIFlashInit();
 #endif
@@ -768,9 +770,9 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
 
     // Write the validation struct and current AppConfig contents to EEPROM/Flash
 #if defined(EEPROM_CS_TRIS) || defined (EEPROM_I2CCON)
-    XEEBeginWrite(0x0000);
-    XEEWriteArray((BYTE*) & NVMValidationStruct, sizeof (NVMValidationStruct));
-    XEEWriteArray((BYTE*) ptrAppConfig, sizeof (APP_CONFIG));
+//    XEEBeginWrite(0x0000);
+    XEEWriteArray(0x0000, (BYTE*) & NVMValidationStruct, sizeof (NVMValidationStruct));
+    XEEWriteArray(sizeof (NVMValidationStruct), (BYTE*) ptrAppConfig, sizeof (APP_CONFIG));
 #else
     SPIFlashBeginWrite(0x0000);
     SPIFlashWriteArray((BYTE*) & NVMValidationStruct, sizeof (NVMValidationStruct));

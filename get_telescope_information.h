@@ -2,10 +2,10 @@
  *
  *      ~ OpenGoto ~
  *
- *  Processing LX200 commands
+ *  TODO add description
  *
  *********************************************************************
- * FileName:        lx200_protocol.h
+ * FileName:        get_telescope_information.h
  * Processor:       PIC24FJ256GB106
  * Compiler:        Microchip XC16 v1.21 or higher
  *
@@ -16,12 +16,19 @@
  * Sylvain Girard   	2 mai 2014 Creation
  ********************************************************************/
 
-#ifndef LX200_PROTOCOL_H
-#define	LX200_PROTOCOL_H
+#ifndef GET_TELESCOPE_INFORMATION_H
+#define	GET_TELESCOPE_INFORMATION_H
 
-void LX200ProcessCommand(char *LX200Cmd_P);
+extern BOOL LX200Precise;
 
-extern char LX200String[];
-extern char LX200Response[];
+void PrecisionToggle();
+void GetPrecision();
+void GetTelescopeRA();
+void GetCurrentTargetRA();
+void GetTelescopeDeclination();
+void GetCurrentTargetDeclination();
+void GetTelescopeAzimuth();
+void GetTelescopeAltitude();
+void GetSiderealTime();
 
-#endif	/* LX200_PROTOCOL_H */
+#endif	/* GET_TELESCOPE_INFORMATION_H */

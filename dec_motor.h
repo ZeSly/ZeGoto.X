@@ -19,11 +19,15 @@
 #ifndef DEC_MOTOR_H
 #define	DEC_MOTOR_H
 
+#define Dec_EI (IEC0bits.T3IE = 1)
+#define Dec_DI (IEC0bits.T3IE = 0)
+
 void DecMotorInit(void);
 void DecStart(void);
 void DecDecelerate(void);
 void DecStop(void);
-void DecDirection(uint8_t dir);
+void DecSetDirection(uint8_t dir);
+void UpdateDecStepPosition();
 
 /* Mount specific variables */
 extern int32_t DecStepPerDegree;
@@ -32,6 +36,7 @@ extern int32_t DecStepPerSecond;
 
 /* Position variables */
 extern int32_t DecStepPosition;
+extern int32_t DecStepStart;
 extern int32_t DecStepTarget;
 
 extern uint8_t NorthDirection;

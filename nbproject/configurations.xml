@@ -82,6 +82,8 @@
       <itemPath>main.h</itemPath>
       <itemPath>lx200_protocol.h</itemPath>
       <itemPath>get_telescope_information.h</itemPath>
+      <itemPath>telescope_movement_commands.h</itemPath>
+      <itemPath>rtcc.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -158,6 +160,8 @@
       <itemPath>dec_motor.c</itemPath>
       <itemPath>lx200_protocol.c</itemPath>
       <itemPath>get_telescope_information.c</itemPath>
+      <itemPath>telescope_movement_commands.c</itemPath>
+      <itemPath>rtcc.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -205,13 +209,13 @@
         <makeCustomizationNormalizeHexFile>false</makeCustomizationNormalizeHexFile>
       </makeCustomizationType>
       <C30>
-        <property key="code-model" value="default"/>
+        <property key="code-model" value="large-code"/>
         <property key="const-model" value="default"/>
         <property key="data-model" value="default"/>
         <property key="enable-all-warnings" value="true"/>
         <property key="enable-ansi-std" value="false"/>
         <property key="enable-ansi-warnings" value="false"/>
-        <property key="enable-fatal-warnings" value="false"/>
+        <property key="enable-fatal-warnings" value="true"/>
         <property key="enable-large-arrays" value="false"/>
         <property key="enable-omit-frame-pointer" value="false"/>
         <property key="enable-procedural-abstraction" value="false"/>
@@ -362,7 +366,6 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="UCNFG1" value="true"/>
-        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

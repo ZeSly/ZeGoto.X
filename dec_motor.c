@@ -20,8 +20,11 @@
 #include <xc.h>
 #include <stdint.h>
 
+#include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
 #include "ra_motor.h"
+#include "dec_motor.h"
+#include "rtcc.h"
 
 /* Mount specific variables */
 int32_t DecStepPerDegree;
@@ -30,13 +33,19 @@ int32_t DecStepPerSecond;
 
 /* Position variables */
 int32_t DecStepPosition;
+int32_t DecStepStart;
 int32_t DecStepTarget;
+BOOL NorthPoleOVerflow;
 
 uint8_t NorthDirection = 0;
 uint8_t SouthDirection = 1;
 
 /* static for dec motor */
+static int32_t DecRelativeStepPosition;
+static uint8_t DecDirection;
+
 static motor_state_t DecState = MOTOR_STOP;
+
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
 static uint16_t tmodulo;
@@ -60,7 +69,7 @@ void Timer3Init(void)
         tmodulo = 0;
         PR3 = MotorTimerPeriod;
     }
-    IPC2bits.T3IP = 6; // Interrupt priority 7 (high)
+    IPC2bits.T3IP = 6; // Interrupt priority 6 (high)
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
 }
@@ -77,13 +86,16 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         else if (tint_cnt == 0xFFFF)
         {
             DEC_STEP_IO ^= 1;
-            tint_cnt = tlap | DEC_STEP_IO;
+            DecRelativeStepPosition++;
+
+            tint_cnt = tlap;
             PR3 = 0xFFFF;
         }
     }
     else
     {
         DEC_STEP_IO ^= 1;
+        DecRelativeStepPosition++;
     }
 
     switch (DecState)
@@ -178,7 +190,14 @@ void DecMotorInit(void)
     DecStepPerMinute = DecStepPerDegree / 60L;
     DecStepPerSecond = DecStepPerMinute / 60L;
 
-    DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
+    RTCCReadArray(RTCC_RAM + sizeof (int32_t), (BYTE *) &DecStepPosition, sizeof (DecStepPosition));
+    if (DecStepPosition < -NbStepMax / 4L || DecStepPosition > NbStepMax / 4L)
+    {
+        DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
+    }
+
+    DecStepStart = DecStepPosition;
+    NorthPoleOVerflow = FALSE;
 
     Timer3Init();
 }
@@ -187,6 +206,9 @@ void DecStart(void)
 {
     if (DecState == MOTOR_STOP)
     {
+        DecStepStart = DecStepPosition;
+        DecRelativeStepPosition = 0;
+        NorthPoleOVerflow = FALSE;
         DEC_SLEEP_IO = 1;
         DEC_FAULT_CN = 1;
         CurrentSpeed = 1;
@@ -212,7 +234,48 @@ void DecStop(void)
     DEC_SLEEP_IO = 0;
 }
 
-void DecDirection(uint8_t dir)
+void DecSetDirection(uint8_t dir)
 {
+    DecDirection = dir;
     DEC_DIR_IO = dir;
 }
+
+void UpdateDecStepPosition()
+{
+    int32_t DecStepMax = NbStepMax / 4L;
+    int32_t p;
+    static BOOL SavePosition = TRUE;
+
+    if (DecState != MOTOR_STOP)
+    {
+        Dec_DI;
+        p = DecRelativeStepPosition;
+        Dec_EI;
+
+        if (DecDirection == NorthDirection)
+        {
+            if (NorthPoleOVerflow == FALSE) DecStepPosition = DecStepStart + p;
+            else DecStepPosition = DecStepStart + p;
+
+        }
+        else
+        {
+            if (NorthPoleOVerflow == FALSE) DecStepPosition = DecStepStart - p;
+            else DecStepPosition = DecStepStart + p;
+        }
+
+        if ((DecStepPosition < -NbStepMax / 4L) || (DecStepPosition > NbStepMax / 4L))
+        {
+            NorthPoleOVerflow = TRUE;
+            DecStepPosition = DecStepMax - (DecStepPosition - DecStepMax);
+        }
+
+        SavePosition = TRUE;
+    }
+    else if (SavePosition == TRUE)
+    {
+        RTCCWriteArray(RTCC_RAM + sizeof(int32_t), (BYTE*)&DecStepPosition, sizeof(DecStepPosition));
+        SavePosition = FALSE;
+    }
+}
+
