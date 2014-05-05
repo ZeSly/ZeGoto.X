@@ -240,6 +240,21 @@ void DecAccelerate(void)
         DEC_FAULT_CN = 1;
 
         CurrentSpeed = 2;
+        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        if (MotorTimerPeriod > 0xFFFF)
+        {
+            tlap = MotorTimerPeriod / 0xFFFF;
+            tint_cnt = tlap;
+            tmodulo = MotorTimerPeriod % 0xFFFF;
+            PR3 = 0xFFFF;
+        }
+        else
+        {
+            tint_cnt = 0;
+            tmodulo = 0;
+            PR3 = MotorTimerPeriod;
+        }
+
         accel_decel_cnt = AccelPeriod;
         DecState = MOTOR_ACCEL;
 

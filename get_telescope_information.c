@@ -59,6 +59,7 @@ void GetPrecision()
  * Overview:        Convert step position to right ascension and send it to
  *                  host
  *****************************************************************************/
+extern volatile BYTE fullspeed;
 void SendRA(int32_t StepPosition_P)
 {
     int32_t diff = RAStepPosition - RAStepTarget;
@@ -89,13 +90,13 @@ void SendRA(int32_t StepPosition_P)
         if (hours == 24) hours = 0; // it should never happens !
 
 
-        sprintf(LX200Response, "%02li:%02li:%02li# %li\r\n", hours, minutes, seconds, diff);
+        sprintf(LX200Response, "%02li:%02li:%02li# %li %c\r\n", hours, minutes, seconds, diff, fullspeed ? 'f' : ' ');
     }
     else
     {
         int32_t minutes = 10L * (StepPosition_P % a) / (float) b;
 
-        sprintf(LX200Response, "%02li:%02li.%01li# %li\r\n", hours, minutes / 10, minutes % 10, diff);
+        sprintf(LX200Response, "%02li:%02li.%01li# %li %c\r\n", hours, minutes / 10, minutes % 10, diff, fullspeed ? 'f' : ' ');
     }
 }
 

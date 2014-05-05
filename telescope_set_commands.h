@@ -23,4 +23,7 @@ void SetTargetObjectRA();
 void SetTargetObjectDeclination();
 void SyncWithCurrentTarget();
 
+void SetStepTargetRA();
+void SetStepTargetDeclination();
+
 #endif	/* TELESCOPE_SET_COMMANDS_H */

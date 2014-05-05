@@ -26,6 +26,7 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "rtcc.h"
+#include "stdlib.h"
 
 /******************************************************************************
  * Function:        void SetTargetObjectRA()
@@ -68,7 +69,21 @@ void SetTargetObjectRA()
         LX200Response[0] = '1';
     }
     LX200Response[1] = '\0';
-    sprintf(LX200Response, "%li\r\n", RAStepTarget);
+}
+
+void SetStepTargetRA()
+{
+    RAStepTarget = atol(LX200String + 3);
+
+    if (RAStepTarget < 0 || RAStepTarget > NbStepMax)
+    {
+        LX200Response[0] = '0';
+    }
+    else
+    {
+        LX200Response[0] = '1';
+    }
+    LX200Response[1] = '\0';
 }
 
 /******************************************************************************
@@ -118,7 +133,21 @@ void SetTargetObjectDeclination()
         LX200Response[0] = '1';
     }
     LX200Response[1] = '\0';
-    sprintf(LX200Response, "%li\r\n", DecStepTarget);
+}
+
+void SetStepTargetDeclination()
+{
+    DecStepTarget = atol(LX200String + 3);
+
+    if (DecStepTarget < -NbStepMax / 4L || DecStepTarget > NbStepMax / 4L)
+    {
+        LX200Response[0] = '0';
+    }
+    else
+    {
+        LX200Response[0] = '1';
+    }
+    LX200Response[1] = '\0';
 }
 
 /******************************************************************************

@@ -106,6 +106,11 @@ void SlewToTarget()
     {
         NumberRAStep = int32abs(RAStepTarget - RAStepPosition);
         RADecelPositon = NumberRAStep / 2L;
+//        if (NumberRAStep % 2L == 0)
+//        {
+//            RADecelPositon--;
+//        }
+
         if (RAStepPosition < RAStepTarget)
         {
             MoveEast();
@@ -120,6 +125,11 @@ void SlewToTarget()
     {
         NumberDecStep = int32abs(DecStepTarget - DecStepPosition);
         DecDecelPositon = NumberDecStep / 2L;
+//        if (NumberDecStep % 2L == 0)
+//        {
+//            DecDecelPositon++;
+//        }
+
         if (DecStepPosition < DecStepTarget)
         {
             MoveNorth();

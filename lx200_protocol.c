@@ -58,6 +58,8 @@ typedef struct
     void (*f)();
 } LX200Command;
 
+void DumpSpeedList();
+
 LX200Command LX200CommandTab[] =
 {
     { "GR", 2, GetTelescopeRA},
@@ -97,6 +99,11 @@ LX200Command LX200CommandTab[] =
     { "ZGD", 3, GetStepDeclination},
     { "ZGr", 3, GetStepTargetRA},
     { "ZGd", 3, GetStepTargetDeclination},
+
+    { "ZSr", 3, SetStepTargetRA},
+    { "ZSd", 3, SetStepTargetDeclination},
+
+    { "ZGs", 3, DumpSpeedList },
 
     { NULL, 0, NULL}
 };

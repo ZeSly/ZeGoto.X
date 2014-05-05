@@ -20,12 +20,13 @@
 
 /* Device header file */
 #include <xc.h>
-
+#include "USB\usb_function_cdc.h"
 #include "HardwareProfile.h"
 #include "ra_motor.h"
 #include "GenericTypeDefs.h"
 #include "rtcc.h"
 #include "dec_motor.h"
+#include "lx200_protocol.h"
 
 /* Mount specific settings */
 int32_t NbStepMax = 8640000UL;
@@ -88,9 +89,20 @@ void Timer2Init(void)
     IEC0bits.T2IE = 1;
 }
 
+typedef struct s_speedlist
+{
+    int32_t speed;
+    int32_t position;
+    uint32_t MotorTimerPeriod;
+    struct s_speedlist *next;
+} t_speedlist;
+
+t_speedlist *lastspeed = NULL;
+t_speedlist *speedlist = NULL;
+volatile BYTE fullspeed = 0;
+
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
-//    static BYTE fullspeed = 0;
     BOOL MakeOneStep = FALSE;
 
     if (tmodulo != 0)
@@ -104,8 +116,9 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         {
             MakeOneStep = TRUE;
 
+            tint_cnt = tlap;
             // if SideralHalfPeriod is odd
-            if (SideralPeriod & 1) tint_cnt = tlap | ~RA_STEP_IO;
+//            if (SideralPeriod & 1) tint_cnt |= ~RA_STEP_IO;
 
             PR2 = 0xFFFF;
         }
@@ -129,12 +142,6 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
                     accel_decel_cnt = AccelPeriod - accel_decel_cnt;
                 }
                 NumberRAStep--;
-//                if (NumberRAStep == 0)
-//                {
-//                    CurrentSpeed = 1;
-//                    MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
-//                    RAState = MOTOR_STOP;
-//                }
             }
         }
     }
@@ -142,7 +149,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     switch (RAState)
     {
     case MOTOR_STOP:
-//        fullspeed = 0;
+        fullspeed = 0;
         break;
 
     case MOTOR_ACCEL:
@@ -151,13 +158,22 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         {
             accel_decel_cnt = AccelPeriod;
             CurrentSpeed++;
+            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+
+            t_speedlist *newspeed = malloc(sizeof (*newspeed));
+            newspeed->speed = CurrentSpeed;
+            newspeed->position = RARelativeStepPosition;
+            newspeed->MotorTimerPeriod = MotorTimerPeriod;
+            newspeed->next = NULL;
+            lastspeed->next = newspeed;
+            lastspeed = newspeed;
+
             if (CurrentSpeed >= MaxSpeed)
             {
                 RADecelPositon = RARelativeStepPosition;
                 RAState = MOTOR_NOACC;
             }
 
-            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
             if (MotorTimerPeriod > 0xFFFF)
             {
                 tlap = MotorTimerPeriod / 0xFFFF;
@@ -180,15 +196,23 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = NumberRAStep ? AccelPeriod : DecelPeriod;
-
             CurrentSpeed--;
+            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+
+            t_speedlist *newspeed = malloc(sizeof (*newspeed));
+            newspeed->speed = CurrentSpeed;
+            newspeed->position = RARelativeStepPosition;
+            newspeed->MotorTimerPeriod = MotorTimerPeriod;
+            newspeed->next = NULL;
+            lastspeed->next = newspeed;
+            lastspeed = newspeed;
+
             if (CurrentSpeed == 1)
             {
                 RAState = MOTOR_STOP;
             }
 
             
-            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
             if (MotorTimerPeriod > 0xFFFF)
             {
                 tlap = MotorTimerPeriod / 0xFFFF;
@@ -206,7 +230,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         break;
 
     case MOTOR_NOACC:
-//        fullspeed = 1;
+        fullspeed = 1;
         break;
     }
 
@@ -263,10 +287,69 @@ void RAAccelerate(void)
         RAStepStart = RAStepPosition;
         RARelativeStepPosition = 0;
 
-        accel_decel_cnt = AccelPeriod;
         CurrentSpeed++;
+        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        if (MotorTimerPeriod > 0xFFFF)
+        {
+            tlap = MotorTimerPeriod / 0xFFFF;
+            tint_cnt = tlap;
+            tmodulo = MotorTimerPeriod % 0xFFFF;
+            PR2 = 0xFFFF;
+        }
+        else
+        {
+            tint_cnt = 0;
+            tmodulo = 0;
+            PR2 = MotorTimerPeriod;
+        }
+
+        accel_decel_cnt = AccelPeriod;
         RAState = MOTOR_ACCEL;
+
+        t_speedlist * p;
+        for (p = speedlist ; p != NULL ; p = p->next)
+            free(p);
+
+        speedlist = malloc(sizeof(*speedlist));
+        speedlist->speed = CurrentSpeed;
+        speedlist->position = RARelativeStepPosition;
+        speedlist->MotorTimerPeriod = MotorTimerPeriod;
+        speedlist->next = NULL;
+        lastspeed = speedlist;
+        
     }
+}
+
+void DumpSpeedList()
+{
+    t_speedlist *p;
+
+    do
+    {
+        CDCTxService();
+    }
+    while (!USBUSARTIsTxTrfReady());
+    strcpy(LX200Response, "speed;postion\r\n");
+    putUSBUSART(LX200Response, strlen(LX200Response));
+    
+
+    for (p = speedlist; p != NULL; p = p->next)
+    {
+        do
+        {
+            CDCTxService();
+        }
+        while (!USBUSARTIsTxTrfReady());
+        sprintf(LX200Response, "%li;%li;%lu\r\n", p->speed, p->position, p->MotorTimerPeriod);
+        putUSBUSART(LX200Response, strlen(LX200Response));
+        
+    }
+
+    do
+    {
+        CDCTxService();
+    }
+    while (!USBUSARTIsTxTrfReady());
 }
 
 void RADecelerate(void)
