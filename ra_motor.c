@@ -25,6 +25,7 @@
 #include "ra_motor.h"
 #include "GenericTypeDefs.h"
 #include "rtcc.h"
+#include "dec_motor.h"
 
 /* Mount specific settings */
 int32_t NbStepMax = 8640000UL;
@@ -33,17 +34,21 @@ int32_t RAStepPerSec;
 uint32_t SideralPeriod = 159563UL;
 uint32_t SideralHalfPeriod = 159563UL / 2;
 uint16_t MaxSpeed = 120;
+uint16_t CenteringSpeed = 10;
 
 /* Acceleration/decelation varibles and constant */
 int32_t AccelTime = 4; // seconds
 int32_t DecelTime = 1; // seconds
 int32_t AccelPeriod;
 int32_t DecelPeriod;
+uint16_t CurrentMaxSpeed;
 
 /* Position variables */
 int32_t RAStepPosition;
 int32_t RAStepStart;
 int32_t RAStepTarget;
+int32_t NumberRAStep;
+int32_t RADecelPositon;
 
 uint8_t WestDirection = 0;
 uint8_t EastDirection = 1;
@@ -51,6 +56,7 @@ uint8_t EastDirection = 1;
 /* static for RA motor */
 static int32_t RARelativeStepPosition;
 static uint8_t RADirection;
+static uint8_t RANextDirection;
 
 static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 
@@ -84,6 +90,8 @@ void Timer2Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
+//    static BYTE fullspeed = 0;
+
     if (tmodulo != 0)
     {
         tint_cnt--;
@@ -94,7 +102,25 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         else if (tint_cnt == 0xFFFF)
         {
             RA_STEP_IO ^= 1;
-            if (RAState != MOTOR_STOP) RARelativeStepPosition++;
+            if (RAState != MOTOR_STOP)
+            {
+                RARelativeStepPosition++;
+                if (NumberRAStep)
+                {
+                    if (NumberRAStep <= RADecelPositon && RAState != MOTOR_DECEL)
+                    {
+                        RAState = MOTOR_DECEL;
+                        accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+                    }
+                    NumberRAStep--;
+                    if (NumberRAStep == 0)
+                    {
+                        CurrentSpeed = 1;
+                        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+                        RAState = MOTOR_STOP;
+                    }
+                }
+            }
 
             // if SideralHalfPeriod is odd
             if (SideralPeriod & 1) tint_cnt = tlap | RA_STEP_IO;
@@ -105,12 +131,31 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     else
     {
         RA_STEP_IO ^= 1;
-        if (RAState != MOTOR_STOP) RARelativeStepPosition++;
+        if (RAState != MOTOR_STOP)
+        {
+            RARelativeStepPosition++;
+            if (NumberRAStep)
+            {
+                if (NumberRAStep <= RADecelPositon && RAState != MOTOR_DECEL)
+                {
+                    RAState = MOTOR_DECEL;
+                    accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+                }
+                NumberRAStep--;
+                if (NumberRAStep == 0)
+                {
+                    CurrentSpeed = 1;
+                    MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+                    RAState = MOTOR_STOP;
+                }
+            }
+        }
     }
 
     switch (RAState)
     {
     case MOTOR_STOP:
+//        fullspeed = 0;
         break;
 
     case MOTOR_ACCEL:
@@ -121,6 +166,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
             CurrentSpeed++;
             if (CurrentSpeed >= MaxSpeed)
             {
+                RADecelPositon = RARelativeStepPosition;
                 RAState = MOTOR_NOACC;
             }
 
@@ -146,12 +192,14 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         accel_decel_cnt -= PR2;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = DecelPeriod;
+            accel_decel_cnt = NumberRAStep ? AccelPeriod : DecelPeriod;
+
             CurrentSpeed--;
             if (CurrentSpeed == 1)
             {
                 RAState = MOTOR_STOP;
             }
+
             
             MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
             if (MotorTimerPeriod > 0xFFFF)
@@ -171,6 +219,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         break;
 
     case MOTOR_NOACC:
+//        fullspeed = 1;
         break;
     }
 
@@ -221,9 +270,14 @@ void RAAccelerate(void)
 {
     if (RAState == MOTOR_STOP)
     {
+        RADirection = RANextDirection;
+        RA_DIR_IO = RANextDirection;
+
         RAStepStart = RAStepPosition;
         RARelativeStepPosition = 0;
+
         accel_decel_cnt = AccelPeriod;
+        CurrentSpeed++;
         RAState = MOTOR_ACCEL;
     }
 }
@@ -246,8 +300,7 @@ void RAStop(void)
 
 void RASetDirection(uint8_t dir)
 {
-    RADirection = dir;
-    RA_DIR_IO = dir;
+    RANextDirection = dir;
 }
 
 extern BOOL NorthPoleOVerflow;

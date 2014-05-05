@@ -25,6 +25,8 @@
 
 #include "get_telescope_information.h"
 #include "telescope_movement_commands.h"
+#include "slew_rate_commands.h"
+#include "telescope_set_commands.h"
 
 char LX200String[16];
 char LX200Response[64];
@@ -69,10 +71,10 @@ LX200Command LX200CommandTab[] =
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
 
-//    { "Sr", 2, SetTargetObjectRA},
-//    { "Sd", 2, SetTargetObjectDeclination},
-//
-//    { "CM", 2, SyncWithCurrentTarget},
+    { "Sr", 2, SetTargetObjectRA},
+    { "Sd", 2, SetTargetObjectDeclination},
+
+    { "CM", 2, SyncWithCurrentTarget},
 
     { "GVD", 3, GetTelescopeFirmwareDate},
     { "GVN", 3, GetTelescopeFirmwareNumber},
@@ -84,12 +86,12 @@ LX200Command LX200CommandTab[] =
     { "Mn", 2, MoveNorth},
     { "Ms", 2, MoveSouth},
     { "Mw", 2, MoveWest},
-//    { "MS", 2, SlewToTarget},
+    { "MS", 2, SlewToTarget},
 
-//    { "RC", 2, SetCenteringRate},
-//    { "RG", 2, SetGuidingRate},
-//    { "RM", 2, SetFindRate},
-//    { "RS", 2, SetMaxRate},
+    { "RC", 2, SetCenteringRate},
+    { "RG", 2, SetGuidingRate},
+    { "RM", 2, SetFindRate},
+    { "RS", 2, SetMaxRate},
 
     { NULL, 0, NULL}
 };

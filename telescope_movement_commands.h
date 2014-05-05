@@ -32,10 +32,10 @@ void MoveEast();
 void MoveNorth();
 void MoveSouth();
 void MoveWest();
-//void SlewToTarget();
+void SlewToTarget();
 
 extern char CurrentMove;
-//extern bool SlewingToTarget;
+extern BOOL SlewingToTarget;
 //extern long StartRAStepPosition;
 //extern long StartDecStepPosition;
 //extern long NumberRAStep;

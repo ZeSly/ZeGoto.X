@@ -49,17 +49,21 @@ extern int32_t RAStepPerSec;
 extern uint32_t SideralPeriod;
 extern uint32_t SideralHalfPeriod;
 extern uint16_t MaxSpeed;
+extern uint16_t CenteringSpeed;
 
 /* Acceleration/decelation varibles and constant */
 extern int32_t AccelTime;
 extern int32_t DecelTime;
 extern int32_t AccelPeriod;
 extern int32_t DecelPeriod;
+extern uint16_t CurrentMaxSpeed;
 
 /* Position variables */
 extern int32_t RAStepPosition;
 extern int32_t RAStepStart;
 extern int32_t RAStepTarget;
+extern int32_t NumberRAStep;
+extern int32_t RADecelPositon;
 
 extern uint8_t WestDirection;
 extern uint8_t EastDirection;

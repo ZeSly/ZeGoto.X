@@ -84,6 +84,8 @@
       <itemPath>get_telescope_information.h</itemPath>
       <itemPath>telescope_movement_commands.h</itemPath>
       <itemPath>rtcc.h</itemPath>
+      <itemPath>slew_rate_commands.h</itemPath>
+      <itemPath>telescope_set_commands.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -162,6 +164,8 @@
       <itemPath>get_telescope_information.c</itemPath>
       <itemPath>telescope_movement_commands.c</itemPath>
       <itemPath>rtcc.c</itemPath>
+      <itemPath>slew_rate_commands.c</itemPath>
+      <itemPath>telescope_set_commands.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -366,6 +370,7 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="UCNFG1" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

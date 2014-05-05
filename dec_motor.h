@@ -23,7 +23,7 @@
 #define Dec_DI (IEC0bits.T3IE = 0)
 
 void DecMotorInit(void);
-void DecStart(void);
+void DecAccelerate(void);
 void DecDecelerate(void);
 void DecStop(void);
 void DecSetDirection(uint8_t dir);
@@ -38,6 +38,8 @@ extern int32_t DecStepPerSecond;
 extern int32_t DecStepPosition;
 extern int32_t DecStepStart;
 extern int32_t DecStepTarget;
+extern int32_t NumberDecStep;
+extern int32_t DecDecelPositon;
 
 extern uint8_t NorthDirection;
 extern uint8_t SouthDirection;

@@ -446,7 +446,7 @@ void ZeroconfARPPktNotify (DWORD SenderIPAddr, DWORD TargetIPAddr,
 			case ARP_DEFEND_TYPE:
 				if(temp_IP_addr.Val == TargetIPAddr ) // Probe-Conflict
 				{
-					if(memcmp(SenderMACAddr, &AppConfig.MyMACAddr, 6)) 
+					if(memcmp(SenderMACAddr, &MyMACAddr, 6)) 
 					{
 						DEBUG_ZCLL_PRINT("ARPPktNotify: Somebody has initiated " \
 							"the procedure to use same Addr.\r\n");
@@ -477,7 +477,7 @@ void ZeroconfARPPktNotify (DWORD SenderIPAddr, DWORD TargetIPAddr,
 		{
 			if(AppConfig.MyIPAddr.Val == SenderIPAddr)
 			{
-				if(memcmp(SenderMACAddr, &AppConfig.MyMACAddr, 6)) 
+				if(memcmp(SenderMACAddr, &MyMACAddr, 6)) 
 				{
 					DEBUG_ZCLL_PRINT("ARPPktNotify: Some-one has started using" \
 						" our IP-address \r\n");
@@ -528,10 +528,10 @@ static void zcll_seed_random()
 {
 	DWORD_VAL temp;
 	DWORD tick = TickGet();
-	temp.v[3] = AppConfig.MyMACAddr.v[2];
-	temp.v[2] = AppConfig.MyMACAddr.v[3];
-	temp.v[1] = AppConfig.MyMACAddr.v[4];
-	temp.v[0] =	AppConfig.MyMACAddr.v[5];
+	temp.v[3] = MyMACAddr.v[2];
+	temp.v[2] = MyMACAddr.v[3];
+	temp.v[1] = MyMACAddr.v[4];
+	temp.v[0] =	MyMACAddr.v[5];
 	srand( temp.Val + tick ); 
 }
 #endif
@@ -927,7 +927,7 @@ void ZeroconfLLProcess(void)
 #ifdef STACK_CLIENT_MODE
 		else if((conflict_count == 0) && temp_IP_addr.Val && (ARPIsResolved(&temp_IP_addr, &temp_MAC_addr)) ) 
 		{
-			if(!memcmp (&temp_MAC_addr, &AppConfig.MyMACAddr, 6) )
+			if(!memcmp (&temp_MAC_addr, &MyMACAddr, 6) )
 			{
 				DEBUG0_ZCLL_PRINT("SM_ADDR_PROBE: Resolved with our address only. " \
 					"Rare Case !!!! \r\n");

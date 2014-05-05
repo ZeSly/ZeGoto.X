@@ -27,10 +27,10 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 
-#include <stdlib.h>
+//#include <stdio.h>
 
 char CurrentMove;
-BOOL SlewingToTarget = FALSE;
+//BOOL SlewingToTarget = FALSE;
 
 void Halt()
 {
@@ -73,7 +73,7 @@ void MoveNorth()
     CurrentMove |= MOVE_TO_NORTH;
     CurrentMove &= ~MOVE_TO_SOUTH;
     DecSetDirection(NorthDirection);
-    DecDecelerate();
+    DecAccelerate();
 }
 
 void MoveSouth()
@@ -81,7 +81,7 @@ void MoveSouth()
     CurrentMove |= MOVE_TO_SOUTH;
     CurrentMove &= ~MOVE_TO_NORTH;
     DecSetDirection(SouthDirection);
-    DecStart();
+    DecAccelerate();
 }
 
 void MoveWest()
@@ -89,49 +89,47 @@ void MoveWest()
     CurrentMove |= MOVE_TO_WEST;
     CurrentMove &= ~MOVE_TO_EAST;
     RASetDirection(WestDirection);
-    DecStart();
+    RAAccelerate();
 }
-/*
-long StartRAStepPosition;
-long StartDecStepPosition;
-long NumberRAStep;
-long NumberDecStep;
+
+int32_t int32abs(int32_t a)
+{
+   return a < 0 ? -a : a;
+}
 
 void SlewToTarget()
 {
-//    Serial.print("1");
 
-    StartRAStepPosition = RAStepPosition;
-    StartDecStepPosition = DecStepPosition;
-    NumberRAStep = abs(RAStepTarget - StartRAStepPosition);
-    NumberDecStep = abs(DecStepTarget - StartDecStepPosition);
+//    SlewingToTarget = TRUE;
 
-//    char trace[64];
-//    sprintf(trace, "\r\nRAStepPosition=%li DecStepPosition=%li", RAStepPosition, DecStepPosition);
-//    Serial.print(trace);
-//    sprintf(trace, "\r\nRAStepTarget=%li DecStepTarget=%li", RAStepTarget, DecStepTarget);
-//    Serial.print(trace);
-//    sprintf(trace, "\r\nNumberRAStep=%li NumberDecStep=%li\r\n", NumberRAStep, NumberDecStep);
-//    Serial.print(trace);
-
-    SlewingToTarget = TRUE;
-
-    if (DecStepPosition < DecStepTarget)
+    if (RAStepTarget)
     {
-        MoveNorth();
-    }
-    else if (DecStepPosition > DecStepTarget)
-    {
-        MoveSouth();
+        NumberRAStep = int32abs(RAStepTarget - RAStepPosition);
+        RADecelPositon = NumberRAStep / 2L;
+        if (RAStepPosition < RAStepTarget)
+        {
+            MoveEast();
+        }
+        else if (RAStepPosition > RAStepTarget)
+        {
+            MoveWest();
+        }
     }
 
-    if (RAStepPosition < RAStepTarget)
+    if (DecStepTarget)
     {
-        MoveEast();
+        NumberDecStep = int32abs(DecStepTarget - DecStepPosition);
+        DecDecelPositon = NumberDecStep / 2L;
+        if (DecStepPosition < DecStepTarget)
+        {
+            MoveNorth();
+        }
+        else if (DecStepPosition > DecStepTarget)
+        {
+            MoveSouth();
+        }
     }
-    else if (RAStepPosition > RAStepTarget)
-    {
-        MoveWest();
-    }
+
+    LX200Response[0] = '0';
+    LX200Response[1] = '\0';
 }
-*/

@@ -170,5 +170,6 @@ typedef struct
 void RTCCWriteArray(BYTE address, BYTE *val, WORD wLen);
 BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length);
 void RTCCInit();
+BOOL RTCCReadMacAddress(BYTE *MacAddress);
 
 #endif	/* RTCC_H */

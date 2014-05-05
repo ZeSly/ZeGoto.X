@@ -309,12 +309,12 @@ void MACInit(void)
 
     // Enter Bank 3 and initialize physical MAC address registers
     BankSel(MAADR1);
-    WriteReg((BYTE)MAADR1, AppConfig.MyMACAddr.v[0]);
-    WriteReg((BYTE)MAADR2, AppConfig.MyMACAddr.v[1]);
-    WriteReg((BYTE)MAADR3, AppConfig.MyMACAddr.v[2]);
-    WriteReg((BYTE)MAADR4, AppConfig.MyMACAddr.v[3]);
-    WriteReg((BYTE)MAADR5, AppConfig.MyMACAddr.v[4]);
-    WriteReg((BYTE)MAADR6, AppConfig.MyMACAddr.v[5]);
+    WriteReg((BYTE)MAADR1, MyMACAddr.v[0]);
+    WriteReg((BYTE)MAADR2, MyMACAddr.v[1]);
+    WriteReg((BYTE)MAADR3, MyMACAddr.v[2]);
+    WriteReg((BYTE)MAADR4, MyMACAddr.v[3]);
+    WriteReg((BYTE)MAADR5, MyMACAddr.v[4]);
+    WriteReg((BYTE)MAADR6, MyMACAddr.v[5]);
 
     // Disable the CLKOUT output to reduce EMI generation
     WriteReg((BYTE)ECOCON, 0x00);   // Output off (0V)
@@ -659,7 +659,7 @@ void MACPutHeader(MAC_ADDR *remote, BYTE type, WORD dataLen)
     MACPutArray((BYTE*)remote, sizeof(*remote));
 
     // Write our MAC address in the Ethernet source field
-    MACPutArray((BYTE*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
+    MACPutArray((BYTE*)&MyMACAddr, sizeof(MyMACAddr));
 
     // Write the appropriate Ethernet Type WORD for the protocol being used
     MACPut(0x08);

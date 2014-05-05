@@ -350,8 +350,8 @@ static BOOL ARPPut(ARP_PACKET* packet)
     packet->Protocol      = ARP_IP;
     packet->MACAddrLen    = sizeof(MAC_ADDR);
     packet->ProtocolLen   = sizeof(IP_ADDR);
-//    packet->SenderMACAddr = AppConfig.MyMACAddr;	// HI-TECH PICC-18 compiler can't handle this statement, use memcpy() as a workaround
-	memcpy(&packet->SenderMACAddr, (void*)&AppConfig.MyMACAddr, sizeof(packet->SenderMACAddr));
+//    packet->SenderMACAddr = MyMACAddr;	// HI-TECH PICC-18 compiler can't handle this statement, use memcpy() as a workaround
+	memcpy(&packet->SenderMACAddr, (void*)&MyMACAddr, sizeof(packet->SenderMACAddr));
 #ifdef STACK_USE_ZEROCONF_LINK_LOCAL
     //packet->SenderIPAddr  = AppConfig.MyIPAddr; /* Removed for ZCLL, SenderIPAddr should be filled in */
 #else
@@ -503,7 +503,7 @@ BOOL ARPProcess(void)
                                 * Check Sender's MAC-address with own MAC-address and 
                                 * if it is matched, response will not be sent back. This
                                 * was leading to flooding of ARP-answeres */
-                                if(!memcmp (&packet.SenderMACAddr, &AppConfig.MyMACAddr, 6))
+                                if(!memcmp (&packet.SenderMACAddr, &MyMACAddr, 6))
                                 {
                                      putsUART("Loopback answer suppressed \r\n");
                                      return TRUE;

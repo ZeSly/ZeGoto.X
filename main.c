@@ -86,6 +86,7 @@
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
 static unsigned short wOriginalAppConfigChecksum; // Checksum of the ROM defaults for AppConfig
+MAC_ADDR MyMACAddr;
 
 /** V A R I A B L E S ********************************************************/
 #if defined(__18CXX)
@@ -260,16 +261,16 @@ int main(void)
         {
             dwLastIP = AppConfig.MyIPAddr.Val;
 
-//            if (mUSBUSARTIsTxTrfReady())
-//            {
-//                char sIP[128];
-//                sprintf(sIP, (ROM char*) "IP ard: %d.%d.%d.%d\r\n",
-//                        AppConfig.MyIPAddr.v[0],
-//                        AppConfig.MyIPAddr.v[1],
-//                        AppConfig.MyIPAddr.v[2],
-//                        AppConfig.MyIPAddr.v[3]);
-//                putrsUSBUSART(sIP);
-//            }
+            //            if (mUSBUSARTIsTxTrfReady())
+            //            {
+            //                char sIP[128];
+            //                sprintf(sIP, (ROM char*) "IP ard: %d.%d.%d.%d\r\n",
+            //                        AppConfig.MyIPAddr.v[0],
+            //                        AppConfig.MyIPAddr.v[1],
+            //                        AppConfig.MyIPAddr.v[2],
+            //                        AppConfig.MyIPAddr.v[3]);
+            //                putrsUSBUSART(sIP);
+            //            }
 
 #if defined(STACK_USE_ANNOUNCE)
             AnnounceIP();
@@ -357,6 +358,8 @@ int main(void)
  *
  * Note:            None
  *******************************************************************/
+#include "telescope_movement_commands.h"
+
 static void ProcessIO(void)
 {
     static BYTE nb_blink = 6;
@@ -365,7 +368,7 @@ static void ProcessIO(void)
     BYTE numBytesWrite;
 
     // Blink LED2
-    if(TickGet() - t >= TICK_SECOND/4ul && nb_blink)
+    if (TickGet() - t >= TICK_SECOND / 4ul && nb_blink)
     {
         t = TickGet();
         LED2_IO ^= 1;
@@ -375,42 +378,44 @@ static void ProcessIO(void)
     UpdateRAStepPosition();
     UpdateDecStepPosition();
 
-    if (bPadState & PAD_S3)
+    if (!CurrentMove)
     {
-        RASetDirection(WestDirection);
-        RAAccelerate();
+        if (bPadState & PAD_S3)
+        {
+            RASetDirection(WestDirection);
+            RAAccelerate();
 
-    }
-    else if (bPadState & PAD_S4)
-    {
-        RASetDirection(EastDirection);
-        RAAccelerate();
+        }
+        else if (bPadState & PAD_S4)
+        {
+            RASetDirection(EastDirection);
+            RAAccelerate();
 
-    }
-    else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
-    {
-        RADecelerate();
+        }
+        else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
+        {
+            RADecelerate();
 
+        }
+
+
+        if (bPadState & PAD_S5)
+        {
+            DecSetDirection(NorthDirection);
+            DecAccelerate();
+
+        }
+        else if (bPadState & PAD_S6)
+        {
+            DecSetDirection(SouthDirection);
+            DecAccelerate();
+        }
+        else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
+        {
+            DecDecelerate();
+        }
     }
 
-    
-    if (bPadState & PAD_S5)
-    {
-        DecSetDirection(NorthDirection);
-        DecStart();
-
-    }
-    else if (bPadState & PAD_S6)
-    {
-        DecSetDirection(SouthDirection);
-        DecStart();
-    }
-    else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
-    {
-        DecDecelerate();
-    }
-
-    
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
 
@@ -418,6 +423,7 @@ static void ProcessIO(void)
     {
         static char LX200Cmd[32];
         static BYTE j = 0;
+        static BOOL getting_cmd = FALSE;
 
         numBytesWrite = 0;
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
@@ -432,20 +438,33 @@ static void ProcessIO(void)
                     USB_In_Buffer[0] = 'P';
                     numBytesWrite = 1;
                 }
-                else if (USB_Out_Buffer[i] == ':') // start of a LX200 commande
+                else if (USB_Out_Buffer[i] == ':' && getting_cmd == FALSE) // start of a LX200 command
                 {
                     j = 0;
+                    getting_cmd = TRUE;
                 }
-                else if (USB_Out_Buffer[i] == '#')  // end of a LX200 commande
+                else if (USB_Out_Buffer[i] == '#') // end of a LX200 command
                 {
                     if (j > 0)
                     {
+                        LX200Cmd[j++] = '#';
                         LX200Cmd[j] = '\0';
                         LX200ProcessCommand(LX200Cmd);
-                        strcpy(USB_In_Buffer, LX200Response);
-                        numBytesWrite = strlen(USB_In_Buffer);
+                        if (LX200Response[0] != '\0')
+                        {
+                            strcpy(USB_In_Buffer, LX200Response);
+                            numBytesWrite = strlen(USB_In_Buffer);
+                        }
+//                        else
+//                        {
+//                            USB_In_Buffer[0] = '.';
+//                            USB_In_Buffer[1] = '\0';
+//                            numBytesWrite = 1;
+//                        }
+                        LX200Response[0] = '\0';
                     }
                     j = 0;
+                    getting_cmd = FALSE;
                 }
                 else
                 {
@@ -489,7 +508,7 @@ static void InitializeBoard(void)
 {
     AD1CON1 = 0;
     AD1PCFGL = 0xFFFF;
-//    AD1PCFGLbits.PCFG10 = 0;    // Power sense on AN10
+    //    AD1PCFGLbits.PCFG10 = 0;    // Power sense on AN10
 
     // Sleep mode for the 2 DRV8824
     RA_SLEEP_TRIS = OUTPUT_PIN;
@@ -597,21 +616,13 @@ static void InitializeBoard(void)
 // that locate the MAC address at 0x1FFF0.  Syntax below is for MPLAB C 
 // Compiler for PIC18 MCUs. Syntax will vary for other compilers.
 //#pragma romdata MACROM=0x1FFF0
-static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
+//static ROM BYTE SerializedMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
 //#pragma romdata
 
 static void InitAppConfig(void)
 {
-//    char s[32];
-//
-//    memset(s, 0, 32);
-//    strcpypgm2ram(s, (ROM char *)"Sylvain");
-//    XEEBeginWrite(0x0000);
-//    XEEWriteArray(s,32);
-//
-//    memset(s, 0, 32);
-//    XEEReadArray(0x0000, s,32);
-    
+    RTCCReadMacAddress(MyMACAddr.v);
+
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS) || defined(EEPROM_I2CCON)
     unsigned char vNeedToSaveDefaults = 0;
 #endif
@@ -624,11 +635,11 @@ static void InitAppConfig(void)
 
         AppConfig.Flags.bIsDHCPEnabled = TRUE;
         AppConfig.Flags.bInConfigMode = TRUE;
-        memcpypgm2ram((void*) &AppConfig.MyMACAddr, (ROM void*) SerializedMACAddress, sizeof (AppConfig.MyMACAddr));
+        //memcpypgm2ram((void*) &MyMACAddr, (ROM void*) SerializedMACAddress, sizeof (MyMACAddr));
         //        {
         //            _prog_addressT MACAddressAddress;
         //            MACAddressAddress.next = 0x157F8;
-        //            _memcpy_p2d24((char*)&AppConfig.MyMACAddr, MACAddressAddress, sizeof(AppConfig.MyMACAddr));
+        //            _memcpy_p2d24((char*)&MyMACAddr, MACAddressAddress, sizeof(MyMACAddr));
         //        }
         AppConfig.MyIPAddr.Val = MY_DEFAULT_IP_ADDR_BYTE1 | MY_DEFAULT_IP_ADDR_BYTE2 << 8ul | MY_DEFAULT_IP_ADDR_BYTE3 << 16ul | MY_DEFAULT_IP_ADDR_BYTE4 << 24ul;
         AppConfig.DefaultIPAddr.Val = AppConfig.MyIPAddr.Val;
@@ -770,7 +781,7 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
 
     // Write the validation struct and current AppConfig contents to EEPROM/Flash
 #if defined(EEPROM_CS_TRIS) || defined (EEPROM_I2CCON)
-//    XEEBeginWrite(0x0000);
+    //    XEEBeginWrite(0x0000);
     XEEWriteArray(0x0000, (BYTE*) & NVMValidationStruct, sizeof (NVMValidationStruct));
     XEEWriteArray(sizeof (NVMValidationStruct), (BYTE*) ptrAppConfig, sizeof (APP_CONFIG));
 #else
@@ -905,28 +916,28 @@ void USBCB_SOF_Handler(void)
     // Callback caller is already doing that.
 
     //This is reverse logic since the pushbutton is active low
-//    if (buttonPressed == sw2)
-//    {
-//        if (buttonCount != 0)
-//        {
-//            buttonCount--;
-//        }
-//        else
-//        {
-//            //This is reverse logic since the pushbutton is active low
-//            buttonPressed = !sw2;
-//
-//            //Wait 100ms before the next press can be generated
-//            buttonCount = 100;
-//        }
-//    }
-//    else
-//    {
-//        if (buttonCount != 0)
-//        {
-//            buttonCount--;
-//        }
-//    }
+    //    if (buttonPressed == sw2)
+    //    {
+    //        if (buttonCount != 0)
+    //        {
+    //            buttonCount--;
+    //        }
+    //        else
+    //        {
+    //            //This is reverse logic since the pushbutton is active low
+    //            buttonPressed = !sw2;
+    //
+    //            //Wait 100ms before the next press can be generated
+    //            buttonCount = 100;
+    //        }
+    //    }
+    //    else
+    //    {
+    //        if (buttonCount != 0)
+    //        {
+    //            buttonCount--;
+    //        }
+    //    }
 }
 
 /*******************************************************************

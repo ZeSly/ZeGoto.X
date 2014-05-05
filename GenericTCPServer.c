@@ -122,7 +122,7 @@
   Returns:
         None
  ***************************************************************************/
-char DebugBuffer[32];
+char DebugBuffer[64];
 
 void GenericTCPServer(void)
 {

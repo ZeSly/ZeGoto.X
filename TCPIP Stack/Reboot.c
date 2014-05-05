@@ -121,7 +121,7 @@ void RebootTask(void)
 	#endif
 
 	// Get our MAC address, IP address, and compute a checksum of them 
-	memcpy((void*)&BootloaderAddress.vMACAddress[0], (void*)&AppConfig.MyMACAddr.v[0], sizeof(AppConfig.MyMACAddr));
+	memcpy((void*)&BootloaderAddress.vMACAddress[0], (void*)&MyMACAddr.v[0], sizeof(MyMACAddr));
 	BootloaderAddress.dwIPAddress = AppConfig.MyIPAddr.Val;
 	BootloaderAddress.wChecksum = CalcIPChecksum((BYTE*)&BootloaderAddress, sizeof(BootloaderAddress) - sizeof(BootloaderAddress.wChecksum));
 	

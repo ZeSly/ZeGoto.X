@@ -105,7 +105,8 @@ typedef struct __attribute__((__packed__)) appConfigStruct
 		unsigned char bIsDHCPEnabled : 1;
 		unsigned char bInConfigMode : 1;
 	} Flags;                            // Flag structure
-	MAC_ADDR	MyMACAddr;              // Application MAC address
+        // The MAC address is read in the MCP79401
+	//MAC_ADDR	MyMACAddr;              // Application MAC address
 
 #if defined(WF_CS_TRIS)
     BYTE	MySSID[32];             // Wireless SSID (if using MRF24W)
@@ -137,6 +138,7 @@ typedef struct __attribute__((__packed__)) appConfigStruct
 
 #ifndef THIS_IS_STACK_APPLICATION
     extern APP_CONFIG AppConfig;
+    extern MAC_ADDR MyMACAddr;
 #endif
 
 

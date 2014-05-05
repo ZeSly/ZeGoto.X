@@ -343,7 +343,7 @@ void StackTask(void)
 		// layers and avoid, for example, having our own gratuitous ARPs get 
 		// answered by ourself.
 		#if defined(WF_CS_TRIS)
-			if(memcmp((void*)&remoteNode.MACAddr, (void*)&AppConfig.MyMACAddr, 6) == 0u)
+			if(memcmp((void*)&remoteNode.MACAddr, (void*)&MyMACAddr, 6) == 0u)
 				continue;
 
 			#if defined(CONFIG_WPA_ENTERPRISE)

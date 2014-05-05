@@ -35,6 +35,9 @@ int32_t DecStepPerSecond;
 int32_t DecStepPosition;
 int32_t DecStepStart;
 int32_t DecStepTarget;
+int32_t NumberDecStep;
+int32_t DecDecelPositon;
+
 BOOL NorthPoleOVerflow;
 
 uint8_t NorthDirection = 0;
@@ -43,6 +46,7 @@ uint8_t SouthDirection = 1;
 /* static for dec motor */
 static int32_t DecRelativeStepPosition;
 static uint8_t DecDirection;
+static uint8_t DecNextDirection;
 
 static motor_state_t DecState = MOTOR_STOP;
 
@@ -76,6 +80,9 @@ void Timer3Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
+//    static int32_t AccelerationSteps = 0;
+    static BYTE fullspeed = 0;
+
     if (tmodulo != 0)
     {
         tint_cnt--;
@@ -87,6 +94,15 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         {
             DEC_STEP_IO ^= 1;
             DecRelativeStepPosition++;
+            if (NumberDecStep)
+            {
+                if (NumberDecStep <= DecDecelPositon && DecState != MOTOR_DECEL)
+                {
+                    DecState = MOTOR_DECEL;
+                    accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+                }
+                NumberDecStep--;
+            }
 
             tint_cnt = tlap;
             PR3 = 0xFFFF;
@@ -96,11 +112,21 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     {
         DEC_STEP_IO ^= 1;
         DecRelativeStepPosition++;
+        if (NumberDecStep)
+        {
+            if (NumberDecStep <= DecDecelPositon && DecState != MOTOR_DECEL)
+            {
+                DecState = MOTOR_DECEL;
+                accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+            }
+            NumberDecStep--;
+        }
     }
 
     switch (DecState)
     {
     case MOTOR_STOP:
+        fullspeed = 0;
         T3CONbits.TON = 0;
         DEC_SLEEP_IO = 0;
         break;
@@ -113,6 +139,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             CurrentSpeed++;
             if (CurrentSpeed >= MaxSpeed)
             {
+                DecDecelPositon = DecRelativeStepPosition;
                 DecState = MOTOR_NOACC;
             }
 
@@ -138,7 +165,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         accel_decel_cnt -= PR3;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = DecelPeriod;
+            accel_decel_cnt = NumberDecStep ? AccelPeriod : DecelPeriod;
             CurrentSpeed--;
             if (CurrentSpeed == 1)
             {
@@ -163,6 +190,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         break;
 
     case MOTOR_NOACC:
+        fullspeed = 1;
         break;
     }
 
@@ -190,7 +218,7 @@ void DecMotorInit(void)
     DecStepPerMinute = DecStepPerDegree / 60L;
     DecStepPerSecond = DecStepPerMinute / 60L;
 
-    RTCCReadArray(RTCC_RAM + sizeof (int32_t), (BYTE *) &DecStepPosition, sizeof (DecStepPosition));
+    RTCCReadArray(RTCC_RAM + sizeof (int32_t), (BYTE *) & DecStepPosition, sizeof (DecStepPosition));
     if (DecStepPosition < -NbStepMax / 4L || DecStepPosition > NbStepMax / 4L)
     {
         DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
@@ -202,18 +230,24 @@ void DecMotorInit(void)
     Timer3Init();
 }
 
-void DecStart(void)
+void DecAccelerate(void)
 {
     if (DecState == MOTOR_STOP)
     {
+        DecDirection = DecNextDirection;
+        DEC_DIR_IO = DecNextDirection;
+
         DecStepStart = DecStepPosition;
         DecRelativeStepPosition = 0;
         NorthPoleOVerflow = FALSE;
+
         DEC_SLEEP_IO = 1;
         DEC_FAULT_CN = 1;
-        CurrentSpeed = 1;
+
+        CurrentSpeed = 2;
         accel_decel_cnt = AccelPeriod;
         DecState = MOTOR_ACCEL;
+
         T3CONbits.TON = 1;
     }
 }
@@ -236,8 +270,7 @@ void DecStop(void)
 
 void DecSetDirection(uint8_t dir)
 {
-    DecDirection = dir;
-    DEC_DIR_IO = dir;
+    DecNextDirection = dir;
 }
 
 void UpdateDecStepPosition()
@@ -274,7 +307,7 @@ void UpdateDecStepPosition()
     }
     else if (SavePosition == TRUE)
     {
-        RTCCWriteArray(RTCC_RAM + sizeof(int32_t), (BYTE*)&DecStepPosition, sizeof(DecStepPosition));
+        RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & DecStepPosition, sizeof (DecStepPosition));
         SavePosition = FALSE;
     }
 }

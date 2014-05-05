@@ -13,7 +13,7 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Sylvain Girard   	2 mai 2014 Creation
+ * Sylvain Girard       2 mai 2014 Creation
  ********************************************************************/
 
 /* Device header file */
@@ -32,10 +32,10 @@ BOOL LX200Precise = FALSE;
 /******************************************************************************
  * Function:        void PrecisionToggle()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Toggle between low/hi precision positions
+ * Overview:        Toggle between low/hi precision positions
  *****************************************************************************/
 void PrecisionToggle()
 {
@@ -51,44 +51,44 @@ void GetPrecision()
 }
 
 /******************************************************************************
- * Function:        void SendRA(long StepPosition_P)
+ * Function:        void SendRA(int32_t StepPosition_P)
  * PreCondition:    None
- * Input:		    long StepPosition_P : position in number of steps
- * Output:		    None
+ * Input:           int32_t StepPosition_P : position in number of steps
+ * Output:          None
  * Side Effects:    None
- * Overview:		Convert step position to right ascension and send it to
+ * Overview:        Convert step position to right ascension and send it to
  *                  host
  *****************************************************************************/
-void SendRA(long StepPosition_P)
+void SendRA(int32_t StepPosition_P)
 {
-    char RAPosition_L[16];
-    long a = 3600L * RAStepPerSec;
-    long b = 60L * RAStepPerSec;
+    int32_t a = 3600L * RAStepPerSec;
+    int32_t b = 60L * RAStepPerSec;
 
-    long hours = StepPosition_P / a;
+    int32_t hours = StepPosition_P / a;
+    int32_t diff = RAStepPosition - RAStepTarget;
+
     if (LX200Precise)
     {
-        long minutes = (StepPosition_P % a) / b;
-        long seconds = ((StepPosition_P % a) % b) / 100;
+        int32_t minutes = (StepPosition_P % a) / b;
+        int32_t seconds = ((StepPosition_P % a) % b) / 100;
 
-        sprintf(RAPosition_L, "%02li:%02li:%02li#", hours, minutes, seconds);
+        sprintf(LX200Response, "%02li:%02li:%02li# %li", hours, minutes, seconds, diff);
     }
     else
     {
-        long minutes = 10L * (StepPosition_P % a) / (float) b;
+        int32_t minutes = 10L * (StepPosition_P % a) / (float) b;
 
-        sprintf(RAPosition_L, "%02li:%02li.%01li#", hours, minutes / 10, minutes % 10);
+        sprintf(LX200Response, "%02li:%02li.%01li# %li", hours, minutes / 10, minutes % 10, diff);
     }
-    strcpy(LX200Response, RAPosition_L);
 }
 
 /******************************************************************************
  * Function:        void GetTelescopeRA()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Telescope Right Ascension
+ * Overview:        Get Telescope Right Ascension
  *****************************************************************************/
 void GetTelescopeRA()
 {
@@ -98,10 +98,10 @@ void GetTelescopeRA()
 /******************************************************************************
  * Function:        void GetCurrentTargetRA()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get current/target object Right Ascension
+ * Overview:        Get current/target object Right Ascension
  *****************************************************************************/
 void GetCurrentTargetRA()
 {
@@ -111,15 +111,14 @@ void GetCurrentTargetRA()
 /******************************************************************************
  * Function:        void SendDeclination()
  * PreCondition:    None
- * Input:		    long StepPosition_P : position in number of steps
- * Output:		    None
+ * Input:           int32_t StepPosition_P : position in number of steps
+ * Output:          None
  * Side Effects:    None
- * Overview:		Convert step position to declinaison and send it to host
+ * Overview:        Convert step position to declinaison and send it to host
  *****************************************************************************/
-void SendDeclination(long StepPosition_P)
+void SendDeclination(int32_t StepPosition_P)
 {
-    char DecPosition_L[16];
-    long DecPos_L;
+    int32_t DecPos_L;
     char signe;
 
     if (StepPosition_P < 0)
@@ -133,29 +132,30 @@ void SendDeclination(long StepPosition_P)
         signe = '+';
     }
 
-    long degrees = DecPos_L / DecStepPerDegree;
+    int32_t degrees = DecPos_L / DecStepPerDegree;
+    int32_t diff = DecStepPosition - DecStepTarget;
+
     if (LX200Precise)
     {
-        long minutes = (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
-        long seconds = ((DecPos_L % DecStepPerDegree) % DecStepPerMinute) / DecStepPerSecond;
+        int32_t minutes = (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
+        int32_t seconds = ((DecPos_L % DecStepPerDegree) % DecStepPerMinute) / DecStepPerSecond;
 
-        sprintf(DecPosition_L, "%c%02li:%02li:%02li#", signe, degrees, minutes, seconds);
+        sprintf(LX200Response, "%c%02li:%02li:%02li# %li", signe, degrees, minutes, seconds, diff);
     }
     else
     {
-        long minutes = 10L * (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
-        sprintf(DecPosition_L, "%c%02li:%02li.%01li#", signe, degrees, minutes / 10, minutes % 10);
+        int32_t minutes = 10L * (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
+        sprintf(LX200Response, "%c%02li:%02li.%01li# %li", signe, degrees, minutes / 10, minutes % 10, diff);
     }
-    strcpy(LX200Response, DecPosition_L);
 }
 
 /******************************************************************************
  * Function:        void GetTelescopeDeclination()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Telescope Right Declination
+ * Overview:        Get Telescope Right Declination
  *****************************************************************************/
 void GetTelescopeDeclination()
 {
@@ -165,10 +165,10 @@ void GetTelescopeDeclination()
 /******************************************************************************
  * Function:        void GetTelescopeDeclination()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Telescope Right Declination
+ * Overview:        Get Telescope Right Declination
  *****************************************************************************/
 void GetCurrentTargetDeclination()
 {
@@ -178,10 +178,10 @@ void GetCurrentTargetDeclination()
 /******************************************************************************
  * Function:        void GetTelescopeAzimuth()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Telescope Azimuth. Not supported, send 0
+ * Overview:        Get Telescope Azimuth. Not supported, send 0
  *****************************************************************************/
 void GetTelescopeAzimuth()
 {
@@ -198,10 +198,10 @@ void GetTelescopeAzimuth()
 /******************************************************************************
  * Function:        void GetTelescopeAltitude()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Telescope Altitude. Not supported, send 0
+ * Overview:        Get Telescope Altitude. Not supported, send 0
  *****************************************************************************/
 void GetTelescopeAltitude()
 {
@@ -218,10 +218,10 @@ void GetTelescopeAltitude()
 /******************************************************************************
  * Function:        void GetSiderealTime()
  * PreCondition:    None
- * Input:		    None
- * Output:		    None
+ * Input:           None
+ * Output:          None
  * Side Effects:    None
- * Overview:		Get Sedireal Time. Not supported, send 0
+ * Overview:        Get Sedireal Time. Not supported, send 0
  *****************************************************************************/
 void GetSiderealTime()
 {

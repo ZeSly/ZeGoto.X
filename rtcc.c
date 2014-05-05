@@ -43,10 +43,17 @@ typedef BOOL XEE_RESULT;
 /* Implemented in i2ceeprom.c */
 unsigned char I2CGet(void);
 char I2CPut(unsigned char data_out);
+XEE_RESULT XEEWrite(BYTE val);
+XEE_RESULT XEEEndWrite(void);
 
-/*
- RTCC Write
- */
+/******************************************************************************
+ * Function:        XEE_RESULT RTCCBeginWrite(BYTE address)
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        send first address to write to the RTCC
+ *****************************************************************************/
 XEE_RESULT RTCCBeginWrite(BYTE address)
 {
     do
@@ -69,9 +76,14 @@ XEE_RESULT RTCCBeginWrite(BYTE address)
     return XEE_SUCCESS;
 }
 
-XEE_RESULT XEEWrite(BYTE val);
-XEE_RESULT XEEEndWrite(void);
-
+/******************************************************************************
+ * Function:        void RTCCWriteArray(BYTE address, BYTE *val, WORD wLen)
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Write an array of byte in the RTCC
+ *****************************************************************************/
 void RTCCWriteArray(BYTE address, BYTE *val, WORD wLen)
 {
     RTCCBeginWrite(address++);
@@ -81,10 +93,16 @@ void RTCCWriteArray(BYTE address, BYTE *val, WORD wLen)
     }
     XEEEndWrite();
 }
-/*
- RTCC Read
- */
-XEE_RESULT RTCCBeginRead(BYTE address)
+
+/******************************************************************************
+ * Function:        XEE_RESULT RTCCBeginRead(BYTE address)
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        send first address to read to the RTCC
+ *****************************************************************************/
+XEE_RESULT RTCCBeginRead(BYTE i2c_control, BYTE address)
 {
     if (RTCCBeginWrite(address) != XEE_SUCCESS)
         return !XEE_SUCCESS;
@@ -94,18 +112,26 @@ XEE_RESULT RTCCBeginRead(BYTE address)
     while (EEPROM_I2CCONbits.RSEN);
 
     // Send "control" byte with device address to slave
-    if (I2CPut(RTCC_CONTROL | READ))
+    if (I2CPut(i2c_control | READ))
         return !XEE_SUCCESS;
 
     I2CIdle();
     return XEE_SUCCESS;
 }
 
+/******************************************************************************
+ * Function:        BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length)
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Read an array of byte in the RTCC
+ *****************************************************************************/
 BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length)
 {
     XEE_RESULT r;
 
-    r = RTCCBeginRead(address++);
+    r = RTCCBeginRead(RTCC_CONTROL, address++);
     if (r != XEE_SUCCESS)
         return FALSE;
 
@@ -133,6 +159,14 @@ BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length)
     return TRUE;
 }
 
+/******************************************************************************
+ * Function:        void RTCCInit()
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Set RTCC VBATEN bits to activate battery backup
+ *****************************************************************************/
 void RTCCInit()
 {
     RTCWKDAYbits rtcwkday;
@@ -141,4 +175,48 @@ void RTCCInit()
     if (rtcwkday.VBATEN == 0)
         rtcwkday.VBATEN = 1;
     RTCCWriteArray(RTCWKDAY, (BYTE *) &rtcwkday, 1);
+}
+
+/******************************************************************************
+ * Function:        XEE_RESULT RTCCBeginWrite(BYTE address)
+ * PreCondition:    I2C initialized
+ * Input:           Nono
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        send first address to write to the RTCC
+ *****************************************************************************/
+BOOL RTCCReadMacAddress(BYTE *MacAddress)
+{
+    BYTE address = 0xF2;
+    BYTE length;
+    XEE_RESULT r;
+
+    r = RTCCBeginRead(MAC_CONTROL, address++);
+    if (r != XEE_SUCCESS)
+        return FALSE;
+
+    length = 6;
+    while (length) /* Receive the number of bytes specified by length */
+    {
+        *MacAddress = I2CGet(); /* save byte received */
+        MacAddress++;
+        length--;
+        if (length == 0) /* If last char, generate NACK sequence */
+        {
+            EEPROM_I2CCONbits.ACKDT = 1;
+            EEPROM_I2CCONbits.ACKEN = 1;
+        }
+        else /* For other chars,generate ACK sequence */
+        {
+            EEPROM_I2CCONbits.ACKDT = 0;
+            EEPROM_I2CCONbits.ACKEN = 1;
+        }
+        while (EEPROM_I2CCONbits.ACKEN == 1)
+            ; /* Wait till ACK/NACK sequence is over */
+    }
+
+    I2CStop();
+
+    return TRUE;
+
 }
