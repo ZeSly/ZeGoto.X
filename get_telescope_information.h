@@ -33,4 +33,9 @@ void GetTelescopeAzimuth();
 void GetTelescopeAltitude();
 void GetSiderealTime();
 
+void GetStepRA();
+void GetStepDeclination();
+void GetStepTargetRA();
+void GetStepTargetDeclination();
+
 #endif	/* GET_TELESCOPE_INFORMATION_H */

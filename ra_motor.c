@@ -91,6 +91,7 @@ void Timer2Init(void)
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
 //    static BYTE fullspeed = 0;
+    BOOL MakeOneStep = FALSE;
 
     if (tmodulo != 0)
     {
@@ -101,34 +102,20 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            RA_STEP_IO ^= 1;
-            if (RAState != MOTOR_STOP)
-            {
-                RARelativeStepPosition++;
-                if (NumberRAStep)
-                {
-                    if (NumberRAStep <= RADecelPositon && RAState != MOTOR_DECEL)
-                    {
-                        RAState = MOTOR_DECEL;
-                        accel_decel_cnt = AccelPeriod - accel_decel_cnt;
-                    }
-                    NumberRAStep--;
-                    if (NumberRAStep == 0)
-                    {
-                        CurrentSpeed = 1;
-                        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
-                        RAState = MOTOR_STOP;
-                    }
-                }
-            }
+            MakeOneStep = TRUE;
 
             // if SideralHalfPeriod is odd
-            if (SideralPeriod & 1) tint_cnt = tlap | RA_STEP_IO;
+            if (SideralPeriod & 1) tint_cnt = tlap | ~RA_STEP_IO;
 
             PR2 = 0xFFFF;
         }
     }
     else
+    {
+        MakeOneStep = TRUE;
+    }
+
+    if (MakeOneStep == TRUE)
     {
         RA_STEP_IO ^= 1;
         if (RAState != MOTOR_STOP)
@@ -142,12 +129,12 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
                     accel_decel_cnt = AccelPeriod - accel_decel_cnt;
                 }
                 NumberRAStep--;
-                if (NumberRAStep == 0)
-                {
-                    CurrentSpeed = 1;
-                    MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
-                    RAState = MOTOR_STOP;
-                }
+//                if (NumberRAStep == 0)
+//                {
+//                    CurrentSpeed = 1;
+//                    MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+//                    RAState = MOTOR_STOP;
+//                }
             }
         }
     }

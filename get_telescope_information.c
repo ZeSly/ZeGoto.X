@@ -61,24 +61,41 @@ void GetPrecision()
  *****************************************************************************/
 void SendRA(int32_t StepPosition_P)
 {
+    int32_t diff = RAStepPosition - RAStepTarget;
     int32_t a = 3600L * RAStepPerSec;
     int32_t b = 60L * RAStepPerSec;
 
     int32_t hours = StepPosition_P / a;
-    int32_t diff = RAStepPosition - RAStepTarget;
+    int32_t modulo_hours = StepPosition_P % a;
 
     if (LX200Precise)
     {
-        int32_t minutes = (StepPosition_P % a) / b;
-        int32_t seconds = ((StepPosition_P % a) % b) / 100;
+        int32_t minutes = modulo_hours / b;
+        int32_t modulo_minutes = modulo_hours % b;
+        int32_t seconds = modulo_minutes / 100;
+        int32_t modulo_seconds = modulo_minutes % 100;
+        if (modulo_seconds > 50) seconds++;
 
-        sprintf(LX200Response, "%02li:%02li:%02li# %li", hours, minutes, seconds, diff);
+        if (seconds == 60)
+        {
+            seconds = 0;
+            minutes++;
+        }
+        if (minutes == 60)
+        {
+            minutes = 0;
+            hours++;
+        }
+        if (hours == 24) hours = 0; // it should never happens !
+
+
+        sprintf(LX200Response, "%02li:%02li:%02li# %li\r\n", hours, minutes, seconds, diff);
     }
     else
     {
         int32_t minutes = 10L * (StepPosition_P % a) / (float) b;
 
-        sprintf(LX200Response, "%02li:%02li.%01li# %li", hours, minutes / 10, minutes % 10, diff);
+        sprintf(LX200Response, "%02li:%02li.%01li# %li\r\n", hours, minutes / 10, minutes % 10, diff);
     }
 }
 
@@ -95,6 +112,11 @@ void GetTelescopeRA()
     SendRA(RAStepPosition);
 }
 
+void GetStepRA()
+{
+    sprintf(LX200Response, "%li#", RAStepPosition);
+}
+
 /******************************************************************************
  * Function:        void GetCurrentTargetRA()
  * PreCondition:    None
@@ -108,6 +130,11 @@ void GetCurrentTargetRA()
     SendRA(RAStepTarget);
 }
 
+void GetStepTargetRA()
+{
+    sprintf(LX200Response, "%li#", RAStepTarget);
+}
+
 /******************************************************************************
  * Function:        void SendDeclination()
  * PreCondition:    None
@@ -118,6 +145,7 @@ void GetCurrentTargetRA()
  *****************************************************************************/
 void SendDeclination(int32_t StepPosition_P)
 {
+    int32_t diff = DecStepPosition - DecStepTarget;
     int32_t DecPos_L;
     char signe;
 
@@ -133,19 +161,34 @@ void SendDeclination(int32_t StepPosition_P)
     }
 
     int32_t degrees = DecPos_L / DecStepPerDegree;
-    int32_t diff = DecStepPosition - DecStepTarget;
+    int32_t modulo_degrees = DecPos_L % DecStepPerDegree;
 
     if (LX200Precise)
     {
-        int32_t minutes = (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
-        int32_t seconds = ((DecPos_L % DecStepPerDegree) % DecStepPerMinute) / DecStepPerSecond;
+        int32_t minutes = modulo_degrees / DecStepPerMinute;
+        int32_t modulo_minutes = modulo_degrees % DecStepPerMinute;
+        int32_t seconds = modulo_minutes / DecStepPerSecond;
+        int32_t modulo_seconds = modulo_minutes % DecStepPerSecond;
 
-        sprintf(LX200Response, "%c%02li:%02li:%02li# %li", signe, degrees, minutes, seconds, diff);
+        if (modulo_seconds > DecStepPerSecond / 2L) seconds++;
+        if (seconds == 60)
+        {
+            seconds = 0;
+            minutes++;
+        }
+        if (minutes == 60)
+        {
+            minutes = 0;
+            degrees++;
+        }
+        if (degrees > 90) degrees = 90; // it should never happens !
+
+        sprintf(LX200Response, "%c%02li:%02li:%02li# %li\r\n", signe, degrees, minutes, seconds, diff);
     }
     else
     {
         int32_t minutes = 10L * (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
-        sprintf(LX200Response, "%c%02li:%02li.%01li# %li", signe, degrees, minutes / 10, minutes % 10, diff);
+        sprintf(LX200Response, "%c%02li:%02li.%01li# %li\r\n", signe, degrees, minutes / 10, minutes % 10, diff);
     }
 }
 
@@ -162,6 +205,11 @@ void GetTelescopeDeclination()
     SendDeclination(DecStepPosition);
 }
 
+void GetStepDeclination()
+{
+    sprintf(LX200Response, "%li#", DecStepPosition);
+}
+
 /******************************************************************************
  * Function:        void GetTelescopeDeclination()
  * PreCondition:    None
@@ -173,6 +221,11 @@ void GetTelescopeDeclination()
 void GetCurrentTargetDeclination()
 {
     SendDeclination(DecStepTarget);
+}
+
+void GetStepTargetDeclination()
+{
+    sprintf(LX200Response, "%li#", DecStepTarget);
 }
 
 /******************************************************************************

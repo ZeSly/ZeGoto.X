@@ -80,8 +80,8 @@ void Timer3Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
-//    static int32_t AccelerationSteps = 0;
-    static BYTE fullspeed = 0;
+//    static BYTE fullspeed = 0;
+    BOOL MakeOneStep = FALSE;
 
     if (tmodulo != 0)
     {
@@ -92,23 +92,18 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            DEC_STEP_IO ^= 1;
-            DecRelativeStepPosition++;
-            if (NumberDecStep)
-            {
-                if (NumberDecStep <= DecDecelPositon && DecState != MOTOR_DECEL)
-                {
-                    DecState = MOTOR_DECEL;
-                    accel_decel_cnt = AccelPeriod - accel_decel_cnt;
-                }
-                NumberDecStep--;
-            }
+            MakeOneStep = TRUE;
 
             tint_cnt = tlap;
             PR3 = 0xFFFF;
         }
     }
     else
+    {
+        MakeOneStep = TRUE;
+    }
+
+    if (MakeOneStep == TRUE)
     {
         DEC_STEP_IO ^= 1;
         DecRelativeStepPosition++;
@@ -126,7 +121,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     switch (DecState)
     {
     case MOTOR_STOP:
-        fullspeed = 0;
+//        fullspeed = 0;
         T3CONbits.TON = 0;
         DEC_SLEEP_IO = 0;
         break;
@@ -190,7 +185,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         break;
 
     case MOTOR_NOACC:
-        fullspeed = 1;
+//        fullspeed = 1;
         break;
     }
 

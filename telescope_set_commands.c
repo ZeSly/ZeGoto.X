@@ -52,7 +52,7 @@ void SetTargetObjectRA()
     }
     else
     {
-        seconds = (int32_t) (LX200String[p + 7] - '0') * 10 + (int32_t) (LX200String[p + 8] - '0');
+        seconds = (int32_t) (LX200String[p + 6] - '0') * 10 + (int32_t) (LX200String[p + 7] - '0');
         LX200Precise = TRUE;
     }
 
@@ -68,6 +68,7 @@ void SetTargetObjectRA()
         LX200Response[0] = '1';
     }
     LX200Response[1] = '\0';
+    sprintf(LX200Response, "%li\r\n", RAStepTarget);
 }
 
 /******************************************************************************
@@ -117,6 +118,7 @@ void SetTargetObjectDeclination()
         LX200Response[0] = '1';
     }
     LX200Response[1] = '\0';
+    sprintf(LX200Response, "%li\r\n", DecStepTarget);
 }
 
 /******************************************************************************

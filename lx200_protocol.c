@@ -93,6 +93,11 @@ LX200Command LX200CommandTab[] =
     { "RM", 2, SetFindRate},
     { "RS", 2, SetMaxRate},
 
+    { "ZGR", 3, GetStepRA},
+    { "ZGD", 3, GetStepDeclination},
+    { "ZGr", 3, GetStepTargetRA},
+    { "ZGd", 3, GetStepTargetDeclination},
+
     { NULL, 0, NULL}
 };
 
