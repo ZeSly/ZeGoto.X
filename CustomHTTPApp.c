@@ -59,6 +59,7 @@
 
 #include "TCPIP Stack/TCPIP.h"
 #include "main.h"		// Needed for SaveAppConfig() prototype
+#include "USB/usb.h"
 
 /****************************************************************************
   Section:
@@ -1654,7 +1655,21 @@ void HTTPPrint_builddate(void)
 
 void HTTPPrint_version(void)
 {
+    TCPPutROMString(sktHTTP, (ROM void*) VERSION);
+}
+
+
+void HTTPPrint_tcpipversion(void)
+{
     TCPPutROMString(sktHTTP, (ROM void*) TCPIP_STACK_VERSION);
+}
+
+void HTTPPrint_usbversion(void)
+{
+    char usb_version[8];
+
+    sprintf(usb_version, "v%d.%d.%d", USB_MAJOR_VER, USB_MINOR_VER, USB_DOT_VER);
+    TCPPutString(sktHTTP, (void*) usb_version);
 }
 
 
@@ -1774,6 +1789,41 @@ void HTTPPrint_ledSelected(WORD num, WORD state)
     // Print output if TRUE and ON or if FALSE and OFF
     if ((state && num) || (!state && !num))
         TCPPutROMString(sktHTTP, (ROM BYTE*) "SELECTED");
+    return;
+}
+
+void HTTPPrint_lcdtext(void)
+{
+    WORD len;
+
+    // Determine how many bytes we can write
+    len = TCPIsPutReady(sktHTTP);
+
+#if defined(USE_LCD)
+    // If just starting, set callbackPos
+    if (curHTTP.callbackPos == 0u)
+        curHTTP.callbackPos = 32;
+
+    // Write a byte at a time while we still can
+    // It may take up to 12 bytes to write a character
+    // (spaces and newlines are longer)
+    while (len > 12u && curHTTP.callbackPos)
+    {
+        // After 16 bytes write a newline
+        if (curHTTP.callbackPos == 16u)
+            len -= TCPPutROMArray(sktHTTP, (ROM BYTE*) "<br />", 6);
+
+        if (LCDText[32 - curHTTP.callbackPos] == ' ' || LCDText[32 - curHTTP.callbackPos] == '\0')
+            len -= TCPPutROMArray(sktHTTP, (ROM BYTE*) "&nbsp;", 6);
+        else
+            len -= TCPPut(sktHTTP, LCDText[32 - curHTTP.callbackPos]);
+
+        curHTTP.callbackPos--;
+    }
+#else
+    TCPPutROMString(sktHTTP, (ROM BYTE*) "No LCD Present");
+#endif
+
     return;
 }
 

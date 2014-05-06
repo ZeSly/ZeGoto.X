@@ -1,0 +1,106 @@
+BODY{ color: White; font-family: Arial, Helvetica, sans-serif; font-size: 10pt; background-color: Black; margin: 0; padding: 0; }
+TD {font-size: 10pt;  }
+p { font-size: 10pt;  margin-bottom: 7px; margin-top: 0; }
+a{ color: #76DEFC; text-decoration: none; }
+a:hover{	text-decoration: underline;  color: White;   }
+form{	margin:0;}
+
+#header{ width:760px; margin-top:10px; margin-left:auto; margin-right:auto;}
+#header ul{ margin: 0; padding-left: 0; height: 44px; line-height: 44px; display: block; list-style: none; background-color: #000;  background-repeat: no-repeat;  }
+#header li{ display: inline; background-color: #222;  float: right;  }
+#header li a{ height: 32px; line-height: 32px; display: block; padding-left: 15px; padding-right: 15px; border-left: 1px solid Black;  float: left;     }
+#header li a:hover{ background-color: #444; text-decoration: none;}
+h1{ margin: 0; padding: 40px 0 0 0; font-family: "trebuchet ms",arial,tahoma,verdana,sans-serif; font-weight: normal; letter-spacing: .005em; color: White;  font-size: 20pt;  }
+
+#status { width: 175px; float: right; padding: 10px; margin: 10px; border: 1px dotted #666; font-weight: bold;}
+#status p { padding: 5px 0 5px 10px; text-indent: -10px; margin: 0;}
+#status .leds { font-size: 20pt;}
+#status .leds a { color: #ddd; cursor: pointer;}
+#status .leds a:hover { color: #ddd; text-decoration: none;}
+
+#CONTENT{ width:760px; margin-left:auto; margin-right:auto;   }
+h2{ margin: 0; padding: 24px 0 7px 40px; font-family: "trebuchet ms",arial,tahoma,verdana,sans-serif; font-weight: normal; letter-spacing: .005em; color: White; font-size: 15pt; }
+#TEXT{ padding: 35px 40px 35px 40px; border-bottom: 1px solid #484848; border-top: 1px solid #484848; background-color: #222; }
+#TEXT p{	margin-top: 1em;margin-bottom: 1em;}
+
+#FOOTER{	width:760px; margin-top:27px; margin-left:auto; margin-right:auto;  border-top: 4px solid #363636;  text-align: right;  padding-top: 5px;   }
+#FOOTER p{ font-size: 11px; line-height: 14px; margin: 0;  color: #DDDDDD; }
+#FOOTER a{ font-size: 11px;	font-weight: normal;	text-decoration: none;  color: White;    }
+#FOOTER a:hover{ color: white; text-decoration: underline; }
+
+.examplebox {
+	margin:10px 40px 10px 40px;
+	padding: 8px;
+	border: 1px dotted #999;
+	text-align:center;
+	background:#333;
+}
+
+.code {
+	font-family: Courier New, Courier, fixed-width, fixed;
+}
+
+.exercise {
+	background: #fe9;
+    color:black;
+	padding: 5px;
+	margin-left: 10px;
+	border-left: 2px solid #eb3;
+}
+
+.error {
+	margin-left: 10px;
+	padding: 10px;
+	background: #600;
+	border-left: 2px solid #F66;
+}
+
+fieldset {
+	margin:10px 40px 10px 40px;
+	padding: 8px;
+	border: 1px dotted #999;
+	text-align:center;
+	background:#333;
+}
+
+fieldset div {	padding: 2px 0px 2px 150px;}
+
+fieldset div label {
+	margin-left: -140px;
+	padding-top: 2px;
+	width: 135px;
+	font-weight: bold;
+	position: absolute;
+}
+
+fieldset input {
+	width: 250px;
+    color: white;
+    background:#222;
+    border: 1px solid #999;
+    padding: 2px;
+}
+
+fieldset input.sm {
+	width: auto;
+    border: 2px outset;
+    border-color: #999;
+}
+
+fieldset textarea {
+	width: 250px;
+}
+
+.result
+{
+	margin: 10px 40px 10px 40px;
+	padding: 8px;
+	border: 1px solid #333;
+	text-align: center;
+	font-weight: bold;
+	background: #eee;
+}
+
+.ok { border-color: #6f6; background: #060;}
+.fail { border-color: #f66; background: #600;}
+.unk { border-color: #ff6; background: #660;	}

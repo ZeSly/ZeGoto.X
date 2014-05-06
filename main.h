@@ -51,7 +51,7 @@
 #ifndef _MAIN_H
 #define _MAIN_H
 
-#define VERSION "0.0.1"
+#define VERSION "v0.2"
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS) || defined(EEPROM_I2CCON)
 	void SaveAppConfig(const APP_CONFIG *AppConfig);

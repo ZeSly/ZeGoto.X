@@ -19,12 +19,5 @@
 <a href="/index.htm">Overview</a>
 <a href="/dynvars.htm">Dynamic Variables</a>
 <a href="/forms.htm">Form Processing</a>
-<a href="/auth.htm">Authentication</a>
-<a href="/cookies.htm">Cookies</a>
-<a href="/upload.htm">File Uploads</a>
-<a href="/upload_Image.htm">Image Uploads</a>
-<a href="/email">Send E-mail</a>
-<a href="/dyndns">Dynamic DNS</a>
 <a href="/protect/config.htm">Network Configuration</a>
-<a href="/snmp/snmpconfig.htm">SNMP Configuration</a>
 </div>

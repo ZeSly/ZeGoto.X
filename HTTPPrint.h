@@ -69,6 +69,10 @@ void HTTPPrint_config_dns1(void);
 void HTTPPrint_config_dns2(void);
 void HTTPPrint_reboot(void);
 void HTTPPrint_rebootaddr(void);
+void HTTPPrint_(void);
+void HTTPPrint_lcdtext(void);
+void HTTPPrint_usbversion(void);
+void HTTPPrint_tcpipversion(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -152,6 +156,12 @@ void HTTPPrint(DWORD callbackID)
         case 0x00000020:
 			HTTPPrint_rebootaddr();
 			break;
+        case 0x00000022:
+			HTTPPrint_();
+			break;
+        case 0x00000023:
+			HTTPPrint_lcdtext();
+			break;
         case 0x0000003a:
 			HTTPPrint_btn(4);
 			break;
@@ -163,6 +173,12 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000003d:
 			HTTPPrint_btn(7);
+			break;
+        case 0x0000003e:
+			HTTPPrint_usbversion();
+			break;
+        case 0x0000003f:
+			HTTPPrint_tcpipversion();
 			break;
 		default:
 			// Output notification for undefined values

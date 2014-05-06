@@ -1,0 +1,87 @@
+~inc:header.inc~
+<h2>Welcome</h2>
+<div id="TEXT">
+    <div id="status">
+        <div id="loading" style="display:none">Error:<br />Connection to demo board was lost.</div>
+        <div id="display">
+            <span style="float:right;font-size:9px;font-weight:normal;padding-top:8px;text-indent:0px">(click to toggle)</span>
+            <p>LEDs:<br /><span class="leds">
+            <a id="led2" onclick="newAJAXCommand('leds.cgi?led=2');">&bull;</a>
+            <a id="led1" onclick="newAJAXCommand('leds.cgi?led=1');">&bull;</a>
+            </span></p>
+            <table>
+            <caption>Buttons:</caption>
+            <tr>
+                <th id="btn1">?</th>
+                <th></th>
+                <th id="btn2">?</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th id="btn7">?</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th></th>
+                <th id="btn5">?</th>
+                <th></th>
+            </tr>
+            <tr>
+                <th id="btn3">?</th>
+                <th></th>
+                <th id="btn4">?</th>
+            </tr>
+            <tr>
+                <th></th>
+                <th id="btn6">?</th>
+                <th></th>
+            </tr>
+            </table>
+        </div>
+    </div>
+
+    <table style="padding-left: 10px;">
+    <tr><td><b>Firmware Version:</b></td><td>&nbsp;</td><td>~version~</td></tr>
+    <tr><td><b>USB Stack Version:</b></td><td>&nbsp;</td><td>~usbversion~</td></tr>
+    <tr><td><b>TCP/IP Stack Version:</b></td><td>&nbsp;</td><td>~tcpipversion~</td></tr>
+    <tr><td><b>Build Date:</b></td><td>&nbsp;</td><td>~builddate~</td></tr>
+    </table>
+
+    <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc rhoncus, eros nec dictum adipiscing, mauris orci ornare pede, a dictum neque lacus sed ligula. Pellentesque mollis arcu quis lorem. Sed vitae quam et mauris euismod aliquam. Pellentesque quis nisl a ante iaculis volutpat. Duis varius sem at nisi. Etiam mattis scelerisque erat. Maecenas lacus sapien, elementum non, semper id, gravida vel, risus. Suspendisse mi risus, iaculis in, bibendum quis, pulvinar eget, velit. Fusce neque libero, vestibulum a, fermentum vel, rutrum sit amet, mauris. Ut ac dui. Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Suspendisse interdum nisi congue ligula. </p>
+    <p>Nam dignissim ligula vel sapien. Curabitur viverra lacus sagittis sem. Donec pretium pretium sapien. Aenean dapibus, augue quis pulvinar iaculis, velit libero rhoncus dui, a adipiscing elit libero at elit. Donec facilisis mauris quis dui. Donec et justo. Praesent ornare vestibulum quam. Sed ultricies pellentesque mi. Etiam odio. Aenean justo. Fusce quis massa ac risus sodales ultricies. Duis eget eros sed ante placerat dignissim. </p>
+</div>
+
+<script type="text/javascript">
+// Parses the xmlResponse from status.xml and updates the status box
+function updateStatus(xmlData) {
+	var mainstat = document.getElementById('display').style.display;
+	var loadstat = document.getElementById('loading').style.display;
+
+	// Check if a timeout occurred
+	if(!xmlData)
+	{
+		mainstat = 'none';
+		loadstat = 'inline';
+		return;
+	}
+
+	// Make sure we're displaying the status display
+	mainstat = 'inline';
+	loadstat = 'none';
+
+	// Loop over all the LEDs
+	for(i = 1; i <= 2; i++)
+		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#f00' : '#ddd';
+
+	// Loop over all the buttons
+	for(i = 1; i <= 7; i++)
+		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '_' : 'O';
+
+}
+setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
+</script>
+
+<script type="text/javascript">
+document.getElementById('hello').innerHTML = "~hellomsg~";
+</script>
+~inc:footer.inc~
