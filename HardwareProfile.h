@@ -182,6 +182,7 @@
 /** RA motor control ***********************************************/
 #define RA_HOME_TRIS        (TRISEbits.TRISE4)
 #define RA_HOME_IO          (PORTEbits.RE4)
+#define RA_HOME_PULLUP      (CNPU4bits.CN62PUE)
 #define RA_SLEEP_TRIS       (TRISEbits.TRISE6)
 #define RA_SLEEP_IO         (LATEbits.LATE6)
 #define RA_DIR_TRIS         (TRISEbits.TRISE1)
@@ -193,10 +194,12 @@
 #define RA_FAULT_TRIS       (TRISEbits.TRISE5)
 #define RA_FAULT_IO         (PORTEbits.RE5)
 #define RA_FAULT_CN         (CNEN4bits.CN63IE)
+#define RA_FAULT_PULLUP     (CNPU4bits.CN63PUE)
 
 /** Dec motor control ***********************************************/
 #define DEC_HOME_TRIS       (TRISDbits.TRISD1)
 #define DEC_HOME_IO         (PORTDbits.RD1)
+#define DEC_HOME_PULLUP     (CNPU4bits.CN50PUE)
 #define DEC_SLEEP_TRIS      (TRISFbits.TRISF1)
 #define DEC_SLEEP_IO        (LATFbits.LATF1)
 #define DEC_DIR_TRIS        (TRISDbits.TRISD4)
@@ -208,6 +211,7 @@
 #define DEC_FAULT_TRIS      (TRISEbits.TRISE0)
 #define DEC_FAULT_IO        (PORTEbits.RE0)
 #define DEC_FAULT_CN        (CNEN4bits.CN58IE)
+#define DEC_FAULT_PULLUP    (CNPU4bits.CN58PUE)
 
 #define TEST_PIN_TRIS       (TRISDbits.TRISD7)
 #define TEST_PIN_OUT        (LATDbits.LATD7);

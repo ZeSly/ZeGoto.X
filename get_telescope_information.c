@@ -59,10 +59,8 @@ void GetPrecision()
  * Overview:        Convert step position to right ascension and send it to
  *                  host
  *****************************************************************************/
-extern volatile BYTE fullspeed;
 void SendRA(int32_t StepPosition_P)
 {
-    int32_t diff = RAStepPosition - RAStepTarget;
     int32_t a = 3600L * RAStepPerSec;
     int32_t b = 60L * RAStepPerSec;
 
@@ -81,22 +79,33 @@ void SendRA(int32_t StepPosition_P)
         {
             seconds = 0;
             minutes++;
+            if (minutes == 60)
+            {
+                minutes = 0;
+                hours++;
+                if (hours == 24) hours = 0; // it should never happens !
+            }
         }
-        if (minutes == 60)
-        {
-            minutes = 0;
-            hours++;
-        }
-        if (hours == 24) hours = 0; // it should never happens !
 
-
-        sprintf(LX200Response, "%02li:%02li:%02li# %li %c\r\n", hours, minutes, seconds, diff, fullspeed ? 'f' : ' ');
+        sprintf(LX200Response, "%02li:%02li:%02li#", hours, minutes, seconds);
     }
     else
     {
-        int32_t minutes = 10L * (StepPosition_P % a) / (float) b;
+        int32_t minutes = 10L * modulo_hours / (float) b;
+        int32_t modulo_minutes = minutes % 10;
 
-        sprintf(LX200Response, "%02li:%02li.%01li# %li %c\r\n", hours, minutes / 10, minutes % 10, diff, fullspeed ? 'f' : ' ');
+        if (modulo_minutes >= 5)
+        {
+            minutes++;
+            if (minutes == 60)
+            {
+                minutes = 0;
+                hours++;
+            }
+            if (hours == 24) hours = 0; // it should never happens !
+        }
+
+        sprintf(LX200Response, "%02li:%02li.%01li#", hours, minutes / 10, modulo_minutes);
     }
 }
 
@@ -146,7 +155,6 @@ void GetStepTargetRA()
  *****************************************************************************/
 void SendDeclination(int32_t StepPosition_P)
 {
-    int32_t diff = DecStepPosition - DecStepTarget;
     int32_t DecPos_L;
     char signe;
 
@@ -176,20 +184,33 @@ void SendDeclination(int32_t StepPosition_P)
         {
             seconds = 0;
             minutes++;
+            if (minutes == 60)
+            {
+                minutes = 0;
+                degrees++;
+                if (degrees > 90) degrees = 90; // it should never happens !
+            }
         }
-        if (minutes == 60)
-        {
-            minutes = 0;
-            degrees++;
-        }
-        if (degrees > 90) degrees = 90; // it should never happens !
 
-        sprintf(LX200Response, "%c%02li:%02li:%02li# %li\r\n", signe, degrees, minutes, seconds, diff);
+        sprintf(LX200Response, "%c%02li:%02li:%02li#", signe, degrees, minutes, seconds);
     }
     else
     {
         int32_t minutes = 10L * (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
-        sprintf(LX200Response, "%c%02li:%02li.%01li# %li\r\n", signe, degrees, minutes / 10, minutes % 10, diff);
+        int32_t modulo_minutes = minutes % 10;
+
+        if (modulo_minutes >= 5)
+        {
+            minutes++;
+            if (minutes == 60)
+            {
+                minutes = 0;
+                degrees++;
+            }
+            if (degrees > 90) degrees = 90; // it should never happens !
+        }
+
+        sprintf(LX200Response, "%c%02li:%02li.%01li#", signe, degrees, minutes / 10, minutes % 10);
     }
 }
 

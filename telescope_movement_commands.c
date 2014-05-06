@@ -30,7 +30,6 @@
 //#include <stdio.h>
 
 char CurrentMove;
-//BOOL SlewingToTarget = FALSE;
 
 void Halt()
 {
@@ -99,17 +98,14 @@ int32_t int32abs(int32_t a)
 
 void SlewToTarget()
 {
-
-//    SlewingToTarget = TRUE;
-
     if (RAStepTarget)
     {
         NumberRAStep = int32abs(RAStepTarget - RAStepPosition);
         RADecelPositon = NumberRAStep / 2L;
-//        if (NumberRAStep % 2L == 0)
-//        {
-//            RADecelPositon--;
-//        }
+        if (NumberRAStep % 2L == 0)
+        {
+            RADecelPositon--;
+        }
 
         if (RAStepPosition < RAStepTarget)
         {

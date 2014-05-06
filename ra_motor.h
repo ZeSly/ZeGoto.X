@@ -28,7 +28,7 @@ typedef enum
 {
     MOTOR_STOP,
     MOTOR_ACCEL,
-    MOTOR_NOACC,
+    MOTOR_FULLSPEED,
     MOTOR_DECEL,
 } motor_state_t;
 

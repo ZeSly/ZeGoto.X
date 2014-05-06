@@ -25,6 +25,7 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "rtcc.h"
+#include "telescope_movement_commands.h"
 
 /* Mount specific variables */
 int32_t DecStepPerDegree;
@@ -80,8 +81,8 @@ void Timer3Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
-//    static BYTE fullspeed = 0;
     BOOL MakeOneStep = FALSE;
+    BOOL NewMotorPeriod = FALSE;
 
     if (tmodulo != 0)
     {
@@ -121,7 +122,6 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     switch (DecState)
     {
     case MOTOR_STOP:
-//        fullspeed = 0;
         T3CONbits.TON = 0;
         DEC_SLEEP_IO = 0;
         break;
@@ -132,27 +132,13 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         {
             accel_decel_cnt = AccelPeriod;
             CurrentSpeed++;
+            NewMotorPeriod = TRUE;
+
             if (CurrentSpeed >= MaxSpeed)
             {
                 DecDecelPositon = DecRelativeStepPosition;
-                DecState = MOTOR_NOACC;
+                DecState = MOTOR_FULLSPEED;
             }
-
-            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
-            if (MotorTimerPeriod > 0xFFFF)
-            {
-                tlap = MotorTimerPeriod / 0xFFFF;
-                tint_cnt = tlap;
-                tmodulo = MotorTimerPeriod % 0xFFFF;
-                PR3 = 0xFFFF;
-            }
-            else
-            {
-                tint_cnt = 0;
-                tmodulo = 0;
-                PR3 = MotorTimerPeriod;
-            }
-
         }
         break;
 
@@ -162,31 +148,37 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         {
             accel_decel_cnt = NumberDecStep ? AccelPeriod : DecelPeriod;
             CurrentSpeed--;
-            if (CurrentSpeed == 1)
+            NewMotorPeriod = TRUE;
+
+            if (CurrentSpeed == 0)
             {
                 DecState = MOTOR_STOP;
+                CurrentMove &= ~MOVE_DEC;
             }
 
-            MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
-            if (MotorTimerPeriod > 0xFFFF)
-            {
-                tlap = MotorTimerPeriod / 0xFFFF;
-                tint_cnt = tlap;
-                tmodulo = MotorTimerPeriod % 0xFFFF;
-                PR3 = 0xFFFF;
-            }
-            else
-            {
-                tint_cnt = 0;
-                tmodulo = 0;
-                PR3 = MotorTimerPeriod;
-            }
         }
         break;
 
-    case MOTOR_NOACC:
-//        fullspeed = 1;
+    case MOTOR_FULLSPEED:
         break;
+    }
+
+    if (NewMotorPeriod == TRUE)
+    {
+        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        if (MotorTimerPeriod > 0xFFFF)
+        {
+            tlap = MotorTimerPeriod / 0xFFFF;
+            tint_cnt = tlap;
+            tmodulo = MotorTimerPeriod % 0xFFFF;
+            PR3 = 0xFFFF;
+        }
+        else
+        {
+            tint_cnt = 0;
+            tmodulo = 0;
+            PR3 = MotorTimerPeriod;
+        }
     }
 
     // Reset interrupt flag
@@ -195,12 +187,16 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 
 void DecMotorInit(void)
 {
+    DEC_HOME_PULLUP = 1;
+    DEC_FAULT_PULLUP = 1;
+
     DEC_HOME_TRIS = INPUT_PIN;
+    DEC_FAULT_TRIS = INPUT_PIN;
+
     DEC_SLEEP_TRIS = OUTPUT_PIN;
     DEC_DIR_TRIS = OUTPUT_PIN;
     DEC_STEP_TRIS = OUTPUT_PIN;
     DEC_MODE_TRIS = OUTPUT_PIN;
-    DEC_FAULT_TRIS = INPUT_PIN;
 
     DEC_SLEEP_IO = 0;
     DEC_MODE_IO = 1; // 8 microsteps / step
@@ -239,7 +235,7 @@ void DecAccelerate(void)
         DEC_SLEEP_IO = 1;
         DEC_FAULT_CN = 1;
 
-        CurrentSpeed = 2;
+        CurrentSpeed = 1;
         MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
         if (MotorTimerPeriod > 0xFFFF)
         {
@@ -264,7 +260,7 @@ void DecAccelerate(void)
 
 void DecDecelerate(void)
 {
-    if (DecState == MOTOR_ACCEL || DecState == MOTOR_NOACC)
+    if (DecState == MOTOR_ACCEL || DecState == MOTOR_FULLSPEED)
     {
         accel_decel_cnt = DecelPeriod;
         DecState = MOTOR_DECEL;
