@@ -453,7 +453,7 @@ mchpPvtEntpriseAssignedNumber.Val = 0x42C7; //microchip = 17095.
 	{
 		for(i=0;i<6/*sizeof(MAC_ADDR)*/;i++)
 		{
-			snmpEngineID[5+i]=MyMACAddr.v[i];
+			snmpEngineID[5+i]=AppConfig.MyMACAddr.v[i];
 		}
 		
 		snmpEngineID[5+6/*sizeof(MAC_ADDR)*/]='\0';
@@ -463,7 +463,7 @@ mchpPvtEntpriseAssignedNumber.Val = 0x42C7; //microchip = 17095.
 	}
 	else if(fifthOctectIdentifier == IPV4_ADDR_ENGN_ID)
 	{
-		dummyptr= (UINT8*)strncpy((char *)&snmpEngineID[5], (const char *) &MyMACAddr, sizeof(IP_ADDR));
+		dummyptr= (UINT8*)strncpy((char *)&snmpEngineID[5], (const char *) &AppConfig.MyMACAddr, sizeof(IP_ADDR));
 	
 		snmpEngineID[5+4/*sizeof(IP_ADDR)*/]='\0';
 		snmpEngnIDLength=4/* 4 Bytes of IANA Pvt Enterprise Assigned Number*/

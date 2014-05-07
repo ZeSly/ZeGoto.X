@@ -324,9 +324,9 @@ void AutoIPTasks(void)
     
             // Initializes the random number generator with a seed based on the MAC address
             case SM_AUTOIP_INIT_RNG:
-                AutoIPRandSeed (((DWORD)MyMACAddr.v[0] + ((DWORD)MyMACAddr.v[1] << 8) + \
-                        ((DWORD)MyMACAddr.v[2] << 16) + ((DWORD)MyMACAddr.v[3] << 24) + \
-                        ((DWORD)MyMACAddr.v[4]) + ((DWORD)MyMACAddr.v[5] << 8)), i);
+                AutoIPRandSeed (((DWORD)AppConfig.MyMACAddr.v[0] + ((DWORD)AppConfig.MyMACAddr.v[1] << 8) + \
+                        ((DWORD)AppConfig.MyMACAddr.v[2] << 16) + ((DWORD)AppConfig.MyMACAddr.v[3] << 24) + \
+                        ((DWORD)AppConfig.MyMACAddr.v[4]) + ((DWORD)AppConfig.MyMACAddr.v[5] << 8)), i);
     
                 AutoIPClient.smAUTOIPState = SM_AUTOIP_CHECK_ADDRESS;
     
@@ -386,7 +386,7 @@ void AutoIPTasks(void)
     
                 AppConfig.MyIPAddr = AutoIPClient.packet.TargetIPAddr;
                 AppConfig.MyMask.Val = 0x0000FFFF;
-            	memcpy(&AutoIPClient.packet.SenderMACAddr, (void*)&MyMACAddr, sizeof(AutoIPClient.packet.SenderMACAddr));
+            	memcpy(&AutoIPClient.packet.SenderMACAddr, (void*)&AppConfig.MyMACAddr, sizeof(AutoIPClient.packet.SenderMACAddr));
                 AutoIPClient.packet.HardwareType  = HW_ETHERNET;
                 AutoIPClient.packet.Protocol      = ARP_IP;
                 AutoIPClient.packet.MACAddrLen    = sizeof(MAC_ADDR);

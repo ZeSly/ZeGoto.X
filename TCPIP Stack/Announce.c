@@ -132,8 +132,8 @@ void AnnounceIP(void)
 	i = 0;
 	while(1)
 	{
-		UDPPut(btohexa_high(MyMACAddr.v[i]));
-	    UDPPut(btohexa_low(MyMACAddr.v[i]));
+		UDPPut(btohexa_high(AppConfig.MyMACAddr.v[i]));
+	    UDPPut(btohexa_low(AppConfig.MyMACAddr.v[i]));
 	    if(++i == 6u)
 	    	break;
 	    UDPPut('-');
@@ -240,8 +240,8 @@ void DiscoveryTask(void)
 			i = 0;
 			while(1)
 			{
-				UDPPut(btohexa_high(MyMACAddr.v[i]));
-			    UDPPut(btohexa_low(MyMACAddr.v[i]));
+				UDPPut(btohexa_high(AppConfig.MyMACAddr.v[i]));
+			    UDPPut(btohexa_low(AppConfig.MyMACAddr.v[i]));
 			    if(++i == 6u)
 			    	break;
 			    UDPPut('-');

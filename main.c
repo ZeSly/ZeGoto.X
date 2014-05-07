@@ -86,7 +86,6 @@
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
 static unsigned short wOriginalAppConfigChecksum; // Checksum of the ROM defaults for AppConfig
-MAC_ADDR MyMACAddr;
 
 /** V A R I A B L E S ********************************************************/
 #if defined(__18CXX)
@@ -621,7 +620,8 @@ static void InitializeBoard(void)
 
 static void InitAppConfig(void)
 {
-    RTCCReadMacAddress(MyMACAddr.v);
+    BYTE RTCCMACAddress[6];
+    RTCCReadMacAddress(RTCCMACAddress);
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS) || defined(EEPROM_I2CCON)
     unsigned char vNeedToSaveDefaults = 0;
@@ -635,7 +635,7 @@ static void InitAppConfig(void)
 
         AppConfig.Flags.bIsDHCPEnabled = TRUE;
         AppConfig.Flags.bInConfigMode = TRUE;
-        //memcpypgm2ram((void*) &MyMACAddr, (ROM void*) SerializedMACAddress, sizeof (MyMACAddr));
+        memcpy((void*) &AppConfig.MyMACAddr, (void*) RTCCMACAddress, sizeof (AppConfig.MyMACAddr));
         //        {
         //            _prog_addressT MACAddressAddress;
         //            MACAddressAddress.next = 0x157F8;

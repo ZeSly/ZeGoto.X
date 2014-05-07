@@ -478,7 +478,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
 
 
     // Use current config in non-volatile memory as defaults
-#if defined(EEPROM_CS_TRIS)
+#if defined(EEPROM_CS_TRIS) || defined(EEPROM_I2CCON)
     XEEReadArray(sizeof (NVM_VALIDATION_STRUCT), (BYTE*) & newAppConfig, sizeof (newAppConfig));
 #elif defined(SPIFLASH_CS_TRIS)
     SPIFlashReadArray(sizeof (NVM_VALIDATION_STRUCT), (BYTE*) & newAppConfig, sizeof (newAppConfig));
@@ -564,7 +564,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void)
             {
                 ((BYTE*) & w)[1] = curHTTP.data[i * 2];
                 ((BYTE*) & w)[0] = curHTTP.data[i * 2 + 1];
-                newMyMACAddr.v[i] = hexatob(*((WORD_VAL*) & w));
+                newAppConfig.MyMACAddr.v[i] = hexatob(*((WORD_VAL*) & w));
             }
         }
         else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "host"))
@@ -1999,8 +1999,8 @@ void HTTPPrint_config_mac(void)
     {
         if (i)
             TCPPut(sktHTTP, ':');
-        TCPPut(sktHTTP, btohexa_high(MyMACAddr.v[i]));
-        TCPPut(sktHTTP, btohexa_low(MyMACAddr.v[i]));
+        TCPPut(sktHTTP, btohexa_high(AppConfig.MyMACAddr.v[i]));
+        TCPPut(sktHTTP, btohexa_low(AppConfig.MyMACAddr.v[i]));
     }
 
     // Indicate that we're done

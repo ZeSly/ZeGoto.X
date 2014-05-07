@@ -840,7 +840,7 @@ static BYTE _DHCPReceive(void)
 		for ( i = 0; i < 6u; i++ )
 		{
 			UDPGet(&v);
-			if ( v != MyMACAddr.v[i])
+			if ( v != AppConfig.MyMACAddr.v[i])
 				goto UDPInvalid;
 		}
 
@@ -1135,7 +1135,7 @@ static void _DHCPSend(BYTE messageType, BOOL bRenewing)
 		UDPPut(0x00);
 
 	// Load chaddr - Client hardware address.
-	UDPPutArray((BYTE*)&MyMACAddr, sizeof(MyMACAddr));
+	UDPPutArray((BYTE*)&AppConfig.MyMACAddr, sizeof(AppConfig.MyMACAddr));
 
 	// Set chaddr[6..15], sname and file as zeros.
 	for ( i = 0; i < 202u; i++ )
