@@ -19,6 +19,7 @@
 #ifndef GET_TELESCOPE_INFORMATION_H
 #define	GET_TELESCOPE_INFORMATION_H
 
+#include <stdint.h>
 #include "GenericTypeDefs.h"
 
 extern BOOL LX200Precise;
@@ -37,5 +38,8 @@ void GetStepRA();
 void GetStepDeclination();
 void GetStepTargetRA();
 void GetStepTargetDeclination();
+
+void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
+void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
 
 #endif	/* GET_TELESCOPE_INFORMATION_H */

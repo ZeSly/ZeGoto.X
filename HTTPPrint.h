@@ -73,6 +73,9 @@ void HTTPPrint_(void);
 void HTTPPrint_lcdtext(void);
 void HTTPPrint_usbversion(void);
 void HTTPPrint_tcpipversion(void);
+void HTTPPrint_rightascension(void);
+void HTTPPrint_declination(void);
+void HTTPPrint_wikiskycoord(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -179,6 +182,15 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000003f:
 			HTTPPrint_tcpipversion();
+			break;
+        case 0x00000040:
+			HTTPPrint_rightascension();
+			break;
+        case 0x00000041:
+			HTTPPrint_declination();
+			break;
+        case 0x00000042:
+			HTTPPrint_wikiskycoord();
 			break;
 		default:
 			// Output notification for undefined values

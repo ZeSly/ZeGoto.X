@@ -61,6 +61,8 @@
 #include "main.h"		// Needed for SaveAppConfig() prototype
 #include "USB/usb.h"
 
+#include "get_telescope_information.h"
+
 /****************************************************************************
   Section:
         Function Prototypes and Memory Globalizers
@@ -1674,6 +1676,8 @@ void HTTPPrint_usbversion(void)
 
 
 #include "inputs.h"
+#include "ra_motor.h"
+#include "dec_motor.h"
 
 ROM BYTE HTML_UP_ARROW[] = "up";
 ROM BYTE HTML_DOWN_ARROW[] = "dn";
@@ -2194,4 +2198,40 @@ void HTTPPrint_status_fail(void)
     lastFailure = FALSE;
 }
 
+void HTTPPrint_rightascension(void)
+{
+    char rightascension[16];
+
+    GetRAString(RAStepPosition, TRUE, rightascension);
+    rightascension[2] = 'h';
+    rightascension[5] = 'm';
+    rightascension[8] = 's';
+    rightascension[9] = '\0';
+    TCPPutString(sktHTTP, (BYTE *) rightascension);
+}
+
+void HTTPPrint_declination(void)
+{
+    char declination[16];
+
+    GetDecString(DecStepPosition, TRUE, declination);
+    declination[3] = '°';
+    declination[6] = '\'';
+    declination[9] = '\'';
+    declination[10] = '\'';
+    declination[11] = '\0';
+    TCPPutString(sktHTTP, (BYTE *) declination);
+}
+
+void HTTPPrint_wikiskycoord(void)
+{
+    char wikiskycoord[32];
+    double ra, dec;
+
+    ra = (double)RAStepPosition / (double) NbStepMax * 24.0;
+    dec = (double) DecStepPosition / (double) NbStepMax * 360.0;
+
+    sprintf(wikiskycoord, "ra=%f&de=%f", ra, dec);
+    TCPPutString(sktHTTP, (BYTE *) wikiskycoord);
+}
 #endif

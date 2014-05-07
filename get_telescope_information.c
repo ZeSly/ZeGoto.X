@@ -59,7 +59,7 @@ void GetPrecision()
  * Overview:        Convert step position to right ascension and send it to
  *                  host
  *****************************************************************************/
-void SendRA(int32_t StepPosition_P)
+void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
 {
     int32_t a = 3600L * RAStepPerSec;
     int32_t b = 60L * RAStepPerSec;
@@ -67,7 +67,7 @@ void SendRA(int32_t StepPosition_P)
     int32_t hours = StepPosition_P / a;
     int32_t modulo_hours = StepPosition_P % a;
 
-    if (LX200Precise)
+    if (Precise_P)
     {
         int32_t minutes = modulo_hours / b;
         int32_t modulo_minutes = modulo_hours % b;
@@ -87,7 +87,7 @@ void SendRA(int32_t StepPosition_P)
             }
         }
 
-        sprintf(LX200Response, "%02li:%02li:%02li#", hours, minutes, seconds);
+        sprintf(Str_P, "%02li:%02li:%02li#", hours, minutes, seconds);
     }
     else
     {
@@ -105,7 +105,7 @@ void SendRA(int32_t StepPosition_P)
             if (hours == 24) hours = 0; // it should never happens !
         }
 
-        sprintf(LX200Response, "%02li:%02li.%01li#", hours, minutes / 10, modulo_minutes);
+        sprintf(Str_P, "%02li:%02li.%01li#", hours, minutes / 10, modulo_minutes);
     }
 }
 
@@ -119,7 +119,7 @@ void SendRA(int32_t StepPosition_P)
  *****************************************************************************/
 void GetTelescopeRA()
 {
-    SendRA(RAStepPosition);
+    GetRAString(RAStepPosition, LX200Precise, LX200Response);
 }
 
 void GetStepRA()
@@ -137,7 +137,7 @@ void GetStepRA()
  *****************************************************************************/
 void GetCurrentTargetRA()
 {
-    SendRA(RAStepTarget);
+    GetRAString(RAStepTarget, LX200Precise, LX200Response);
 }
 
 void GetStepTargetRA()
@@ -153,7 +153,7 @@ void GetStepTargetRA()
  * Side Effects:    None
  * Overview:        Convert step position to declinaison and send it to host
  *****************************************************************************/
-void SendDeclination(int32_t StepPosition_P)
+void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
 {
     int32_t DecPos_L;
     char signe;
@@ -172,7 +172,7 @@ void SendDeclination(int32_t StepPosition_P)
     int32_t degrees = DecPos_L / DecStepPerDegree;
     int32_t modulo_degrees = DecPos_L % DecStepPerDegree;
 
-    if (LX200Precise)
+    if (Precise_P)
     {
         int32_t minutes = modulo_degrees / DecStepPerMinute;
         int32_t modulo_minutes = modulo_degrees % DecStepPerMinute;
@@ -192,7 +192,7 @@ void SendDeclination(int32_t StepPosition_P)
             }
         }
 
-        sprintf(LX200Response, "%c%02li:%02li:%02li#", signe, degrees, minutes, seconds);
+        sprintf(Str_P, "%c%02li:%02li:%02li#", signe, degrees, minutes, seconds);
     }
     else
     {
@@ -210,7 +210,7 @@ void SendDeclination(int32_t StepPosition_P)
             if (degrees > 90) degrees = 90; // it should never happens !
         }
 
-        sprintf(LX200Response, "%c%02li:%02li.%01li#", signe, degrees, minutes / 10, minutes % 10);
+        sprintf(Str_P, "%c%02li:%02li.%01li#", signe, degrees, minutes / 10, minutes % 10);
     }
 }
 
@@ -224,7 +224,7 @@ void SendDeclination(int32_t StepPosition_P)
  *****************************************************************************/
 void GetTelescopeDeclination()
 {
-    SendDeclination(DecStepPosition);
+    GetDecString(DecStepPosition, LX200Precise, LX200Response);
 }
 
 void GetStepDeclination()
@@ -242,7 +242,7 @@ void GetStepDeclination()
  *****************************************************************************/
 void GetCurrentTargetDeclination()
 {
-    SendDeclination(DecStepTarget);
+    GetDecString(DecStepTarget, LX200Precise, LX200Response);
 }
 
 void GetStepTargetDeclination()

@@ -62,3 +62,6 @@ ddns_host
 +btn(7)
 +usbversion
 +tcpipversion
++rightascension
++declination
++wikiskycoord
