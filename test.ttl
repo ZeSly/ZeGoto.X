@@ -1,0 +1,250 @@
+connect '/C=13'
+setecho 0
+fileopen fhandle 'test-report.txt' 0
+
+; test the name
+cmd = ':GVP#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if timeout then
+    filewriteln fhandle ' timeout FAILED'
+else
+    filewrite fhandle ' '
+    filewrite fhandle inputstr
+    filewriteln fhandle ' OK'
+endif
+flushrecv
+
+; sending RA step target
+cmd = ':ZSr200000#'
+filewrite fhandle cmd
+send cmd
+wait '0' '1'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+elseif result=1 then
+    filewriteln fhandle ' 0 rejected FAILED'
+else
+    filewriteln fhandle ' 1 OK'
+endif
+flushrecv
+
+cmd = ':ZGr#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    strcompare inputstr '200000#' 
+    if result != 0 then
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' bad response FAILED'
+    else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+    endif
+endif
+flushrecv
+
+; sending dec step target
+cmd = ':ZSd100000#'
+filewrite fhandle cmd
+send cmd
+wait '0' '1'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+elseif result=1 then
+    filewriteln fhandle ' 0 rejected FAILED'
+else
+    filewriteln fhandle ' 1 OK'
+endif
+flushrecv
+
+cmd = ':ZGd#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    strcompare inputstr '100000#' 
+    if result != 0 then
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' bad response FAILED'
+    else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+    endif
+endif
+flushrecv
+
+; sync
+cmd = ':CM#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+endif
+flushrecv
+
+cmd = ':ZGD#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    strcompare inputstr '100000#' 
+    if result != 0 then
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' bad response FAILED'
+    else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+    endif
+endif
+flushrecv
+
+cmd = ':ZGR#'
+filewrite fhandle cmd
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    strcompare inputstr '200000#' 
+    if result != 0 then
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' bad response FAILED'
+    else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+    endif
+endif
+flushrecv
+
+; test goto command 100000 step RA and dec
+filewriteln fhandle 'GOTO test'
+
+; sending dec step target
+cmd = ':ZSr300000#'
+filewrite fhandle cmd
+send cmd
+wait '0' '1'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+elseif result=1 then
+    filewriteln fhandle ' 0 rejected FAILED'
+else
+    filewriteln fhandle ' 1 OK'
+endif
+flushrecv
+
+; sending dec step target
+cmd = ':ZSd200000#'
+filewrite fhandle cmd
+send cmd
+wait '0' '1'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+elseif result=1 then
+    filewriteln fhandle ' 0 rejected FAILED'
+else
+    filewriteln fhandle ' 1 OK'
+endif
+flushrecv
+
+; slew to target
+cmd = ':MS#'
+filewrite fhandle cmd
+send cmd
+wait '0' '1' '2'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    if result=1 then
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' OK'
+        pause 1
+    else
+        filewrite fhandle ' '
+        filewrite fhandle inputstr
+        filewriteln fhandle ' bad response FAILED'
+    endif
+endif
+flushrecv
+
+lastpos = ' '
+cmd = ':ZGR#'
+filewrite fhandle cmd
+:getpos1
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    filewrite fhandle ' '
+    filewriteln fhandle inputstr
+    strcompare inputstr lastpos
+    if result!=0 then
+        lastpos = inputstr
+        pause 1
+        goto getpos1
+    else
+        filewrite fhandle ' no more movement, last RA position: '
+        filewrite fhandle inputstr
+        strcompare inputstr '300000#'
+        if result=0 then 
+            filewriteln fhandle ' OK'
+        else
+            filewriteln fhandle ' FAILED'
+        endif
+    endif
+endif
+
+lastpos = ' '
+cmd = ':ZGD#'
+filewrite fhandle cmd
+:getpos2
+send cmd
+waitregex '#'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+else
+    filewrite fhandle ' '
+    filewriteln fhandle inputstr
+    strcompare inputstr lastpos
+    if result!=0 then
+        lastpos = inputstr
+        pause 1
+        goto getpos2
+    else
+        filewrite fhandle 'No more movement, last Dec position: '
+        filewrite fhandle inputstr
+        strcompare inputstr '200000#'
+        if result=0 then 
+            filewriteln fhandle ' OK'
+        else
+            filewriteln fhandle ' FAILED'
+        endif
+    endif
+endif
+
+fileclose fhandle
+disconnect

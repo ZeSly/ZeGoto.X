@@ -26,4 +26,7 @@ void SyncWithCurrentTarget();
 void SetStepTargetRA();
 void SetStepTargetDeclination();
 
+void SelDate();
+void SelLocalTime();
+
 #endif	/* TELESCOPE_SET_COMMANDS_H */

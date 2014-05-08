@@ -27,8 +27,6 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 
-//#include <stdio.h>
-
 char CurrentMove;
 
 void Halt()
@@ -102,10 +100,10 @@ void SlewToTarget()
     {
         NumberRAStep = int32abs(RAStepTarget - RAStepPosition);
         RADecelPositon = NumberRAStep / 2L;
-        if (NumberRAStep % 2L == 0)
-        {
-            RADecelPositon--;
-        }
+//        if (NumberRAStep % 2L == 0)
+//        {
+//            RADecelPositon--;
+//        }
 
         if (RAStepPosition < RAStepTarget)
         {

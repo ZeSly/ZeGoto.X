@@ -298,8 +298,7 @@ void GetTelescopeAltitude()
  * Side Effects:    None
  * Overview:        Get Sedireal Time. Not supported, send 0
  *****************************************************************************/
-void GetSiderealTime()
+void GetSideralTime()
 {
     strcpy(LX200Response, "00:00:00#");
 }
-

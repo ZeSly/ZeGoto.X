@@ -86,7 +86,7 @@ typedef union
     struct
     {
         unsigned DATEONE : 4;
-        unsigned DATEEN : 2;
+        unsigned DATETEN : 2;
     };
 } RTCDATEbits;
 
@@ -97,7 +97,7 @@ typedef union
     struct
     {
         unsigned MTHONE : 4;
-        unsigned MTHEN0 : 1;
+        unsigned MTHTEN : 1;
         unsigned LPYR : 1;
     };
 } RTCMTHbits;

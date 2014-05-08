@@ -376,42 +376,61 @@ static void ProcessIO(void)
 
     UpdateRAStepPosition();
     UpdateDecStepPosition();
+    UpdatePadState();
 
     if (!CurrentMove)
     {
-        if (bPadState & PAD_S3)
-        {
-            RASetDirection(WestDirection);
-            RAAccelerate();
+        static BOOL InvertedDec = FALSE;
 
+        if (PadState.PAD_S1 == 0 && PadState.PAD_S2 == 0)
+        {
+            if (PadState.PAD_S3 == 1)
+            {
+                RASetDirection(WestDirection);
+                RAAccelerate();
+
+            }
+            else if (PadState.PAD_S4 == 1)
+            {
+                RASetDirection(EastDirection);
+                RAAccelerate();
+
+            }
+            else if (PadState.PAD_S3 == 0 || PadState.PAD_S4 == 0)
+            {
+                RADecelerate();
+
+            }
+
+
+            if (PadState.PAD_S5 == 1)
+            {
+                DecSetDirection(NorthDirection);
+                DecAccelerate();
+
+            }
+            else if (PadState.PAD_S6 == 1)
+            {
+                DecSetDirection(SouthDirection);
+                DecAccelerate();
+            }
+            else if (PadState.PAD_S5 == 0 || PadState.PAD_S6 == 0)
+            {
+                DecDecelerate();
+            }
         }
-        else if (bPadState & PAD_S4)
+        else if (PadState.PAD_S2 == 1)
         {
-            RASetDirection(EastDirection);
-            RAAccelerate();
-
+            if (InvertedDec == FALSE)
+            {
+                NorthDirection = NorthDirection ? 0 : 1;
+                SouthDirection = SouthDirection ? 0 : 1;
+                InvertedDec = TRUE;
+            }
         }
-        else if ((bPadState & PAD_S3) == 0 || (bPadState & PAD_S4) == 0)
+        if (PadState.PAD_S2 == 0)
         {
-            RADecelerate();
-
-        }
-
-
-        if (bPadState & PAD_S5)
-        {
-            DecSetDirection(NorthDirection);
-            DecAccelerate();
-
-        }
-        else if (bPadState & PAD_S6)
-        {
-            DecSetDirection(SouthDirection);
-            DecAccelerate();
-        }
-        else if ((bPadState & PAD_S5) == 0 || (bPadState & PAD_S6) == 0)
-        {
-            DecDecelerate();
+            InvertedDec = FALSE;
         }
     }
 
@@ -454,12 +473,12 @@ static void ProcessIO(void)
                             strcpy(USB_In_Buffer, LX200Response);
                             numBytesWrite = strlen(USB_In_Buffer);
                         }
-//                        else
-//                        {
-//                            USB_In_Buffer[0] = '.';
-//                            USB_In_Buffer[1] = '\0';
-//                            numBytesWrite = 1;
-//                        }
+                        //                        else
+                        //                        {
+                        //                            USB_In_Buffer[0] = '.';
+                        //                            USB_In_Buffer[1] = '\0';
+                        //                            numBytesWrite = 1;
+                        //                        }
                         LX200Response[0] = '\0';
                     }
                     j = 0;

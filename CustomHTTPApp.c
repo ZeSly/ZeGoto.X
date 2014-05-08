@@ -62,6 +62,7 @@
 #include "USB/usb.h"
 
 #include "get_telescope_information.h"
+#include "rtcc.h"
 
 /****************************************************************************
   Section:
@@ -1688,25 +1689,25 @@ void HTTPPrint_btn(WORD num)
     switch (num)
     {
     case 1:
-        num = bPadState & PAD_S1;
+        num = PadState.PAD_S1;
         break;
     case 2:
-        num = bPadState & PAD_S2;
+        num = PadState.PAD_S2;
         break;
     case 3:
-        num = bPadState & PAD_S3;
+        num = PadState.PAD_S3;
         break;
     case 4:
-        num = bPadState & PAD_S4;
+        num = PadState.PAD_S4;
         break;
     case 5:
-        num = bPadState & PAD_S5;
+        num = PadState.PAD_S5;
         break;
     case 6:
-        num = bPadState & PAD_S6;
+        num = PadState.PAD_S6;
         break;
     case 7:
-        num = bPadState & PAD_SWITCH;
+        num = PadState.PAD_SWITCH;
         break;
     default:
         num = 0;
@@ -1722,31 +1723,12 @@ void HTTPPrint_led(WORD num)
     // Determine which LED
     switch (num)
     {
-        //		case 0:
-        //			num = LED0_IO;
-        //			break;
     case 1:
         num = LED1_IO;
         break;
     case 2:
         num = LED2_IO;
         break;
-        //		case 3:
-        //			num = LED3_IO;
-        //			break;
-        //		case 4:
-        //			num = LED4_IO;
-        //			break;
-        //		case 5:
-        //			num = LED5_IO;
-        //			break;
-        //		case 6:
-        //			num = LED6_IO;
-        //			break;
-        //		case 7:
-        //			num = LED7_IO;
-        //			break;
-        //
     default:
         num = 0;
     }
@@ -1761,31 +1743,12 @@ void HTTPPrint_ledSelected(WORD num, WORD state)
     // Determine which LED to check
     switch (num)
     {
-        //		case 0:
-        //			num = LED0_IO;
-        //			break;
     case 1:
         num = LED1_IO;
         break;
     case 2:
         num = LED2_IO;
         break;
-        //		case 3:
-        //			num = LED3_IO;
-        //			break;
-        //		case 4:
-        //			num = LED4_IO;
-        //			break;
-        //		case 5:
-        //			num = LED5_IO;
-        //			break;
-        //		case 6:
-        //			num = LED6_IO;
-        //			break;
-        //		case 7:
-        //			num = LED7_IO;
-        //			break;
-        //
     default:
         num = 0;
     }
@@ -2234,4 +2197,62 @@ void HTTPPrint_wikiskycoord(void)
     sprintf(wikiskycoord, "ra=%f&de=%f", ra, dec);
     TCPPutString(sktHTTP, (BYTE *) wikiskycoord);
 }
+
+void HTTPPrint_datetime(void)
+{
+    RTCCMapTimekeeping Timekeeping;
+    BYTE rtccmap[8];
+    char datetime[32];
+    BYTE i = 0;
+
+    RTCCReadArray(0, rtccmap, sizeof (rtccmap));
+    Timekeeping.rtcsec.b = rtccmap[0];
+    Timekeeping.rtcmin.b = rtccmap[1];
+    Timekeeping.rtchour.b = rtccmap[2];
+    Timekeeping.rtcwkday.b = rtccmap[3];
+    Timekeeping.rtcdate.b = rtccmap[4];
+    Timekeeping.rtcmth.b = rtccmap[5];
+    Timekeeping.rtcyear.b = rtccmap[6];
+
+    // 0123456789012345678
+    // dd/mm/yyyy hh:mn:ss
+    datetime[i++] = Timekeeping.rtcdate.DATETEN + '0';
+    datetime[i++] = Timekeeping.rtcdate.DATEONE + '0';
+    datetime[i++] = '/';
+    datetime[i++] = Timekeeping.rtcmth.MTHTEN + '0';
+    datetime[i++] = Timekeeping.rtcmth.MTHONE + '0';
+    datetime[i++] = '/';
+    datetime[i++] = '2';
+    datetime[i++] = '0';
+    datetime[i++] = Timekeeping.rtcyear.YRTEN + '0';
+    datetime[i++] = Timekeeping.rtcyear.YRONE + '0';
+    datetime[i++] = ' ';
+    if (Timekeeping.rtchour.B12_24)
+    {
+        // 12-hour format
+        datetime[i++] = Timekeeping.rtchour.HRTEN0 + '0';
+        datetime[i++] = Timekeeping.rtchour.HRONE + '0';
+    }
+    else
+    {
+        // 24-hour format
+        datetime[i++] = Timekeeping.rtchour.HRTEN + '0';
+        datetime[i++] = Timekeeping.rtchour.HRONE + '0';
+    }
+    datetime[i++] = ':';
+    datetime[i++] = Timekeeping.rtcmin.MINTEN + '0';
+    datetime[i++] = Timekeeping.rtcmin.MINONE + '0';
+    datetime[i++] = ':';
+    datetime[i++] = Timekeeping.rtcsec.SECTEN + '0';
+    datetime[i++] = Timekeeping.rtcsec.SECONE + '0';
+    if (Timekeeping.rtchour.B12_24)
+    {
+        datetime[i++] = ' ';
+        datetime[i++] = Timekeeping.rtchour.AM_PM ? 'A' : 'P';
+        datetime[i++] = 'M';
+    }
+    datetime[i++] = '\0';
+    TCPPutString(sktHTTP, (BYTE *) datetime);
+}
+
 #endif

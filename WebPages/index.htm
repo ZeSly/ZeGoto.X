@@ -40,18 +40,19 @@
         </div>
     </div>
 
-    <table style="padding-left: 10px;">
+    <p id="datetime"><b>dd/mm/yyyy hh:mn:ss</b></p>
+    <p><b>Current positon :</b><br/>
+    RA: ~rightascension~ Dec: ~declination~<br/>
+    <a href="http://server7.wikisky.org/v2?~wikiskycoord~&zoom=8&img_source=DSS2">Show in wikisky.org</a>
+    </p>
+</div>
+<div id="TEXT">
+    <table>
     <tr><td><b>Firmware Version:</b></td><td>&nbsp;</td><td>~version~</td></tr>
     <tr><td><b>USB Stack Version:</b></td><td>&nbsp;</td><td>~usbversion~</td></tr>
     <tr><td><b>TCP/IP Stack Version:</b></td><td>&nbsp;</td><td>~tcpipversion~</td></tr>
     <tr><td><b>Build Date:</b></td><td>&nbsp;</td><td>~builddate~</td></tr>
     </table>
-
-    <p>Current positon :<br/>
-    RA: ~rightascension~ Dec: ~declination~<br/>
-    <a href="http://server7.wikisky.org/v2?~wikiskycoord~&zoom=8&img_source=DSS2">Show in wikisky.org</a>
-    </p>
-    <p>Nam dignissim ligula vel sapien. Curabitur viverra lacus sagittis sem. Donec pretium pretium sapien. Aenean dapibus, augue quis pulvinar iaculis, velit libero rhoncus dui, a adipiscing elit libero at elit. Donec facilisis mauris quis dui. Donec et justo. Praesent ornare vestibulum quam. Sed ultricies pellentesque mi. Etiam odio. Aenean justo. Fusce quis massa ac risus sodales ultricies. Duis eget eros sed ante placerat dignissim. </p>
 </div>
 
 <script type="text/javascript">
@@ -80,6 +81,7 @@ function updateStatus(xmlData) {
 	for(i = 1; i <= 7; i++)
 		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '_' : 'O';
 
+    document.getElementById('datetime').innerHTML = '<b>' + getXMLValue(xmlData, 'datetime') + '</b>';
 }
 setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
 </script>

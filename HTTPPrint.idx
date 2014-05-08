@@ -65,3 +65,5 @@ ddns_host
 +rightascension
 +declination
 +wikiskycoord
+tcpversion
++datetime

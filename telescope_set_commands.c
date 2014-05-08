@@ -167,5 +167,136 @@ void SyncWithCurrentTarget()
     RTCCWriteArray(RTCC_RAM, (BYTE*) & RAStepPosition, sizeof (RAStepPosition));
     RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & DecStepPosition, sizeof (DecStepPosition));
 
-    strcpy(LX200Response, "#");
+    LX200Response[0] = '#';
+    LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void SelDate()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SCMM/DD/YY# Set RTCC date to MM/DD/YY
+ *****************************************************************************/
+void SelDate()
+{
+    RTCCMapTimekeeping Timekeeping;
+    BYTE rtccmap[8];
+    BYTE p = 2;
+
+    RTCCReadArray(0, rtccmap, sizeof (rtccmap));
+    Timekeeping.rtcsec.b = rtccmap[0];
+    Timekeeping.rtcmin.b = rtccmap[1];
+    Timekeeping.rtchour.b = rtccmap[2];
+    Timekeeping.rtcwkday.b = rtccmap[3];
+    Timekeeping.rtcdate.b = rtccmap[4];
+    Timekeeping.rtcmth.b = rtccmap[5];
+    Timekeeping.rtcyear.b = rtccmap[6];
+
+    Timekeeping.rtcmth.MTHTEN = LX200String[p++] - '0';
+    Timekeeping.rtcmth.MTHONE = LX200String[p++] - '0';
+    p++;
+    Timekeeping.rtcdate.DATETEN = LX200String[p++] - '0';
+    Timekeeping.rtcdate.DATEONE = LX200String[p++] - '0';
+    p++;
+    Timekeeping.rtcyear.YRTEN = LX200String[p++] - '0';
+    Timekeeping.rtcyear.YRONE = LX200String[p++] - '0';
+
+    // clering ST bit before writing new date
+    RTCSECbits rtcsec;
+    RTCCReadArray(RTCSEC, &rtcsec.b, 1);
+    rtcsec.ST = 0;
+    RTCCWriteArray(RTCSEC, &rtcsec.b, 1);
+
+    // waiting for OSCRUN bit to clear
+    RTCWKDAYbits rtcwkday;
+    do
+    {
+        RTCCReadArray(RTCWKDAY, &rtcwkday.b, 1);
+    }
+    while (rtcwkday.OSCRUN);
+
+    // writing new date
+    rtccmap[0] = Timekeeping.rtcsec.b;
+    rtccmap[1] = Timekeeping.rtcmin.b;
+    rtccmap[2] = Timekeeping.rtchour.b;
+    rtccmap[3] = Timekeeping.rtcwkday.b;
+    rtccmap[4] = Timekeeping.rtcdate.b;
+    rtccmap[5] = Timekeeping.rtcmth.b;
+    rtccmap[6] = Timekeeping.rtcyear.b;
+    RTCCWriteArray(0, rtccmap, sizeof (rtccmap));
+
+    // setting ST bit before writing new date
+    Timekeeping.rtcsec.ST = 1;
+    RTCCWriteArray(RTCSEC, &Timekeeping.rtcsec.b, 1);
+
+    LX200Response[0] = '1';
+    LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void SelLocalTime()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SLHH:MM:SS# Set RTCC local Time
+ *****************************************************************************/
+void SelLocalTime()
+{
+    RTCCMapTimekeeping Timekeeping;
+    BYTE rtccmap[8];
+    BYTE p = 2;
+
+    RTCCReadArray(0, rtccmap, sizeof (rtccmap));
+    Timekeeping.rtcsec.b = rtccmap[0];
+    Timekeeping.rtcmin.b = rtccmap[1];
+    Timekeeping.rtchour.b = rtccmap[2];
+    Timekeeping.rtcwkday.b = rtccmap[3];
+    Timekeeping.rtcdate.b = rtccmap[4];
+    Timekeeping.rtcmth.b = rtccmap[5];
+    Timekeeping.rtcyear.b = rtccmap[6];
+
+    Timekeeping.rtchour.B12_24 = 0;
+    Timekeeping.rtchour.HRTEN = LX200String[p++] - '0';
+    Timekeeping.rtchour.HRONE = LX200String[p++] - '0';
+    p++;
+    Timekeeping.rtcmin.MINTEN = LX200String[p++] - '0';
+    Timekeeping.rtcmin.MINONE = LX200String[p++] - '0';
+    p++;
+    Timekeeping.rtcsec.SECTEN = LX200String[p++] - '0';
+    Timekeeping.rtcsec.SECONE = LX200String[p++] - '0';
+
+    // clering ST bit before writing new date
+    RTCSECbits rtcsec;
+    RTCCReadArray(RTCSEC, &rtcsec.b, 1);
+    rtcsec.ST = 0;
+
+    RTCCWriteArray(RTCSEC, &rtcsec.b, 1);
+
+    // waiting for OSCRUN bit to clear
+    RTCWKDAYbits rtcwkday;
+    do
+    {
+        RTCCReadArray(RTCWKDAY, &rtcwkday.b, 1);
+    }
+    while (rtcwkday.OSCRUN);
+
+    // writing new time
+    rtccmap[0] = Timekeeping.rtcsec.b;
+    rtccmap[1] = Timekeeping.rtcmin.b;
+    rtccmap[2] = Timekeeping.rtchour.b;
+    rtccmap[3] = Timekeeping.rtcwkday.b;
+    rtccmap[4] = Timekeeping.rtcdate.b;
+    rtccmap[5] = Timekeeping.rtcmth.b;
+    rtccmap[6] = Timekeeping.rtcyear.b;
+    RTCCWriteArray(0, rtccmap, sizeof (rtccmap));
+
+    // setting ST bit before writing new date
+    Timekeeping.rtcsec.ST = 1;
+    RTCCWriteArray(RTCSEC, &Timekeeping.rtcsec.b, 1);
+
+    LX200Response[0] = '1';
+    LX200Response[1] = '\0';
 }

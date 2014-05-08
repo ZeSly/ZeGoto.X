@@ -165,7 +165,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 //            lastspeed->next = newspeed;
 //            lastspeed = newspeed;
 
-            if (CurrentSpeed >= MaxSpeed)
+            if (CurrentSpeed >= CurrentMaxSpeed)
             {
                 RADecelPositon = RARelativeStepPosition;
                 RAState = MOTOR_FULLSPEED;
@@ -242,6 +242,7 @@ void RAMotorInit(void)
     RA_DIR_IO = 0;
     RA_STEP_IO = 0;
 
+    CurrentMaxSpeed = MaxSpeed;
     MotorTimerPeriod = SideralHalfPeriod;
     AccelPeriod = GetPeripheralClock() / MaxSpeed * AccelTime;
     DecelPeriod = GetPeripheralClock() / MaxSpeed * DecelTime;

@@ -32,7 +32,7 @@ void GetTelescopeDeclination();
 void GetCurrentTargetDeclination();
 void GetTelescopeAzimuth();
 void GetTelescopeAltitude();
-void GetSiderealTime();
+void GetSideralTime();
 
 void GetStepRA();
 void GetStepDeclination();

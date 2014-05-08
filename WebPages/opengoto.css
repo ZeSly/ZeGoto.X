@@ -20,7 +20,7 @@ h1{ margin: 0; padding: 40px 0 0 0; font-family: "trebuchet ms",arial,tahoma,ver
 
 #CONTENT{ width:760px; margin-left:auto; margin-right:auto;   }
 h2{ margin: 0; padding: 24px 0 7px 40px; font-family: "trebuchet ms",arial,tahoma,verdana,sans-serif; font-weight: normal; letter-spacing: .005em; color: White; font-size: 15pt; }
-#TEXT{ padding: 35px 40px 35px 40px; border-bottom: 1px solid #484848; border-top: 1px solid #484848; background-color: #222; }
+#TEXT{ padding: 35px 40px 35px 40px; border-bottom: 1px solid #484848; border-top: 1px solid #484848; background-color: #222; margin-bottom: 27px;}
 #TEXT p{	margin-top: 1em;margin-bottom: 1em;}
 
 #FOOTER{	width:760px; margin-top:27px; margin-left:auto; margin-right:auto;  border-top: 4px solid #363636;  text-align: right;  padding-top: 5px;   }

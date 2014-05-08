@@ -76,6 +76,7 @@ void HTTPPrint_tcpipversion(void);
 void HTTPPrint_rightascension(void);
 void HTTPPrint_declination(void);
 void HTTPPrint_wikiskycoord(void);
+void HTTPPrint_datetime(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -191,6 +192,9 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000042:
 			HTTPPrint_wikiskycoord();
+			break;
+        case 0x00000044:
+			HTTPPrint_datetime();
 			break;
 		default:
 			// Output notification for undefined values

@@ -8,17 +8,25 @@
 #ifndef INPUTS_H
 #define	INPUTS_H
 
-#define PAD_S1      1
-#define PAD_S2      2
-#define PAD_S3      4
-#define PAD_S4      8
-#define PAD_S5      16
-#define PAD_S6      32
-#define PAD_SWITCH  64
+typedef union
+{
+    int i;
+    struct
+    {
+        unsigned PAD_S1 : 1;
+        unsigned PAD_S2 : 1;
+        unsigned PAD_S3 : 1;
+        unsigned PAD_S4 : 1;
+        unsigned PAD_S5 : 1;
+        unsigned PAD_S6 : 1;
+        unsigned PAD_SWITCH : 1;
+    };
+} pad_t;
 
-extern volatile BYTE bPadState;
+extern pad_t PadState;
 
 void InputsInit(void);
+void UpdatePadState();
 
 #endif	/* INPUTS_H */
 

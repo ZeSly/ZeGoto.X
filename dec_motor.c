@@ -134,7 +134,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             CurrentSpeed++;
             NewMotorPeriod = TRUE;
 
-            if (CurrentSpeed >= MaxSpeed)
+            if (CurrentSpeed >= CurrentMaxSpeed)
             {
                 DecDecelPositon = DecRelativeStepPosition;
                 DecState = MOTOR_FULLSPEED;
