@@ -378,62 +378,6 @@ static void ProcessIO(void)
     UpdateDecStepPosition();
     UpdatePadState();
 
-    if (!CurrentMove)
-    {
-        static BOOL InvertedDec = FALSE;
-
-        if (PadState.PAD_S1 == 0 && PadState.PAD_S2 == 0)
-        {
-            if (PadState.PAD_S3 == 1)
-            {
-                RASetDirection(WestDirection);
-                RAAccelerate();
-
-            }
-            else if (PadState.PAD_S4 == 1)
-            {
-                RASetDirection(EastDirection);
-                RAAccelerate();
-
-            }
-            else if (PadState.PAD_S3 == 0 || PadState.PAD_S4 == 0)
-            {
-                RADecelerate();
-
-            }
-
-
-            if (PadState.PAD_S5 == 1)
-            {
-                DecSetDirection(NorthDirection);
-                DecAccelerate();
-
-            }
-            else if (PadState.PAD_S6 == 1)
-            {
-                DecSetDirection(SouthDirection);
-                DecAccelerate();
-            }
-            else if (PadState.PAD_S5 == 0 || PadState.PAD_S6 == 0)
-            {
-                DecDecelerate();
-            }
-        }
-        else if (PadState.PAD_S2 == 1)
-        {
-            if (InvertedDec == FALSE)
-            {
-                NorthDirection = NorthDirection ? 0 : 1;
-                SouthDirection = SouthDirection ? 0 : 1;
-                InvertedDec = TRUE;
-            }
-        }
-        if (PadState.PAD_S2 == 0)
-        {
-            InvertedDec = FALSE;
-        }
-    }
-
     // User Application USB tasks
     if ((USBDeviceState < CONFIGURED_STATE) || (USBSuspendControl == 1)) return;
 

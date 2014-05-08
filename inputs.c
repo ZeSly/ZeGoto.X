@@ -23,6 +23,9 @@
 #include "GenericTypeDefs.h"
 #include "inputs.h"
 #include "TCPIP Stack/Tick.h"
+#include "ra_motor.h"
+#include "dec_motor.h"
+#include "telescope_movement_commands.h"
 
 pad_t PadState;
 
@@ -107,7 +110,79 @@ void UpdatePadState()
     {
         if (readPadState.i != PadState.i)
         {
+            uint16_t ManualMaxSpeed;
+
             PadState.i = readPadState.i;
+
+            if (PadState.PAD_SWITCH == 1)
+            {
+                ManualMaxSpeed = MaxSpeed;
+            }
+            else
+            {
+                ManualMaxSpeed = 10; // Centering speed
+            }
+
+            if (!CurrentMove)
+            {
+                static uint16_t SavedMaxSpeed = 0;
+
+                if (PadState.PAD_S1 == 0 && PadState.PAD_S2 == 0)
+                {
+                    if (PadState.PAD_S3 == 1)
+                    {
+                        SavedMaxSpeed = CurrentMaxSpeed;
+                        CurrentMaxSpeed = ManualMaxSpeed;
+                        RASetDirection(WestDirection);
+                        RAAccelerate();
+
+                    }
+                    else if (PadState.PAD_S4 == 1)
+                    {
+                        SavedMaxSpeed = CurrentMaxSpeed;
+                        CurrentMaxSpeed = ManualMaxSpeed;
+                        RASetDirection(EastDirection);
+                        RAAccelerate();
+
+                    }
+                    else if (PadState.PAD_S3 == 0 || PadState.PAD_S4 == 0)
+                    {
+                        RADecelerate();
+                    }
+
+
+                    if (PadState.PAD_S5 == 1)
+                    {
+                        SavedMaxSpeed = CurrentMaxSpeed;
+                        CurrentMaxSpeed = ManualMaxSpeed;
+                        DecSetDirection(NorthDirection);
+                        DecAccelerate();
+
+                    }
+                    else if (PadState.PAD_S6 == 1)
+                    {
+                        SavedMaxSpeed = CurrentMaxSpeed;
+                        CurrentMaxSpeed = ManualMaxSpeed;
+                        DecSetDirection(SouthDirection);
+                        DecAccelerate();
+                    }
+                    else if (PadState.PAD_S5 == 0 || PadState.PAD_S6 == 0)
+                    {
+                        DecDecelerate();
+                    }
+
+                    if (PadState.PAD_S3 == 0 && PadState.PAD_S4 == 0 &&
+                            PadState.PAD_S5 == 0 && PadState.PAD_S6 == 0)
+                    {
+                        CurrentMaxSpeed = SavedMaxSpeed;
+                    }
+                }
+                if (PadState.PAD_S2 == 1)
+                {
+                    NorthDirection = NorthDirection ? 0 : 1;
+                    SouthDirection = SouthDirection ? 0 : 1;
+                }
+            }
         }
     }
 
