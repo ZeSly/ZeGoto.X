@@ -21,11 +21,14 @@
 #define	RTCC_H
 
 #include "GenericTypeDefs.h"
+#include <stdint.h>
 #include "HardwareProfile.h"
+
+/******* D A T A   S T R U C T U R E S ***************************************/
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -37,7 +40,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -48,7 +51,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -68,7 +71,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -81,7 +84,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -92,7 +95,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -104,7 +107,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -115,7 +118,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -131,7 +134,7 @@ typedef union
 
 typedef union
 {
-    BYTE b;
+    uint8_t b;
 
     struct
     {
@@ -142,17 +145,29 @@ typedef union
 
 typedef struct
 {
-    RTCSECbits rtcsec;
-    RTCMINbits rtcmin;
-    RTCHOURbits rtchour;
-    RTCWKDAYbits rtcwkday;
-    RTCDATEbits rtcdate;
-    RTCMTHbits rtcmth;
-    RTCYEARbits rtcyear;
-    CONTROLbits rtccontrol;
-    OSCTRIMbits osctrim;
-    //BYTE eeunlock;
+    RTCSECbits      rtcsec;
+    RTCMINbits      rtcmin;
+    RTCHOURbits     rtchour;
+    RTCWKDAYbits    rtcwkday;
+    RTCDATEbits     rtcdate;
+    RTCMTHbits      rtcmth;
+    RTCYEARbits     rtcyear;
+    CONTROLbits     rtccontrol;
+    OSCTRIMbits     osctrim;
+    //uint8_t eeunlock;
 } RTCCMapTimekeeping;
+
+typedef struct
+{
+    int year;
+    int month;
+    int day;
+    int hour;
+    int minute;
+    int second;
+} datetime_t;
+
+/******* D E F I N I T I O N S ***********************************************/
 
 #define RTCSEC      0x00
 #define RTCMIN      0x01
@@ -167,9 +182,25 @@ typedef struct
 
 #define RTCC_RAM    0x20
 
-void RTCCWriteArray(BYTE address, BYTE *val, WORD wLen);
-BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length);
+/******* P R O T O T Y P E S *************************************************/
+
+void RTCCWriteArray(uint8_t address, uint8_t *val, WORD wLen);
+BOOL RTCCReadArray(uint8_t address, uint8_t *buffer, WORD length);
 void RTCCInit();
-BOOL RTCCReadMacAddress(BYTE *MacAddress);
+BOOL RTCCReadMacAddress(uint8_t *MacAddress);
+
+BOOL RTCCGetTimekeeping(RTCCMapTimekeeping *timekeeping);
+BOOL RTCCSetTimekeeping(RTCCMapTimekeeping *timekeeping);
+
+double DateToJulianDay(datetime_t *datetime);
+void JulianDayToDate(double jj, datetime_t *datetime);
+
+void GetSystemDateTime(datetime_t *datetime);
+void GetUTCDateTime(datetime_t *datetime);
+
+/******* V A R I A B L E S ***************************************************/
+
+extern double UTCOffset;
+extern double JulianDay;
 
 #endif	/* RTCC_H */

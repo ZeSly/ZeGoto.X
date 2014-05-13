@@ -63,6 +63,7 @@
 
 #include "get_telescope_information.h"
 #include "rtcc.h"
+#include <math.h>
 
 /****************************************************************************
   Section:
@@ -2201,18 +2202,10 @@ void HTTPPrint_wikiskycoord(void)
 void HTTPPrint_datetime(void)
 {
     RTCCMapTimekeeping Timekeeping;
-    BYTE rtccmap[8];
     char datetime[32];
     BYTE i = 0;
 
-    RTCCReadArray(0, rtccmap, sizeof (rtccmap));
-    Timekeeping.rtcsec.b = rtccmap[0];
-    Timekeeping.rtcmin.b = rtccmap[1];
-    Timekeeping.rtchour.b = rtccmap[2];
-    Timekeeping.rtcwkday.b = rtccmap[3];
-    Timekeeping.rtcdate.b = rtccmap[4];
-    Timekeeping.rtcmth.b = rtccmap[5];
-    Timekeeping.rtcyear.b = rtccmap[6];
+    RTCCGetTimekeeping(&Timekeeping);
 
     // 0123456789012345678
     // dd/mm/yyyy hh:mn:ss
@@ -2252,7 +2245,37 @@ void HTTPPrint_datetime(void)
         datetime[i++] = 'M';
     }
     datetime[i++] = '\0';
+    
     TCPPutString(sktHTTP, (BYTE *) datetime);
+}
+
+int Dec2DMS(double d, char *s)
+{
+    double fract;
+    double deg, min, sec;
+
+    fract = fabs(modf(d, &deg));
+    fract = modf(fract * 60.0, &min);
+    sec = fract * 60.0;
+    return sprintf(s, "%.0f&deg;%.0f'%.2f''", deg, min, sec);
+}
+
+void HTTPPrint_azimuthcoord(void)
+{
+    char str[256];
+    char *p;
+    double Azimuth, Altitude;
+
+    ComputeAzimuthalCoord(&Altitude, &Azimuth);
+
+    p = str;
+    p += sprintf(p, "Julian day: %f<br/>\n", JulianDay);
+    p += sprintf(p, "Azimut :");
+    p += Dec2DMS(Azimuth, p);
+    p += sprintf(p, "<br/>\nAltitude :");
+    p += Dec2DMS(Altitude, p);
+
+    TCPPutString(sktHTTP, (BYTE *) str);
 }
 
 #endif

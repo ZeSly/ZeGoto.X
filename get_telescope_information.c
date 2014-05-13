@@ -21,11 +21,13 @@
 #include "GenericTypeDefs.h"
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "main.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "lx200_protocol.h"
+#include "rtcc.h"
 
 BOOL LX200Precise = FALSE;
 
@@ -248,6 +250,38 @@ void GetCurrentTargetDeclination()
 void GetStepTargetDeclination()
 {
     sprintf(LX200Response, "%li#", DecStepTarget);
+}
+
+
+#define PI 3.14159265358979323846
+#define DEGREES(a) (a * PI / 180.0)
+
+double tsmh_h;
+double angle_horaire;
+
+void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
+{
+    double latitude = 45.2448;
+    double longitude = 5.63314;
+    double ra = (double) RAStepPosition * 24.0 / (double) NbStepMax;
+    double dec = (double) DecStepPosition * 360.0 / (double) NbStepMax;
+
+    datetime_t datetime;
+    GetUTCDateTime(&datetime);
+
+    double h = datetime.hour + datetime.minute / 60.0 + datetime.second / 3600.0;
+    double n = JulianDay - 2415384.5;
+    double ts = 23750.3 + 236.555362 * n;
+    tsmh_h = ts / 3600.0 + h + (longitude / 15.0);
+    angle_horaire = tsmh_h - ra;
+
+    double ah = angle_horaire * 15.0;
+    double cos_z = sin(DEGREES(latitude)) * sin(DEGREES(dec)) + cos(DEGREES(latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
+    double z = acos(cos_z);
+    double sin_a = cos(DEGREES(dec)) * sin(DEGREES(ah)) / sin(z);
+
+    *Altitude = 90.0 - (z * 180.0 / PI);
+    *Azimuth = asin(sin_a) * 180.0 / PI + 180.0;
 }
 
 /******************************************************************************
