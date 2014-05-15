@@ -253,6 +253,15 @@ void GetStepTargetDeclination()
 }
 
 
+/******************************************************************************
+ * Function:        void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
+ * PreCondition:    None
+ * Input:           double *Altitude, double *Azimuth
+ * Output:          None
+ * Side Effects:    Update JulianDay
+ * Overview:        Compute azimuthal coordinates depending of current UTC time
+ *****************************************************************************/
+
 #define PI 3.14159265358979323846
 #define DEGREES(a) (a * PI / 180.0)
 
@@ -290,17 +299,26 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
  * Input:           None
  * Output:          None
  * Side Effects:    None
- * Overview:        Get Telescope Azimuth. Not supported, send 0
+ * Overview:        Get Telescope Azimuth.
  *****************************************************************************/
 void GetTelescopeAzimuth()
 {
+    double Azimuth, Altitude;
+    double degrees, minutes, seconds;
+
+    ComputeAzimuthalCoord(&Altitude, &Azimuth);
+
+    degrees = floor(Azimuth);
+    minutes = (Azimuth - degrees) * 60.0;
+    seconds = (minutes - floor(minutes)) * 60.0;
+
     if (LX200Precise)
     {
-        strcpy(LX200Response, "000*00#");
+        sprintf(LX200Response, "%03.0f*%02.0f#", degrees, minutes);
     }
     else
     {
-        strcpy(LX200Response, "000*00'00#");
+        sprintf(LX200Response, "%03.0f*%02.0f'%02.0f#", degrees, minutes, seconds);
     }
 }
 
@@ -310,17 +328,26 @@ void GetTelescopeAzimuth()
  * Input:           None
  * Output:          None
  * Side Effects:    None
- * Overview:        Get Telescope Altitude. Not supported, send 0
+ * Overview:        Get Telescope Altitude.
  *****************************************************************************/
 void GetTelescopeAltitude()
 {
+    double Azimuth, Altitude;
+    double degrees, minutes, seconds;
+
+    ComputeAzimuthalCoord(&Altitude, &Azimuth);
+
+    degrees = floor(fabs(Altitude));
+    minutes = (fabs(Altitude) - degrees) * 60.0;
+    seconds = (minutes - floor(minutes)) * 60.0;
+
     if (LX200Precise)
     {
-        strcpy(LX200Response, "+00*00#");
+        sprintf(LX200Response, "%c%03.0f*%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes);
     }
     else
     {
-        strcpy(LX200Response, "+00*00'00#");
+        sprintf(LX200Response, "%c%03.0f*%02.0f'%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes, seconds);
     }
 }
 
@@ -335,4 +362,26 @@ void GetTelescopeAltitude()
 void GetSideralTime()
 {
     strcpy(LX200Response, "00:00:00#");
+}
+
+/******************************************************************************
+ * Function:        void GetUTCOffsetTime()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Get UTC offset time
+ *****************************************************************************/
+void GetUTCOffsetTime()
+{
+    int i;
+
+    sprintf(LX200Response, "%c%04.1f#", UTCOffset < 0 ? '-' : '+', fabs(UTCOffset));
+    for (i = 0 ; LX200Response[i] != '#' ; i++)
+        ;
+    if (LX200Response[i- 1] == '0')
+    {
+        LX200Response[i - 2] = '#';
+        LX200Response[i - 1] = '\0';
+    }
 }

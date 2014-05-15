@@ -28,5 +28,6 @@ void SetStepTargetDeclination();
 
 void SelDate();
 void SelLocalTime();
+void SetUTCOffsetTime();
 
 #endif	/* TELESCOPE_SET_COMMANDS_H */

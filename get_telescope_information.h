@@ -26,13 +26,17 @@ extern BOOL LX200Precise;
 
 void PrecisionToggle();
 void GetPrecision();
+
 void GetTelescopeRA();
 void GetCurrentTargetRA();
+
 void GetTelescopeDeclination();
 void GetCurrentTargetDeclination();
+
 void GetTelescopeAzimuth();
 void GetTelescopeAltitude();
 void GetSideralTime();
+void GetUTCOffsetTime();
 
 void GetStepRA();
 void GetStepDeclination();

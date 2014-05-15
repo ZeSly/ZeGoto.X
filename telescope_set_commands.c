@@ -19,7 +19,8 @@
 /* Device header file */
 #include <xc.h>
 #include <stdint.h>
-#include <string.h>
+//#include <string.h>
+#include <stdlib.h>
 
 #include "lx200_protocol.h"
 #include "get_telescope_information.h"
@@ -233,6 +234,39 @@ void SelLocalTime()
 
         if (RTCCSetTimekeeping(&Timekeeping) == TRUE)
         {
+            LX200Response[0] = '1';
+        }
+    }
+    LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void SetUTCOffsetTime()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SGsHH.H#
+ *                  Set the number of hours added to local time to yield UTC
+ *****************************************************************************/
+void SetUTCOffsetTime()
+{
+    double ut;
+
+    LX200Response[0] = '0';
+    ut = (LX200String[3] - '0') * 10.0;
+    ut += (LX200String[4] - '0');
+    ut += (LX200String[6] - '0') * 0.1;
+    if (ut <= 12)
+    {
+        if (LX200String[2] == '-')
+        {
+            UTCOffset = -ut;
+            LX200Response[0] = '1';
+        }
+        else if (LX200String[2] == '+')
+        {
+            UTCOffset = ut;
             LX200Response[0] = '1';
         }
     }

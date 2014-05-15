@@ -364,6 +364,6 @@ void GetUTCDateTime(datetime_t *datetime)
     datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
 
     JulianDay = DateToJulianDay(datetime);
-    JulianDay += UTCOffset / 24;
+    JulianDay += UTCOffset / 24.0;
     JulianDayToDate(JulianDay, datetime);
 }
