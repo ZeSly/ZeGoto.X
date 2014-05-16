@@ -24,6 +24,7 @@
 #include "main.h"
 #include "lx200_protocol.h"
 #include "telescope_movement_commands.h"
+#include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 
@@ -61,7 +62,7 @@ void MoveEast()
 {
     CurrentMove |= MOVE_TO_EAST;
     CurrentMove &= ~MOVE_TO_WEST;
-    RASetDirection(EastDirection);
+    RASetDirection(Mount.EastDirection);
     RAAccelerate();
 }
 
@@ -69,7 +70,7 @@ void MoveNorth()
 {
     CurrentMove |= MOVE_TO_NORTH;
     CurrentMove &= ~MOVE_TO_SOUTH;
-    DecSetDirection(NorthDirection);
+    DecSetDirection(Mount.NorthDirection);
     DecAccelerate();
 }
 
@@ -77,7 +78,7 @@ void MoveSouth()
 {
     CurrentMove |= MOVE_TO_SOUTH;
     CurrentMove &= ~MOVE_TO_NORTH;
-    DecSetDirection(SouthDirection);
+    DecSetDirection(Mount.SouthDirection);
     DecAccelerate();
 }
 
@@ -85,7 +86,7 @@ void MoveWest()
 {
     CurrentMove |= MOVE_TO_WEST;
     CurrentMove &= ~MOVE_TO_EAST;
-    RASetDirection(WestDirection);
+    RASetDirection(Mount.WestDirection);
     RAAccelerate();
 }
 
@@ -96,39 +97,39 @@ int32_t int32abs(int32_t a)
 
 void SlewToTarget()
 {
-    if (RAStepTarget)
+    if (RA.StepTarget)
     {
-        NumberRAStep = int32abs(RAStepTarget - RAStepPosition);
-        RADecelPositon = NumberRAStep / 2L;
-//        if (NumberRAStep % 2L == 0)
+        RA.NumberStep = int32abs(RA.StepTarget - RA.StepPosition);
+        RA.DecelPositon = RA.NumberStep / 2L;
+//        if (RA.NumberStep % 2L == 0)
 //        {
-//            RADecelPositon--;
+//            RA.DecelPositon--;
 //        }
 
-        if (RAStepPosition < RAStepTarget)
+        if (RA.StepPosition < RA.StepTarget)
         {
             MoveEast();
         }
-        else if (RAStepPosition > RAStepTarget)
+        else if (RA.StepPosition > RA.StepTarget)
         {
             MoveWest();
         }
     }
 
-    if (DecStepTarget)
+    if (Dec.StepTarget)
     {
-        NumberDecStep = int32abs(DecStepTarget - DecStepPosition);
-        DecDecelPositon = NumberDecStep / 2L;
-//        if (NumberDecStep % 2L == 0)
+        Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
+        Dec.DecelPositon = Dec.NumberStep / 2L;
+//        if (Dec.NumberStep % 2L == 0)
 //        {
-//            DecDecelPositon++;
+//            Dec.DecelPositon++;
 //        }
 
-        if (DecStepPosition < DecStepTarget)
+        if (Dec.StepPosition < Dec.StepTarget)
         {
             MoveNorth();
         }
-        else if (DecStepPosition > DecStepTarget)
+        else if (Dec.StepPosition > Dec.StepTarget)
         {
             MoveSouth();
         }

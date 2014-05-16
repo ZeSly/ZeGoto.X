@@ -38,7 +38,7 @@ extern char CurrentMove;
 extern BOOL SlewingToTarget;
 //extern long StartRAStepPosition;
 //extern long StartDecStepPosition;
-//extern long NumberRAStep;
-//extern long NumberDecStep;
+//extern long RA.NumberStep;
+//extern long Dec.NumberStep;
 
 #endif	/* TELESCOPE_MOVEMENT_COMMANDS_H */

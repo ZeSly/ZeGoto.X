@@ -22,27 +22,13 @@
 
 #include "GenericTypeDefs.h"
 #include "HardwareProfile.h"
-#include "ra_motor.h"
+
+#include "mount.h"
 #include "dec_motor.h"
 #include "rtcc.h"
 #include "telescope_movement_commands.h"
 
-/* Mount specific variables */
-int32_t DecStepPerDegree;
-int32_t DecStepPerMinute;
-int32_t DecStepPerSecond;
-
-/* Position variables */
-int32_t DecStepPosition;
-int32_t DecStepStart;
-int32_t DecStepTarget;
-int32_t NumberDecStep;
-int32_t DecDecelPositon;
-
-BOOL NorthPoleOVerflow;
-
-uint8_t NorthDirection = 0;
-uint8_t SouthDirection = 1;
+dec_t Dec;
 
 /* static for dec motor */
 static int32_t DecRelativeStepPosition;
@@ -108,14 +94,14 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     {
         DEC_STEP_IO ^= 1;
         DecRelativeStepPosition++;
-        if (NumberDecStep)
+        if (Dec.NumberStep)
         {
-            if (NumberDecStep <= DecDecelPositon && DecState != MOTOR_DECEL)
+            if (Dec.NumberStep <= Dec.DecelPositon && DecState != MOTOR_DECEL)
             {
                 DecState = MOTOR_DECEL;
-                accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+                accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
             }
-            NumberDecStep--;
+            Dec.NumberStep--;
         }
     }
 
@@ -130,13 +116,13 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         accel_decel_cnt -= PR3;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = AccelPeriod;
+            accel_decel_cnt = Mount.AccelPeriod;
             CurrentSpeed++;
             NewMotorPeriod = TRUE;
 
-            if (CurrentSpeed >= CurrentMaxSpeed)
+            if (CurrentSpeed >= Mount.CurrentMaxSpeed)
             {
-                DecDecelPositon = DecRelativeStepPosition;
+                Dec.DecelPositon = DecRelativeStepPosition;
                 DecState = MOTOR_FULLSPEED;
             }
         }
@@ -146,7 +132,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         accel_decel_cnt -= PR3;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = NumberDecStep ? AccelPeriod : DecelPeriod;
+            accel_decel_cnt = Dec.NumberStep ? Mount.AccelPeriod : Mount.DecelPeriod;
             CurrentSpeed--;
             NewMotorPeriod = TRUE;
 
@@ -165,7 +151,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 
     if (NewMotorPeriod == TRUE)
     {
-        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         if (MotorTimerPeriod > 0xFFFF)
         {
             tlap = MotorTimerPeriod / 0xFFFF;
@@ -203,20 +189,20 @@ void DecMotorInit(void)
     DEC_DIR_IO = 0;
     DEC_STEP_IO = 0;
 
-    MotorTimerPeriod = SideralHalfPeriod;
+    MotorTimerPeriod = Mount.SideralHalfPeriod;
 
-    DecStepPerDegree = NbStepMax / 360L;
-    DecStepPerMinute = DecStepPerDegree / 60L;
-    DecStepPerSecond = DecStepPerMinute / 60L;
+    Dec.StepPerDegree = Mount.Config.NbStepMax / 360L;
+    Dec.StepPerMinute = Dec.StepPerDegree / 60L;
+    Dec.StepPerSecond = Dec.StepPerMinute / 60L;
 
-    RTCCReadArray(RTCC_RAM + sizeof (int32_t), (BYTE *) & DecStepPosition, sizeof (DecStepPosition));
-    if (DecStepPosition < -NbStepMax / 4L || DecStepPosition > NbStepMax / 4L)
+    RTCCReadArray(RTCC_RAM + sizeof (int32_t), (BYTE *) & Dec.StepPosition, sizeof (Dec.StepPosition));
+    if (Dec.StepPosition < -Mount.Config.NbStepMax / 4L || Dec.StepPosition > Mount.Config.NbStepMax / 4L)
     {
-        DecStepPosition = NbStepMax / 4; // Set default position to north celestial pole
+        Dec.StepPosition = Mount.Config.NbStepMax / 4; // Set default position to north celestial pole
     }
 
-    DecStepStart = DecStepPosition;
-    NorthPoleOVerflow = FALSE;
+    Dec.StepStart = Dec.StepPosition;
+    Dec.NorthPoleOVerflow = FALSE;
 
     Timer3Init();
 }
@@ -228,15 +214,15 @@ void DecAccelerate(void)
         DecDirection = DecNextDirection;
         DEC_DIR_IO = DecNextDirection;
 
-        DecStepStart = DecStepPosition;
+        Dec.StepStart = Dec.StepPosition;
         DecRelativeStepPosition = 0;
-        NorthPoleOVerflow = FALSE;
+        Dec.NorthPoleOVerflow = FALSE;
 
         DEC_SLEEP_IO = 1;
         DEC_FAULT_CN = 1;
 
         CurrentSpeed = 1;
-        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         if (MotorTimerPeriod > 0xFFFF)
         {
             tlap = MotorTimerPeriod / 0xFFFF;
@@ -251,7 +237,7 @@ void DecAccelerate(void)
             PR3 = MotorTimerPeriod;
         }
 
-        accel_decel_cnt = AccelPeriod;
+        accel_decel_cnt = Mount.AccelPeriod;
         DecState = MOTOR_ACCEL;
 
         T3CONbits.TON = 1;
@@ -262,7 +248,7 @@ void DecDecelerate(void)
 {
     if (DecState == MOTOR_ACCEL || DecState == MOTOR_FULLSPEED)
     {
-        accel_decel_cnt = DecelPeriod;
+        accel_decel_cnt = Mount.DecelPeriod;
         DecState = MOTOR_DECEL;
     }
 }
@@ -281,7 +267,7 @@ void DecSetDirection(uint8_t dir)
 
 void UpdateDecStepPosition()
 {
-    int32_t DecStepMax = NbStepMax / 4L;
+    int32_t DecStepMax = Mount.Config.NbStepMax / 4L;
     int32_t p;
     static BOOL SavePosition = TRUE;
 
@@ -291,29 +277,29 @@ void UpdateDecStepPosition()
         p = DecRelativeStepPosition;
         Dec_EI;
 
-        if (DecDirection == NorthDirection)
+        if (DecDirection == Mount.NorthDirection)
         {
-            if (NorthPoleOVerflow == FALSE) DecStepPosition = DecStepStart + p;
-            else DecStepPosition = DecStepStart + p;
+            if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart + p;
+            else Dec.StepPosition = Dec.StepStart + p;
 
         }
         else
         {
-            if (NorthPoleOVerflow == FALSE) DecStepPosition = DecStepStart - p;
-            else DecStepPosition = DecStepStart + p;
+            if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart - p;
+            else Dec.StepPosition = Dec.StepStart + p;
         }
 
-        if ((DecStepPosition < -NbStepMax / 4L) || (DecStepPosition > NbStepMax / 4L))
+        if ((Dec.StepPosition < -Mount.Config.NbStepMax / 4L) || (Dec.StepPosition > Mount.Config.NbStepMax / 4L))
         {
-            NorthPoleOVerflow = TRUE;
-            DecStepPosition = DecStepMax - (DecStepPosition - DecStepMax);
+            Dec.NorthPoleOVerflow = TRUE;
+            Dec.StepPosition = DecStepMax - (Dec.StepPosition - DecStepMax);
         }
 
         SavePosition = TRUE;
     }
     else if (SavePosition == TRUE)
     {
-        RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & DecStepPosition, sizeof (DecStepPosition));
+        RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & Dec.StepPosition, sizeof (Dec.StepPosition));
         SavePosition = FALSE;
     }
 }

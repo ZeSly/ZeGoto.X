@@ -33,7 +33,7 @@ pot
 +rebootaddr
 cookiename
 +
-+lcdtext
+lcdtext
 ledSelected(4,TRUE)
 ledSelected(4,FALSE)
 ledSelected(3,TRUE)

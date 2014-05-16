@@ -22,38 +22,17 @@
 #include <xc.h>
 #include "USB\usb_function_cdc.h"
 #include "HardwareProfile.h"
-#include "ra_motor.h"
 #include "GenericTypeDefs.h"
+
+#include "mount.h"
+#include "ra_motor.h"
 #include "rtcc.h"
 #include "dec_motor.h"
 #include "lx200_protocol.h"
 #include "telescope_movement_commands.h"
 
-/* Mount specific settings */
-int32_t NbStepMax = 8640000UL;
-int32_t RAStepPerSec;
-
-uint32_t SideralPeriod = 159563UL;
-uint32_t SideralHalfPeriod = 159563UL / 2;
-uint16_t MaxSpeed = 120;
-uint16_t CenteringSpeed = 10;
-
-/* Acceleration/decelation varibles and constant */
-int32_t AccelTime = 4; // seconds
-int32_t DecelTime = 1; // seconds
-int32_t AccelPeriod;
-int32_t DecelPeriod;
-uint16_t CurrentMaxSpeed;
-
-/* Position variables */
-int32_t RAStepPosition;
-int32_t RAStepStart;
-int32_t RAStepTarget;
-int32_t NumberRAStep;
-int32_t RADecelPositon;
-
-uint8_t WestDirection = 0;
-uint8_t EastDirection = 1;
+/* Position structure */
+ra_t RA;
 
 /* static for RA motor */
 static int32_t RARelativeStepPosition;
@@ -132,14 +111,14 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         if (RAState != MOTOR_STOP)
         {
             RARelativeStepPosition++;
-            if (NumberRAStep)
+            if (RA.NumberStep)
             {
-                if (NumberRAStep <= RADecelPositon && RAState != MOTOR_DECEL)
+                if (RA.NumberStep <= RA.DecelPositon && RAState != MOTOR_DECEL)
                 {
                     RAState = MOTOR_DECEL;
-                    accel_decel_cnt = AccelPeriod - accel_decel_cnt;
+                    accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
                 }
-                NumberRAStep--;
+                RA.NumberStep--;
             }
         }
     }
@@ -153,7 +132,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         accel_decel_cnt -= PR2;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = AccelPeriod;
+            accel_decel_cnt = Mount.AccelPeriod;
             CurrentSpeed++;
             NewMotorPeriod = TRUE;
 
@@ -165,9 +144,9 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 //            lastspeed->next = newspeed;
 //            lastspeed = newspeed;
 
-            if (CurrentSpeed >= CurrentMaxSpeed)
+            if (CurrentSpeed >= Mount.CurrentMaxSpeed)
             {
-                RADecelPositon = RARelativeStepPosition;
+                RA.DecelPositon = RARelativeStepPosition;
                 RAState = MOTOR_FULLSPEED;
             }
         }
@@ -177,7 +156,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         accel_decel_cnt -= PR2;
         if (accel_decel_cnt <= 0)
         {
-            accel_decel_cnt = NumberRAStep ? AccelPeriod : DecelPeriod;
+            accel_decel_cnt = RA.NumberStep ? Mount.AccelPeriod : Mount.DecelPeriod;
             CurrentSpeed--;
             NewMotorPeriod = TRUE;
 
@@ -205,7 +184,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 
     if (NewMotorPeriod == TRUE)
     {
-        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         if (MotorTimerPeriod > 0xFFFF)
         {
             tlap = MotorTimerPeriod / 0xFFFF;
@@ -242,19 +221,16 @@ void RAMotorInit(void)
     RA_DIR_IO = 0;
     RA_STEP_IO = 0;
 
-    CurrentMaxSpeed = MaxSpeed;
-    MotorTimerPeriod = SideralHalfPeriod;
-    AccelPeriod = GetPeripheralClock() / MaxSpeed * AccelTime;
-    DecelPeriod = GetPeripheralClock() / MaxSpeed * DecelTime;
+    MotorTimerPeriod = Mount.SideralHalfPeriod;
 
-    RTCCReadArray(RTCC_RAM, (BYTE *)&RAStepPosition, sizeof (RAStepPosition));
-    if (RAStepPosition < 0 || RAStepPosition > NbStepMax)
+    RTCCReadArray(RTCC_RAM, (BYTE *)&RA.StepPosition, sizeof (RA.StepPosition));
+    if (RA.StepPosition < 0 || RA.StepPosition > Mount.Config.NbStepMax)
     {
-        RAStepPosition = 0; // Set default position to north celestial pole
+        RA.StepPosition = 0; // Set default position to north celestial pole
     }
 
-    RAStepPerSec = NbStepMax / (24L * 3600L);
-    RAStepStart = RAStepPosition;
+    RA.StepPerSec = Mount.Config.NbStepMax / (24L * 3600L);
+    RA.StepStart = RA.StepPosition;
 
     Timer2Init();
 }
@@ -275,11 +251,11 @@ void RAAccelerate(void)
         RADirection = RANextDirection;
         RA_DIR_IO = RANextDirection;
 
-        RAStepStart = RAStepPosition;
+        RA.StepStart = RA.StepPosition;
         RARelativeStepPosition = 0;
 
         CurrentSpeed++;
-        MotorTimerPeriod = SideralHalfPeriod / CurrentSpeed;
+        MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         if (MotorTimerPeriod > 0xFFFF)
         {
             tlap = MotorTimerPeriod / 0xFFFF;
@@ -294,7 +270,7 @@ void RAAccelerate(void)
             PR2 = MotorTimerPeriod;
         }
 
-        accel_decel_cnt = AccelPeriod;
+        accel_decel_cnt = Mount.AccelPeriod;
         RAState = MOTOR_ACCEL;
 
 //        t_speedlist * p;
@@ -347,7 +323,7 @@ void RADecelerate(void)
 {
     if (RAState == MOTOR_ACCEL || RAState == MOTOR_FULLSPEED)
     {
-        accel_decel_cnt = DecelPeriod;
+        accel_decel_cnt = Mount.DecelPeriod;
         RAState = MOTOR_DECEL;
     }
 }
@@ -364,42 +340,40 @@ void RASetDirection(uint8_t dir)
     RANextDirection = dir;
 }
 
-extern BOOL NorthPoleOVerflow;
-
 void UpdateRAStepPosition()
 {
     static BOOL LastNorthPoleOVerflow = FALSE;
     int32_t p;
     static BOOL SavePosition = TRUE;
 
-    if (RAState != MOTOR_STOP || NorthPoleOVerflow == TRUE)
+    if (RAState != MOTOR_STOP || Dec.NorthPoleOVerflow == TRUE)
     {
         RA_DI;
         p = RARelativeStepPosition;
         RA_EI;
 
-        if (RADirection == WestDirection)
+        if (RADirection == Mount.WestDirection)
         {
-            RAStepPosition = RAStepStart - p;
-            if (RAStepPosition < 0) RAStepPosition += NbStepMax;
+            RA.StepPosition = RA.StepStart - p;
+            if (RA.StepPosition < 0) RA.StepPosition += Mount.Config.NbStepMax;
         }
         else
         {
-            RAStepPosition = RAStepStart + p;
-            if (RAStepPosition > NbStepMax) RAStepPosition -= NbStepMax;
+            RA.StepPosition = RA.StepStart + p;
+            if (RA.StepPosition > Mount.Config.NbStepMax) RA.StepPosition -= Mount.Config.NbStepMax;
         }
 
-        if (LastNorthPoleOVerflow == FALSE && NorthPoleOVerflow == TRUE)
+        if (LastNorthPoleOVerflow == FALSE && Dec.NorthPoleOVerflow == TRUE)
         {
-            RAStepStart += NbStepMax / 2L;
-            RAStepStart %= NbStepMax;
+            RA.StepStart += Mount.Config.NbStepMax / 2L;
+            RA.StepStart %= Mount.Config.NbStepMax;
         }
-        LastNorthPoleOVerflow = NorthPoleOVerflow;
+        LastNorthPoleOVerflow = Dec.NorthPoleOVerflow;
         SavePosition = TRUE;
     }
     else if (SavePosition == TRUE)
     {
-        RTCCWriteArray(RTCC_RAM, (BYTE*) &RAStepPosition, sizeof (RAStepPosition));
+        RTCCWriteArray(RTCC_RAM, (BYTE*) &RA.StepPosition, sizeof (RA.StepPosition));
         SavePosition = FALSE;
     }
 }

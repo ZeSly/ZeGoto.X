@@ -24,6 +24,7 @@
 #include <math.h>
 
 #include "main.h"
+#include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "lx200_protocol.h"
@@ -63,8 +64,8 @@ void GetPrecision()
  *****************************************************************************/
 void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
 {
-    int32_t a = 3600L * RAStepPerSec;
-    int32_t b = 60L * RAStepPerSec;
+    int32_t a = 3600L * RA.StepPerSec;
+    int32_t b = 60L * RA.StepPerSec;
 
     int32_t hours = StepPosition_P / a;
     int32_t modulo_hours = StepPosition_P % a;
@@ -121,12 +122,12 @@ void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
  *****************************************************************************/
 void GetTelescopeRA()
 {
-    GetRAString(RAStepPosition, LX200Precise, LX200Response);
+    GetRAString(RA.StepPosition, LX200Precise, LX200Response);
 }
 
 void GetStepRA()
 {
-    sprintf(LX200Response, "%li#", RAStepPosition);
+    sprintf(LX200Response, "%li#", RA.StepPosition);
 }
 
 /******************************************************************************
@@ -139,12 +140,12 @@ void GetStepRA()
  *****************************************************************************/
 void GetCurrentTargetRA()
 {
-    GetRAString(RAStepTarget, LX200Precise, LX200Response);
+    GetRAString(RA.StepTarget, LX200Precise, LX200Response);
 }
 
 void GetStepTargetRA()
 {
-    sprintf(LX200Response, "%li#", RAStepTarget);
+    sprintf(LX200Response, "%li#", RA.StepTarget);
 }
 
 /******************************************************************************
@@ -171,17 +172,17 @@ void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
         signe = '+';
     }
 
-    int32_t degrees = DecPos_L / DecStepPerDegree;
-    int32_t modulo_degrees = DecPos_L % DecStepPerDegree;
+    int32_t degrees = DecPos_L / Dec.StepPerDegree;
+    int32_t modulo_degrees = DecPos_L % Dec.StepPerDegree;
 
     if (Precise_P)
     {
-        int32_t minutes = modulo_degrees / DecStepPerMinute;
-        int32_t modulo_minutes = modulo_degrees % DecStepPerMinute;
-        int32_t seconds = modulo_minutes / DecStepPerSecond;
-        int32_t modulo_seconds = modulo_minutes % DecStepPerSecond;
+        int32_t minutes = modulo_degrees / Dec.StepPerMinute;
+        int32_t modulo_minutes = modulo_degrees % Dec.StepPerMinute;
+        int32_t seconds = modulo_minutes / Dec.StepPerSecond;
+        int32_t modulo_seconds = modulo_minutes % Dec.StepPerSecond;
 
-        if (modulo_seconds > DecStepPerSecond / 2L) seconds++;
+        if (modulo_seconds > Dec.StepPerSecond / 2L) seconds++;
         if (seconds == 60)
         {
             seconds = 0;
@@ -198,7 +199,7 @@ void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
     }
     else
     {
-        int32_t minutes = 10L * (DecPos_L % DecStepPerDegree) / DecStepPerMinute;
+        int32_t minutes = 10L * (DecPos_L % Dec.StepPerDegree) / Dec.StepPerMinute;
         int32_t modulo_minutes = minutes % 10;
 
         if (modulo_minutes >= 5)
@@ -226,12 +227,12 @@ void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P)
  *****************************************************************************/
 void GetTelescopeDeclination()
 {
-    GetDecString(DecStepPosition, LX200Precise, LX200Response);
+    GetDecString(Dec.StepPosition, LX200Precise, LX200Response);
 }
 
 void GetStepDeclination()
 {
-    sprintf(LX200Response, "%li#", DecStepPosition);
+    sprintf(LX200Response, "%li#", Dec.StepPosition);
 }
 
 /******************************************************************************
@@ -244,12 +245,12 @@ void GetStepDeclination()
  *****************************************************************************/
 void GetCurrentTargetDeclination()
 {
-    GetDecString(DecStepTarget, LX200Precise, LX200Response);
+    GetDecString(Dec.StepTarget, LX200Precise, LX200Response);
 }
 
 void GetStepTargetDeclination()
 {
-    sprintf(LX200Response, "%li#", DecStepTarget);
+    sprintf(LX200Response, "%li#", Dec.StepTarget);
 }
 
 
@@ -272,8 +273,8 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
 {
     double latitude = 45.2448;
     double longitude = 5.63314;
-    double ra = (double) RAStepPosition * 24.0 / (double) NbStepMax;
-    double dec = (double) DecStepPosition * 360.0 / (double) NbStepMax;
+    double ra = (double) RA.StepPosition * 24.0 / (double) Mount.Config.NbStepMax;
+    double dec = (double) Dec.StepPosition * 360.0 / (double) Mount.Config.NbStepMax;
 
     datetime_t datetime;
     GetUTCDateTime(&datetime);

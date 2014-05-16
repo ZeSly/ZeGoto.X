@@ -29,19 +29,23 @@ void DecStop(void);
 void DecSetDirection(uint8_t dir);
 void UpdateDecStepPosition();
 
-/* Mount specific variables */
-extern int32_t DecStepPerDegree;
-extern int32_t DecStepPerMinute;
-extern int32_t DecStepPerSecond;
+typedef struct
+{
+    /* Mount specific variables */
+    int32_t StepPerDegree;
+    int32_t StepPerMinute;
+    int32_t StepPerSecond;
 
-/* Position variables */
-extern int32_t DecStepPosition;
-extern int32_t DecStepStart;
-extern int32_t DecStepTarget;
-extern int32_t NumberDecStep;
-extern int32_t DecDecelPositon;
+    /* Position variables */
+    int32_t StepPosition;
+    int32_t StepStart;
+    int32_t StepTarget;
+    int32_t NumberStep;
+    int32_t DecelPositon;
 
-extern uint8_t NorthDirection;
-extern uint8_t SouthDirection;
+    BOOL NorthPoleOVerflow;
+} dec_t;
+
+extern dec_t Dec;
 
 #endif	/* DEC_MOTOR_H */

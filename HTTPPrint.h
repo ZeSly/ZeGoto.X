@@ -70,7 +70,6 @@ void HTTPPrint_config_dns2(void);
 void HTTPPrint_reboot(void);
 void HTTPPrint_rebootaddr(void);
 void HTTPPrint_(void);
-void HTTPPrint_lcdtext(void);
 void HTTPPrint_usbversion(void);
 void HTTPPrint_tcpipversion(void);
 void HTTPPrint_rightascension(void);
@@ -163,9 +162,6 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000022:
 			HTTPPrint_();
-			break;
-        case 0x00000023:
-			HTTPPrint_lcdtext();
 			break;
         case 0x0000003a:
 			HTTPPrint_btn(4);

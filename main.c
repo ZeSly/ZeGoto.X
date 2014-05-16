@@ -78,6 +78,7 @@
 // Include functions specific to this stack application
 #include "main.h"
 #include "inputs.h"
+#include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "lx200_protocol.h"
@@ -487,6 +488,7 @@ static void InitializeBoard(void)
     RTCCInit();
 
     // Motors
+    MountInit();
     RAMotorInit();
     DecMotorInit();
 

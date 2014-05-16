@@ -23,6 +23,7 @@
 #include "GenericTypeDefs.h"
 #include "inputs.h"
 #include "TCPIP Stack/Tick.h"
+#include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "telescope_movement_commands.h"
@@ -116,7 +117,7 @@ void UpdatePadState()
 
             if (PadState.PAD_SWITCH == 1)
             {
-                ManualMaxSpeed = MaxSpeed;
+                ManualMaxSpeed = Mount.Config.MaxSpeed;
             }
             else
             {
@@ -131,17 +132,17 @@ void UpdatePadState()
                 {
                     if (PadState.PAD_S3 == 1)
                     {
-                        SavedMaxSpeed = CurrentMaxSpeed;
-                        CurrentMaxSpeed = ManualMaxSpeed;
-                        RASetDirection(WestDirection);
+                        SavedMaxSpeed = Mount.CurrentMaxSpeed;
+                        Mount.CurrentMaxSpeed = ManualMaxSpeed;
+                        RASetDirection(Mount.WestDirection);
                         RAAccelerate();
 
                     }
                     else if (PadState.PAD_S4 == 1)
                     {
-                        SavedMaxSpeed = CurrentMaxSpeed;
-                        CurrentMaxSpeed = ManualMaxSpeed;
-                        RASetDirection(EastDirection);
+                        SavedMaxSpeed = Mount.CurrentMaxSpeed;
+                        Mount.CurrentMaxSpeed = ManualMaxSpeed;
+                        RASetDirection(Mount.EastDirection);
                         RAAccelerate();
 
                     }
@@ -153,17 +154,17 @@ void UpdatePadState()
 
                     if (PadState.PAD_S5 == 1)
                     {
-                        SavedMaxSpeed = CurrentMaxSpeed;
-                        CurrentMaxSpeed = ManualMaxSpeed;
-                        DecSetDirection(NorthDirection);
+                        SavedMaxSpeed = Mount.CurrentMaxSpeed;
+                        Mount.CurrentMaxSpeed = ManualMaxSpeed;
+                        DecSetDirection(Mount.NorthDirection);
                         DecAccelerate();
 
                     }
                     else if (PadState.PAD_S6 == 1)
                     {
-                        SavedMaxSpeed = CurrentMaxSpeed;
-                        CurrentMaxSpeed = ManualMaxSpeed;
-                        DecSetDirection(SouthDirection);
+                        SavedMaxSpeed = Mount.CurrentMaxSpeed;
+                        Mount.CurrentMaxSpeed = ManualMaxSpeed;
+                        DecSetDirection(Mount.SouthDirection);
                         DecAccelerate();
                     }
                     else if (PadState.PAD_S5 == 0 || PadState.PAD_S6 == 0)
@@ -172,15 +173,16 @@ void UpdatePadState()
                     }
 
                     if (PadState.PAD_S3 == 0 && PadState.PAD_S4 == 0 &&
-                            PadState.PAD_S5 == 0 && PadState.PAD_S6 == 0)
+                        PadState.PAD_S5 == 0 && PadState.PAD_S6 == 0 &&
+                        SavedMaxSpeed != 0)
                     {
-                        CurrentMaxSpeed = SavedMaxSpeed;
+                        Mount.CurrentMaxSpeed = SavedMaxSpeed;
                     }
                 }
                 if (PadState.PAD_S2 == 1)
                 {
-                    NorthDirection = NorthDirection ? 0 : 1;
-                    SouthDirection = SouthDirection ? 0 : 1;
+                    Mount.NorthDirection = Mount.NorthDirection ? 0 : 1;
+                    Mount.SouthDirection = Mount.SouthDirection ? 0 : 1;
                 }
             }
         }

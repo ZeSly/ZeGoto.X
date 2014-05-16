@@ -17,20 +17,12 @@
  ********************************************************************/
 
 #ifndef RA_MOTOR_H
-#define	RA_MOTOR_H
+#define RA_MOTOR_H
 
 #include <stdint.h>
 
 #define RA_EI (IEC0bits.T2IE = 1)
 #define RA_DI (IEC0bits.T2IE = 0)
-
-typedef enum
-{
-    MOTOR_STOP,
-    MOTOR_ACCEL,
-    MOTOR_FULLSPEED,
-    MOTOR_DECEL,
-} motor_state_t;
 
 void RAMotorInit(void);
 void RAStart(void);
@@ -40,35 +32,18 @@ void RAStop(void);
 void RASetDirection(uint8_t dir);
 void UpdateRAStepPosition();
 
-//#ifndef RA_MOTOR_C
-
-/* Mount specific settings */
-extern int32_t NbStepMax;
-extern int32_t RAStepPerSec;
-
-extern uint32_t SideralPeriod;
-extern uint32_t SideralHalfPeriod;
-extern uint16_t MaxSpeed;
-extern uint16_t CenteringSpeed;
-
-/* Acceleration/decelation varibles and constant */
-extern int32_t AccelTime;
-extern int32_t DecelTime;
-extern int32_t AccelPeriod;
-extern int32_t DecelPeriod;
-extern uint16_t CurrentMaxSpeed;
-
 /* Position variables */
-extern int32_t RAStepPosition;
-extern int32_t RAStepStart;
-extern int32_t RAStepTarget;
-extern int32_t NumberRAStep;
-extern int32_t RADecelPositon;
+typedef struct
+{
+    int32_t StepPerSec;
+    int32_t StepPosition;
+    int32_t StepStart;
+    int32_t StepTarget;
+    int32_t NumberStep;
+    int32_t DecelPositon;
+} ra_t;
 
-extern uint8_t WestDirection;
-extern uint8_t EastDirection;
-
-//#endif
+extern ra_t RA;
 
 #endif	/* RA_MOTOR_H */
 

@@ -18,11 +18,11 @@
 
 /* Device header file */
 #include <xc.h>
-#include "ra_motor.h"
+#include "mount.h"
 
 void SetCenteringRate()
 {
-    CurrentMaxSpeed = CenteringSpeed;
+    Mount.CurrentMaxSpeed = Mount.Config.CenteringSpeed;
 }
 
 void SetGuidingRate()
@@ -31,12 +31,12 @@ void SetGuidingRate()
 
 void SetFindRate()
 {
-    CurrentMaxSpeed = MaxSpeed / 2;
+    Mount.CurrentMaxSpeed = Mount.Config.MaxSpeed / 2;
 }
 
 void SetMaxRate()
 {
-    CurrentMaxSpeed = MaxSpeed;
+    Mount.CurrentMaxSpeed = Mount.Config.MaxSpeed;
 }
 
 

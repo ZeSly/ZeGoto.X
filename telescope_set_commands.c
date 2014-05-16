@@ -19,11 +19,11 @@
 /* Device header file */
 #include <xc.h>
 #include <stdint.h>
-//#include <string.h>
 #include <stdlib.h>
 
 #include "lx200_protocol.h"
 #include "get_telescope_information.h"
+#include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "rtcc.h"
@@ -58,10 +58,10 @@ void SetTargetObjectRA()
         LX200Precise = TRUE;
     }
 
-    RAStepTarget = hours * 3600L + minutes * 60L + seconds;
-    RAStepTarget *= RAStepPerSec;
+    RA.StepTarget = hours * 3600L + minutes * 60L + seconds;
+    RA.StepTarget *= RA.StepPerSec;
 
-    if (RAStepTarget < 0 || RAStepTarget > NbStepMax)
+    if (RA.StepTarget < 0 || RA.StepTarget > Mount.Config.NbStepMax)
     {
         LX200Response[0] = '0';
     }
@@ -74,9 +74,9 @@ void SetTargetObjectRA()
 
 void SetStepTargetRA()
 {
-    RAStepTarget = atol(LX200String + 3);
+    RA.StepTarget = atol(LX200String + 3);
 
-    if (RAStepTarget < 0 || RAStepTarget > NbStepMax)
+    if (RA.StepTarget < 0 || RA.StepTarget > Mount.Config.NbStepMax)
     {
         LX200Response[0] = '0';
     }
@@ -116,16 +116,16 @@ void SetTargetObjectDeclination()
         LX200Precise = FALSE;
     }
 
-    DecStepTarget = degrees * DecStepPerDegree;
-    DecStepTarget += minutes * DecStepPerMinute;
-    DecStepTarget += seconds * DecStepPerSecond;
+    Dec.StepTarget = degrees * Dec.StepPerDegree;
+    Dec.StepTarget += minutes * Dec.StepPerMinute;
+    Dec.StepTarget += seconds * Dec.StepPerSecond;
 
     if (LX200String[p] == '-')
     {
-        DecStepTarget = -DecStepTarget;
+        Dec.StepTarget = -Dec.StepTarget;
     }
 
-    if (DecStepTarget < -NbStepMax / 4L || DecStepTarget > NbStepMax / 4L)
+    if (Dec.StepTarget < -Mount.Config.NbStepMax / 4L || Dec.StepTarget > Mount.Config.NbStepMax / 4L)
     {
         LX200Response[0] = '0';
     }
@@ -138,9 +138,9 @@ void SetTargetObjectDeclination()
 
 void SetStepTargetDeclination()
 {
-    DecStepTarget = atol(LX200String + 3);
+    Dec.StepTarget = atol(LX200String + 3);
 
-    if (DecStepTarget < -NbStepMax / 4L || DecStepTarget > NbStepMax / 4L)
+    if (Dec.StepTarget < -Mount.Config.NbStepMax / 4L || Dec.StepTarget > Mount.Config.NbStepMax / 4L)
     {
         LX200Response[0] = '0';
     }
@@ -162,11 +162,11 @@ void SetStepTargetDeclination()
  *****************************************************************************/
 void SyncWithCurrentTarget()
 {
-    RAStepPosition = RAStepTarget;
-    DecStepPosition = DecStepTarget;
+    RA.StepPosition = RA.StepTarget;
+    Dec.StepPosition = Dec.StepTarget;
 
-    RTCCWriteArray(RTCC_RAM, (BYTE*) & RAStepPosition, sizeof (RAStepPosition));
-    RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & DecStepPosition, sizeof (DecStepPosition));
+    RTCCWriteArray(RTCC_RAM, (BYTE*) & RA.StepPosition, sizeof (RA.StepPosition));
+    RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & Dec.StepPosition, sizeof (Dec.StepPosition));
 
     LX200Response[0] = '#';
     LX200Response[1] = '\0';

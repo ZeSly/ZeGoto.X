@@ -309,7 +309,7 @@ double DateToJulianDay(datetime_t *datetime)
     double c = floor(year / 100);
     double b = 2 - c + floor(c / 4);
     double t = (double) datetime->hour / 24.0 + (double) datetime->minute / 1440.0 + (double) datetime->second / 86400.0;
-    double jj = floor(365.25 * (year + 4716)) + floor(30.6001 * (month + 1)) + datetime->day + t + b - 1524.5;
+    double jj = floor(365.25 * (year + 4716)) + floor(30.6001 * (month + 1)) + (double) datetime->day + t + b - 1524.5;
     return jj;
 }
 
