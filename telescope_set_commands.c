@@ -20,6 +20,7 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "lx200_protocol.h"
 #include "get_telescope_information.h"
@@ -39,7 +40,7 @@
  *****************************************************************************/
 void SetTargetObjectRA()
 {
-    uint8_t p = 2;
+    int p = 2;
     while (LX200String[p] == ' ')
         p++;
 
@@ -97,7 +98,7 @@ void SetStepTargetRA()
  *****************************************************************************/
 void SetTargetObjectDeclination()
 {
-    uint8_t p = 2;
+    int p = 2;
     while (LX200String[p] == ' ')
         p++;
 
@@ -180,7 +181,7 @@ void SyncWithCurrentTarget()
  * Side Effects:    None
  * Overview:        :SCMM/DD/YY# Set RTCC date to MM/DD/YY
  *****************************************************************************/
-void SelDate()
+void SetDate()
 {
     RTCCMapTimekeeping Timekeeping;
     BYTE p = 2;
@@ -214,7 +215,7 @@ void SelDate()
  * Side Effects:    None
  * Overview:        :SLHH:MM:SS# Set RTCC local Time
  *****************************************************************************/
-void SelLocalTime()
+void SetLocalTime()
 {
     RTCCMapTimekeeping Timekeeping;
     BYTE p = 2;
@@ -222,7 +223,7 @@ void SelLocalTime()
     LX200Response[0] = '0';
     if (RTCCGetTimekeeping(&Timekeeping) == TRUE)
     {
-        Timekeeping.rtchour.B12_24 = 0;
+        Timekeeping.rtchour.B12_24 = 0; // The RTCC wil always be set in 24h format
         Timekeeping.rtchour.HRTEN = LX200String[p++] - '0';
         Timekeeping.rtchour.HRONE = LX200String[p++] - '0';
         p++;
@@ -271,4 +272,98 @@ void SetUTCOffsetTime()
         }
     }
     LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void LX200DMSToDec(double *dec)
+ * PreCondition:    None
+ * Input:           double *dec : pointer to the decimal number destination
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Convert a degreee, minutes, second string from a
+ *                  LX200 command to decimal
+ *                  If the convertion fail, *dec is not modified
+ *****************************************************************************/
+void LX200DMSToDec(double *dec)
+{
+    double degrees;
+    double minutes;
+    double seconds;
+    double sign;
+    int p = 2;
+
+    LX200Response[0] = '0';
+    LX200Response[1] = '\0';
+
+    while (LX200String[p] == ' ')
+        p++;
+
+    if (LX200String[p++] == '-')
+    {
+        sign = -1.0;
+    }
+    else
+    {
+        sign = 1.0;
+    }
+
+
+    degrees = (double) (LX200String[p++] - '0');
+    while (isdigit(LX200String[p]))
+    {
+        degrees *= 10.0;
+        degrees += (double) (LX200String[p++] - '0');
+
+    }
+    if (degrees > 0.0 && degrees < 360.0)
+    {
+        p++; // skip the seperator
+        minutes = (double) (LX200String[p++] - '0') * 10.0;
+        minutes += (double) (LX200String[p++] - '0');
+
+        if (LX200String[p] != '#')
+        {
+            p++;
+            seconds = (double) (LX200String[p++] - '0') * 10.0;
+            seconds += (double) (LX200String[p++] - '0');
+            LX200Precise = TRUE;
+        }
+        else
+        {
+            seconds = 0L;
+            LX200Precise = FALSE;
+        }
+
+        *dec = degrees + minutes / 60.0 + seconds / 3600.0;
+        *dec *= sign;
+        LX200Response[0] = '1';
+    }
+}
+
+/******************************************************************************
+ * Function:        void SetCurrentSiteLongitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SGsHH.H#
+ *                  Set the number of hours added to local time to yield UTC
+ *****************************************************************************/
+void SetCurrentSiteLongitude()
+{
+    LX200DMSToDec(&Longitude);
+}
+
+/******************************************************************************
+ * Function:        void SetCurrentSiteLatitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SGsHH.H#
+ *                  Set the number of hours added to local time to yield UTC
+ *****************************************************************************/
+void SetCurrentSiteLatitude()
+{
+    LX200DMSToDec(&Latitude);
 }

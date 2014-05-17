@@ -69,7 +69,13 @@ LX200Command LX200CommandTab[] =
     { "GZ", 2, GetTelescopeAzimuth},
     { "GA", 2, GetTelescopeAltitude},
     { "GS", 2, GetSideralTime},
+    { "GL", 2, GetLocalTime},
     { "GG", 2, GetUTCOffsetTime},
+    { "GC", 2, GetCurrentDate},
+    { "Gc", 2, GetCalendarFormat},
+
+    { "Gg", 2, GetCurrentSiteLongitude},
+    { "Gt", 2, GetCurrentSiteLatitude},
 
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
@@ -96,9 +102,12 @@ LX200Command LX200CommandTab[] =
     { "Sr", 2, SetTargetObjectRA},
     { "Sd", 2, SetTargetObjectDeclination},
 
-    { "SC", 2, SelDate},
-    { "SL", 2, SelLocalTime},
+    { "SC", 2, SetDate},
+    { "SL", 2, SetLocalTime},
     { "SG", 2, SetUTCOffsetTime},
+
+    { "Sg", 2, SetCurrentSiteLongitude},
+    { "St", 2, SetCurrentSiteLatitude},
 
     { "ZGR", 3, GetStepRA},
     { "ZGD", 3, GetStepDeclination},

@@ -268,11 +268,11 @@ void GetStepTargetDeclination()
 
 double tsmh_h;
 double angle_horaire;
+double Latitude = 45.2448;
+double Longitude = -5.63314;
 
 void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
 {
-    double latitude = 45.2448;
-    double longitude = 5.63314;
     double ra = (double) RA.StepPosition * 24.0 / (double) Mount.Config.NbStepMax;
     double dec = (double) Dec.StepPosition * 360.0 / (double) Mount.Config.NbStepMax;
 
@@ -282,11 +282,11 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
     double h = datetime.hour + datetime.minute / 60.0 + datetime.second / 3600.0;
     double n = JulianDay - 2415384.5;
     double ts = 23750.3 + 236.555362 * n;
-    tsmh_h = ts / 3600.0 + h + (longitude / 15.0);
+    tsmh_h = ts / 3600.0 + h - (Longitude / 15.0);
     angle_horaire = tsmh_h - ra;
 
     double ah = angle_horaire * 15.0;
-    double cos_z = sin(DEGREES(latitude)) * sin(DEGREES(dec)) + cos(DEGREES(latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
+    double cos_z = sin(DEGREES(Latitude)) * sin(DEGREES(dec)) + cos(DEGREES(Latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
     double z = acos(cos_z);
     double sin_a = cos(DEGREES(dec)) * sin(DEGREES(ah)) / sin(z);
 
@@ -366,6 +366,33 @@ void GetSideralTime()
 }
 
 /******************************************************************************
+ * Function:        void GetLocalTime()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :GL# Get Local Time in 24 hour format
+ *                  Returns: HH:MM:SS#
+ *****************************************************************************/
+void GetLocalTime()
+{
+    RTCCMapTimekeeping Timekeeping;
+    BYTE i = 0;
+
+    RTCCGetTimekeeping(&Timekeeping);
+
+    LX200Response[i++] = Timekeeping.rtchour.HRTEN + '0';
+    LX200Response[i++] = Timekeeping.rtchour.HRONE + '0';
+    LX200Response[i++] = ':';
+    LX200Response[i++] = Timekeeping.rtcmin.MINTEN + '0';
+    LX200Response[i++] = Timekeeping.rtcmin.MINONE + '0';
+    LX200Response[i++] = ':';
+    LX200Response[i++] = Timekeeping.rtcsec.SECTEN + '0';
+    LX200Response[i++] = Timekeeping.rtcsec.SECONE + '0';
+    LX200Response[i] = '#';
+}
+
+/******************************************************************************
  * Function:        void GetUTCOffsetTime()
  * PreCondition:    None
  * Input:           None
@@ -385,4 +412,93 @@ void GetUTCOffsetTime()
         LX200Response[i - 2] = '#';
         LX200Response[i - 1] = '\0';
     }
+}
+
+/******************************************************************************
+ * Function:        void GetCurrentDate()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :GC# Get current date.
+ *                  Returns: MM/DD/YY#
+ *****************************************************************************/
+void GetCurrentDate()
+{
+    RTCCMapTimekeeping Timekeeping;
+    BYTE i = 0;
+
+    RTCCGetTimekeeping(&Timekeeping);
+
+    LX200Response[i++] = Timekeeping.rtcmth.MTHTEN + '0';
+    LX200Response[i++] = Timekeeping.rtcmth.MTHONE + '0';
+    LX200Response[i++] = '/';
+    LX200Response[i++] = Timekeeping.rtcdate.DATETEN + '0';
+    LX200Response[i++] = Timekeeping.rtcdate.DATEONE + '0';
+    LX200Response[i++] = '/';
+    LX200Response[i++] = Timekeeping.rtcyear.YRTEN + '0';
+    LX200Response[i++] = Timekeeping.rtcyear.YRONE + '0';
+    LX200Response[i++] = '#';
+}
+
+/******************************************************************************
+ * Function:        void GetCalendarFormat()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:       :Gc# Get Calendar Format
+ *                  Returns: 24#
+ *****************************************************************************/
+void GetCalendarFormat()
+{
+    strcpy(LX200Response, "24#");
+}
+
+void LX200Dec2DMS(double d)
+{
+    double fract;
+    double deg, min, sec;
+    char s;
+
+    fract = fabs(modf(d, &deg));
+    fract = modf(fract * 60.0, &min);
+    sec = fract * 60.0;
+    s = deg < 0 ? '-' : '+';
+    if (LX200Precise)
+    {
+        sprintf(LX200Response, "%c%3.0f*%2.0f:%2.0f#", s, fabs(deg), min, sec);
+    }
+    else
+    {
+        sprintf(LX200Response, "%c%3.0f*%2.0f#", s, fabs(deg), min);
+    }
+}
+
+/******************************************************************************
+ * Function:        void GetCurrentSiteLongitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :Gg# Get Current Site Longitude
+ *                  Returns: sDDD*MM#
+ *****************************************************************************/
+void GetCurrentSiteLongitude()
+{
+    LX200Dec2DMS(Longitude);
+}
+
+/******************************************************************************
+ * Function:        void GetCurrentSiteLatitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :Gt# Get Current Site Latitdue
+ *                  Returns: sDD*MM#
+ *****************************************************************************/
+void GetCurrentSiteLatitude()
+{
+    LX200Dec2DMS(Latitude);
 }

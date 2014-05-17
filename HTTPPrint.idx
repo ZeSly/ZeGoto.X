@@ -3,7 +3,7 @@
 +ledSelected(2,FALSE)
 +ledSelected(1,TRUE)
 +ledSelected(1,FALSE)
-+hellomsg
+hellomsg
 +inc:footer.inc
 +version
 +builddate
@@ -68,3 +68,4 @@ ddns_host
 tcpversion
 +datetime
 +azimuthcoord
++gpsdata

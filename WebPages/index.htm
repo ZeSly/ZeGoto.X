@@ -48,6 +48,9 @@
     </p>
 </div>
 <div id="TEXT">
+~gpsdata~
+</div>
+<div id="TEXT">
     <table>
     <tr><td><b>Firmware Version:</b></td><td>&nbsp;</td><td>~version~</td></tr>
     <tr><td><b>USB Stack Version:</b></td><td>&nbsp;</td><td>~usbversion~</td></tr>
@@ -85,9 +88,5 @@ function updateStatus(xmlData) {
     document.getElementById('datetime').innerHTML = '<b>' + getXMLValue(xmlData, 'datetime') + '</b>';
 }
 setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
-</script>
-
-<script type="text/javascript">
-document.getElementById('hello').innerHTML = "~hellomsg~";
 </script>
 ~inc:footer.inc~

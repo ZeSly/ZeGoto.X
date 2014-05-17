@@ -5,7 +5,7 @@
  *  TODO add description
  *
  *********************************************************************
- * FileName:        telescope_set_commands.h
+ * FileName:        gps.h
  * Processor:       PIC24FJ256GB106
  * Compiler:        Microchip XC16 v1.21 or higher
  *
@@ -13,24 +13,32 @@
  *
  * Author               Date        Comment
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- * Sylvain Girard       4 mai 2014 Creation
+ * Sylvain Girard       17 mai 2014 Creation
  ********************************************************************/
 
-#ifndef TELESCOPE_SET_COMMANDS_H
-#define	TELESCOPE_SET_COMMANDS_H
+#ifndef GPS_H
+#define	GPS_H
 
-void SetTargetObjectRA();
-void SetTargetObjectDeclination();
-void SyncWithCurrentTarget();
+typedef struct
+{
+    char UTCTime[13];
+    char Latitute[11];
+    char NSIndicator;
+    char Longitude[12];
+    char EWIndicator;
+    char PositionFixIndicator;
+    char SatellitesUsed;
+    char Status;
+    char Date[9];
+    //double MSLAltitude;
+    char MSLAltitude[8];
+} gps_t;
 
-void SetStepTargetRA();
-void SetStepTargetDeclination();
+extern gps_t GPS;
 
-void SetDate();
-void SetLocalTime();
-void SetUTCOffsetTime();
+void GPSStart();
+void GPSTCPServer(void);
+void GPSDecodeFrame();
 
-void SetCurrentSiteLongitude();
-void SetCurrentSiteLatitude();
 
-#endif	/* TELESCOPE_SET_COMMANDS_H */
+#endif	/* GPS_H */

@@ -35,8 +35,15 @@ void GetCurrentTargetDeclination();
 
 void GetTelescopeAzimuth();
 void GetTelescopeAltitude();
+
 void GetSideralTime();
+void GetLocalTime();
 void GetUTCOffsetTime();
+void GetCurrentDate();
+void GetCalendarFormat();
+
+void GetCurrentSiteLongitude();
+void GetCurrentSiteLatitude();
 
 void GetStepRA();
 void GetStepDeclination();
@@ -47,5 +54,8 @@ void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
 void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
 
 void ComputeAzimuthalCoord(double *Altitude, double *Azimuth);
+
+extern double Latitude;
+extern double Longitude;
 
 #endif	/* GET_TELESCOPE_INFORMATION_H */

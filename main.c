@@ -83,6 +83,7 @@
 #include "dec_motor.h"
 #include "lx200_protocol.h"
 #include "rtcc.h"
+#include "gps.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -131,6 +132,8 @@ int main(void)
 
     // Start RA motor at sideral rate
     RAStart();
+
+    GPSStart();
 
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
     ZeroconfLLInitialize();
@@ -217,8 +220,10 @@ int main(void)
 #endif
 
 #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
-        GenericTCPServer();
+        //GenericTCPServer();
 #endif
+        GPSTCPServer();
+        GPSDecodeFrame();
 
 #if defined(STACK_USE_SMTP_CLIENT)
         SMTPDemo();
@@ -527,11 +532,14 @@ static void InitializeBoard(void)
 #if defined(__PIC24FJ128GB106__) ||  defined(__PIC24FJ256GB106__)
     __builtin_write_OSCCONL(OSCCON & 0xBF); // Unlock PPS
 
-    // Configure SPI1 PPS pins (ENC28J60/ENCX24J600/MRF24W or other PICtail Plus cards)
-    RPOR9bits.RP19R = 8; // Assign RP19 to SCK1 (output)
-    RPOR13bits.RP26R = 7; // Assign RP26 to SDO1 (output)
+    // Configure SPI1 PPS pins for ENC28J60
+    RPOR9bits.RP19R = 8;    // Assign RP19 to SCK1 (output)
+    RPOR13bits.RP26R = 7;   // Assign RP26 to SDO1 (output)
     RPINR20bits.SDI1R = 21; // Assign RP21 to SDI1 (input)
 
+    // Configure UART1 Rx and Tx pins for GPS
+    RPINR18bits.U1RXR = 10; // Assign RP10 to U1RX (input), TX on GPS
+    RPOR8bits.RP17R = 3;    // Assign RP17 to U1TX (output), RX on GPS
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
 #endif

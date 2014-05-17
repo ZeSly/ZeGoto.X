@@ -122,19 +122,7 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
             LED1_IO = (*ptr == '1');
     }
 
-        // If it's the LED updater file
-    else if (!memcmppgm2ram(filename, "cookies.htm", 11))
-    {
-        // This is very simple.  The names and values we want are already in
-        // the data array.  We just set the hasArgs value to indicate how many
-        // name/value pairs we want stored as cookies.
-        // To add the second cookie, just increment this value.
-        // remember to also add a dynamic variable callback to control the printout.
-        curHTTP.hasArgs = 0x01;
-    }
-
-
-        // If it's the LED updater file
+         // If it's the LED updater file
     else if (!memcmppgm2ram(filename, "leds.cgi", 8))
     {
         // Determine which LED to toggle
@@ -509,22 +497,6 @@ void HTTPPrint_ledSelected(WORD num, WORD state)
     return;
 }
 
-void HTTPPrint_hellomsg(void)
-{
-    BYTE *ptr;
-
-    ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE*) "name");
-
-    // We omit checking for space because this is the only data being written
-    if (ptr != NULL)
-    {
-        TCPPutROMString(sktHTTP, (ROM BYTE*) "Hello, ");
-        TCPPutString(sktHTTP, ptr);
-    }
-
-    return;
-}
-
 extern APP_CONFIG AppConfig;
 
 void HTTPPrintIP(IP_ADDR ip)
@@ -748,6 +720,31 @@ void HTTPPrint_azimuthcoord(void)
     p += sprintf(p, "<br/>\nAltitude :");
     p += Dec2DMS(Altitude, p);
 
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+#include "gps.h"
+
+void HTTPPrint_gpsdata(void)
+{
+    char str[256];
+    char *p;
+
+    p = str;
+    if (GPS.Status == 'A')
+    {
+        p += sprintf(p, "Latitute: %s %c ", GPS.Latitute, GPS.NSIndicator);
+        p += sprintf(p, "Longitude: %s %c <br/>\n", GPS.Longitude, GPS.EWIndicator);
+        p += sprintf(p, "Altitude: %s <br/>\n", GPS.MSLAltitude);
+        p += sprintf(p, "Satellites used: %d <br/>\n", GPS.SatellitesUsed);
+        p += sprintf(p, "Position fix indicator: %c<br/>\n", GPS.PositionFixIndicator);
+    }
+    else
+    {
+        p += sprintf(p, "Position not valid<br/>\n");
+        p += sprintf(p, "Position fix indicator: %c<br/>\n", GPS.PositionFixIndicator);
+    }
+    p += sprintf(p, "UTC %s %s<br/>\n", GPS.UTCTime, GPS.Date);
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 

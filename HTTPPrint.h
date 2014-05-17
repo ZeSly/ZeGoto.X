@@ -53,7 +53,6 @@ extern BYTE curHTTPID;
 
 void HTTPPrint(DWORD callbackID);
 void HTTPPrint_ledSelected(WORD,WORD);
-void HTTPPrint_hellomsg(void);
 void HTTPPrint_version(void);
 void HTTPPrint_builddate(void);
 void HTTPPrint_led(WORD);
@@ -77,6 +76,7 @@ void HTTPPrint_declination(void);
 void HTTPPrint_wikiskycoord(void);
 void HTTPPrint_datetime(void);
 void HTTPPrint_azimuthcoord(void);
+void HTTPPrint_gpsdata(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -96,9 +96,6 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000004:
 			HTTPPrint_ledSelected(1,FALSE);
-			break;
-        case 0x00000005:
-			HTTPPrint_hellomsg();
 			break;
         case 0x00000006:
 			HTTPIncFile((ROM BYTE*)"footer.inc");
@@ -195,6 +192,9 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000045:
 			HTTPPrint_azimuthcoord();
+			break;
+        case 0x00000046:
+			HTTPPrint_gpsdata();
 			break;
 		default:
 			// Output notification for undefined values
