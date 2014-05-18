@@ -68,7 +68,6 @@ void HTTPPrint_config_dns1(void);
 void HTTPPrint_config_dns2(void);
 void HTTPPrint_reboot(void);
 void HTTPPrint_rebootaddr(void);
-void HTTPPrint_(void);
 void HTTPPrint_usbversion(void);
 void HTTPPrint_tcpipversion(void);
 void HTTPPrint_rightascension(void);
@@ -77,6 +76,9 @@ void HTTPPrint_wikiskycoord(void);
 void HTTPPrint_datetime(void);
 void HTTPPrint_azimuthcoord(void);
 void HTTPPrint_gpsdata(void);
+void HTTPPrint_svggpssignal(void);
+void HTTPPrint_gpssatellitesinview(void);
+void HTTPPrint_gpssatellitesused(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -157,9 +159,6 @@ void HTTPPrint(DWORD callbackID)
         case 0x00000020:
 			HTTPPrint_rebootaddr();
 			break;
-        case 0x00000022:
-			HTTPPrint_();
-			break;
         case 0x0000003a:
 			HTTPPrint_btn(4);
 			break;
@@ -195,6 +194,15 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000046:
 			HTTPPrint_gpsdata();
+			break;
+        case 0x00000047:
+			HTTPPrint_svggpssignal();
+			break;
+        case 0x00000048:
+			HTTPPrint_gpssatellitesinview();
+			break;
+        case 0x00000055:
+			HTTPPrint_gpssatellitesused();
 			break;
 		default:
 			// Output notification for undefined values

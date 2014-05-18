@@ -24,9 +24,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-
-#undef atof
-extern double atof(const char *);
+#include <ctype.h>
 
 // Defines which port the server will listen on
 #define GPS_SERVER_PORT	9300
@@ -38,11 +36,15 @@ extern double atof(const char *);
 #define GPS_BAUDRATE    9600ul
 #define GPS_BUFFERSIZE  128
 
+int frame_rcv = 0;
+int frame_complete = -1;
+char GPSRxData[2][GPS_BUFFERSIZE];
+
 void GPSStart()
 {
     unsigned long ubrg;
 
-    memset(&GPS, 0, sizeof(GPS));
+    memset(&GPS, 0, sizeof (GPS));
 
     ubrg = GetInstructionClock() / (16ul * GPS_BAUDRATE) - 1ul;
 
@@ -61,11 +63,20 @@ void GPSStart()
         Temp = U1RXREG;
     }
     IFS0bits.U1RXIF = 0; // clear interrupt flag
-}
 
-char GPSRxData[2][GPS_BUFFERSIZE];
-int frame_rcv = 0;
-int frame_complete = -1;
+    GPS.ON = 1;
+//    frame_complete = 0;
+//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,1,12,24,79,359,22,12,55,241,33,15,42,176,44,17,30,053,25*7E");
+//    GPSDecodeFrame();
+//
+//    frame_complete = 1;
+//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,2,12,25,17,239,28,18,15,254,,14,15,317,,22,15,291,15*7B");
+//    GPSDecodeFrame();
+//
+//    frame_complete = 0;
+//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,3,12,26,11,152,35,04,00,103,,33,33,208,38,42,42,666,88*4A");
+//    GPSDecodeFrame();
+}
 
 static volatile unsigned char start_ptr = 0;
 static volatile unsigned char end_ptr = 0;
@@ -82,10 +93,10 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
     while (!U1STAbits.URXDA)
         ;
     c = U1RXREG & 0xFF;
-    
+
     buf_rx[end_ptr] = c;
     end_ptr++;
-    if (end_ptr == sizeof(buf_rx))
+    if (end_ptr == sizeof (buf_rx))
         end_ptr = 0;
 
     if (c == '$')
@@ -116,6 +127,78 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
 }
 
 gps_t GPS;
+double Latitude = 45.2448;
+double Longitude = -5.63314;
+
+/******************************************************************************
+ * Function:        int DMSToDec(double *dec, char *str)
+ * PreCondition:    None
+ * Input:           double *dec : pointer to the decimal number destination
+ *                  char *str : string source
+ * Output:          int : 1 valid, 0 invalid
+ * Side Effects:    None
+ * Overview:        Convert a degreee, minutes, second string from a string to
+ *                  decimal
+ *                  If the convertion fail, *dec is not modified
+ *****************************************************************************/
+int DMSToDec(double *dec, char *str)
+{
+    double degrees;
+    double minutes;
+    double seconds;
+    double sign = 1.0;
+    int r = 0;
+
+
+    if (*str == '-')
+    {
+        sign = -1.0;
+        str++;
+    }
+    else if (*str == '+')
+    {
+        str++;
+    }
+
+
+    degrees = (double) (*str++ -'0');
+    while (isdigit(*str))
+    {
+        degrees *= 10.0;
+        degrees += (double) (*str++ -'0');
+
+    }
+    if (degrees > 0.0 && degrees < 360.0)
+    {
+        str++; // skip the seperator
+        minutes = (double) (*str++ -'0') * 10.0;
+        minutes += (double) (*str++ -'0');
+
+        seconds = 0.0;
+
+        if (*str == '.') // decimal seperator from GPS
+        {
+            str++; // skip the seperator
+            minutes += (double) (*str++ -'0') * 0.1;
+            minutes += (double) (*str++ -'0') * 0.01;
+            minutes += (double) (*str++ -'0') * 0.001;
+            minutes += (double) (*str++ -'0') * 0.0001;
+        }
+        else if (*str != '#') // end of a LX200 command
+        {
+            str++; // skip the seperator
+            seconds = (double) (*str++ -'0') * 10.0;
+            seconds += (double) (*str++ -'0');
+            //            LX200Precise = TRUE;
+        }
+
+        *dec = degrees + minutes / 60.0 + seconds / 3600.0;
+        *dec *= sign;
+        r = 1;
+    }
+
+    return r;
+}
 
 void GPSDecodeUTCTime(char *f)
 {
@@ -139,10 +222,10 @@ void GPSDecodeLatitude(char *f)
 
     if (*f)
     {
-        GPS.Latitute[i++] = *f++;
-        GPS.Latitute[i++] = *f++;
-        GPS.Latitute[i++] = '°';
-        strcpy(GPS.Latitute + i, f);
+        GPS.Latitude[i++] = *f++;
+        GPS.Latitude[i++] = *f++;
+        GPS.Latitude[i++] = '°';
+        strcpy(GPS.Latitude + i, f);
     }
 }
 
@@ -188,7 +271,7 @@ void GPSDecodeDate(char *f)
 void GPSDecodeFrame()
 {
     char frame[GPS_BUFFERSIZE];
-    char *fields[16];
+    char *fields[32];
     char checksum, chk;
     int i, j;
 
@@ -199,7 +282,7 @@ void GPSDecodeFrame()
         j = 0;
         chk = 0;
         fields[j++] = frame;
-        while (i < GPS_BUFFERSIZE && j < 16)
+        while (i < GPS_BUFFERSIZE && j < 32)
         {
             chk += frame[i];
             if (frame[i] == ',')
@@ -227,8 +310,8 @@ void GPSDecodeFrame()
             GPS.PositionFixIndicator = fields[i++][0];
             GPS.SatellitesUsed = atoi(fields[i++]);
             i++;
-//            GPS.MSLAltitude = atof(fields[i++]);
-            strncpy(GPS.MSLAltitude,fields[i], sizeof (GPS.MSLAltitude));
+            //            GPS.MSLAltitude = atof(fields[i++]);
+            strncpy(GPS.MSLAltitude, fields[i], sizeof (GPS.MSLAltitude));
         }
 
         else if (strcmp("$GPGLL", fields[0]) == 0)
@@ -252,6 +335,44 @@ void GPSDecodeFrame()
             GPSDecodeDate(fields[i + 2]);
 
         }
+        else if (strcmp("$GPGSV", fields[0]) == 0)
+        {
+            i++; // skip Total number of messages
+            int MessageNumber = fields[i++][0] - '0';
+            int o = (MessageNumber - 1) * 4;
+            int j;
+
+            //o = 0;
+            GPS.SatellitesInView = atoi(fields[i++]);
+            for (j = 0 ; j < 4 && j + o < GPS.SatellitesInView ; j++)
+            {
+                strcpy(GPS.Satellites[j + o].Id, fields[i++]);
+                GPS.Satellites[j + o].Elevation = atoi(fields[i++]);
+                GPS.Satellites[j + o].Azimuth = atoi(fields[i++]);
+                GPS.Satellites[j + o].SNR = atoi(fields[i++]);
+            }
+//            GPS.SatellitesInView = j + o;
+        }
+
+        if (GPS.ON && GPS.PositionFixIndicator > '0')
+        {
+            if (GPS.Latitude[0])
+            {
+                DMSToDec(&Latitude, GPS.Latitude);
+                if (GPS.NSIndicator == 'S')
+                {
+                    Latitude = -Latitude;
+                }
+            }
+            if (GPS.Longitude[0])
+            {
+                DMSToDec(&Longitude, GPS.Longitude);
+                if (GPS.EWIndicator == 'E')
+                {
+                    Longitude = -Longitude;
+                }
+            }
+        }
 
         frame_complete = -1;
     }
@@ -271,6 +392,7 @@ void GPSTCPServer(void)
     static TCP_SOCKET MySocket;
 
     m = 0;
+
     static enum _TCPServerState
     {
         SM_HOME = 0,
@@ -318,4 +440,14 @@ void GPSTCPServer(void)
         TCPServerState = SM_HOME;
         break;
     }
+}
+
+void GPSon()
+{
+    GPS.ON = 1;
+}
+
+void GPSoff()
+{
+    GPS.ON = 0;
 }

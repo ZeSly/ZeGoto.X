@@ -40,14 +40,16 @@
         </div>
     </div>
 
-    <p id="datetime"><b>dd/mm/yyyy hh:mn:ss</b></p>
-    <p><b>Current positon :</b><br/>
+    <p id="datetime">dd/mm/yyyy hh:mn:ss</p>
+    <p><b>Mount position</b></p>
+    <p>
     RA: ~rightascension~ Dec: ~declination~<br/>
     ~azimuthcoord~<br/>
     <a href="http://server7.wikisky.org/v2?~wikiskycoord~&zoom=8&img_source=DSS2">Show in wikisky.org</a>
     </p>
 </div>
 <div id="TEXT">
+<p><b>GPS</b></p>
 ~gpsdata~
 </div>
 <div id="TEXT">
@@ -85,7 +87,7 @@ function updateStatus(xmlData) {
 	for(i = 1; i <= 7; i++)
 		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '_' : 'O';
 
-    document.getElementById('datetime').innerHTML = '<b>' + getXMLValue(xmlData, 'datetime') + '</b>';
+    document.getElementById('datetime').innerHTML = getXMLValue(xmlData, 'datetime');
 }
 setTimeout("newAJAXCommand('status.xml', updateStatus, true)",500);
 </script>

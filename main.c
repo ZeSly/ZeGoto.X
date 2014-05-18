@@ -225,6 +225,7 @@ int main(void)
         GPSTCPServer();
         GPSDecodeFrame();
 
+
 #if defined(STACK_USE_SMTP_CLIENT)
         SMTPDemo();
 #endif

@@ -69,6 +69,7 @@
 #include "get_telescope_information.h"
 #include "rtcc.h"
 #include <math.h>
+#include "gps.h"
 
 /****************************************************************************
   Section:
@@ -122,7 +123,7 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
             LED1_IO = (*ptr == '1');
     }
 
-         // If it's the LED updater file
+        // If it's the LED updater file
     else if (!memcmppgm2ram(filename, "leds.cgi", 8))
     {
         // Determine which LED to toggle
@@ -403,7 +404,6 @@ void HTTPPrint_version(void)
     TCPPutROMString(sktHTTP, (ROM void*) VERSION);
 }
 
-
 void HTTPPrint_tcpipversion(void)
 {
     TCPPutROMString(sktHTTP, (ROM void*) TCPIP_STACK_VERSION);
@@ -632,7 +632,7 @@ void HTTPPrint_wikiskycoord(void)
     char wikiskycoord[32];
     double ra, dec;
 
-    ra = (double)RA.StepPosition / (double) Mount.Config.NbStepMax * 24.0;
+    ra = (double) RA.StepPosition / (double) Mount.Config.NbStepMax * 24.0;
     dec = (double) Dec.StepPosition / (double) Mount.Config.NbStepMax * 360.0;
 
     sprintf(wikiskycoord, "ra=%f&de=%f", ra, dec);
@@ -685,7 +685,7 @@ void HTTPPrint_datetime(void)
         datetime[i++] = 'M';
     }
     datetime[i++] = '\0';
-    
+
     TCPPutString(sktHTTP, (BYTE *) datetime);
 }
 
@@ -730,22 +730,88 @@ void HTTPPrint_gpsdata(void)
     char str[256];
     char *p;
 
+    TCPFlush(sktHTTP);
     p = str;
+    p += sprintf(p, "Setting : %f %f<br/>\n", Latitude, Longitude);
     if (GPS.Status == 'A')
     {
-        p += sprintf(p, "Latitute: %s %c ", GPS.Latitute, GPS.NSIndicator);
+        p += sprintf(p, "Latitude: %s %c ", GPS.Latitude, GPS.NSIndicator);
         p += sprintf(p, "Longitude: %s %c <br/>\n", GPS.Longitude, GPS.EWIndicator);
         p += sprintf(p, "Altitude: %s <br/>\n", GPS.MSLAltitude);
-        p += sprintf(p, "Satellites used: %d <br/>\n", GPS.SatellitesUsed);
-        p += sprintf(p, "Position fix indicator: %c<br/>\n", GPS.PositionFixIndicator);
     }
     else
     {
         p += sprintf(p, "Position not valid<br/>\n");
-        p += sprintf(p, "Position fix indicator: %c<br/>\n", GPS.PositionFixIndicator);
     }
-    p += sprintf(p, "UTC %s %s<br/>\n", GPS.UTCTime, GPS.Date);
+    p += sprintf(p, "Position fix indicator: ");
+    switch (GPS.PositionFixIndicator)
+    {
+    case '0':
+        p += sprintf(p, "0, position fix unavailable<br/>\n");
+        break;
+    case '1':
+        p += sprintf(p, "1, valid position fix, SPS mode<br/>\n");
+        break;
+    case '2':
+        p += sprintf(p, "2, valid position fix, differential GPS mode<br/>\n");
+        break;
+    case '3':
+        p += sprintf(p, "3, GPS PPS Mode, fix valid<br/>\n");
+        break;
+    case '4':
+        p += sprintf(p, "4, Real Time Kinematic. System used in RTK mode with fixed integers<br/>\n");
+        break;
+    case '5':
+        p += sprintf(p, "5, Float RTK. Satellite system used in RTK mode. Floating integers<br/>\n");
+        break;
+    case '6':
+        p += sprintf(p, "6, Estimated(dead reckoning) Mode<br/>\n");
+        break;
+    case '7':
+        p += sprintf(p, "7, Manual Input Mode<br/>\n");
+        break;
+    case '8':
+        p += sprintf(p, "8, Simulator Mode<br/>\n");
+        break;
+    }
+    p += sprintf(p, "UTC %s %s<br/>", GPS.UTCTime, GPS.Date);
     TCPPutString(sktHTTP, (BYTE *) str);
 }
+
+void HTTPPrint_gpssatellitesinview(void)
+{
+    char str[4];
+
+    sprintf(str, "%d", GPS.SatellitesInView);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_gpssatellitesused(void)
+{
+    char str[4];
+
+    sprintf(str, "%d", GPS.SatellitesUsed);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_svggpssignal()
+{
+    char str[256];
+    char *p;
+    int i;
+
+    p = str;
+    for (i = 0; i < GPS.SatellitesInView; i++)
+    {
+        p += sprintf(p, "%s,%d,%d,%d,",
+                     GPS.Satellites[i].Id,
+                     GPS.Satellites[i].Elevation,
+                     GPS.Satellites[i].Azimuth,
+                     GPS.Satellites[i].SNR);
+    }
+    *--p = '\0';
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
 
 #endif

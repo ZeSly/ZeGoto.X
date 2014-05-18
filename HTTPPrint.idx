@@ -32,7 +32,7 @@ pot
 +reboot
 +rebootaddr
 cookiename
-+
+
 lcdtext
 ledSelected(4,TRUE)
 ledSelected(4,FALSE)
@@ -69,3 +69,18 @@ tcpversion
 +datetime
 +azimuthcoord
 +gpsdata
++svggpssignal
++gpssatellitesinview
+svggpssignal(0)
+svggpssignal(1)
+svggpssignal(2)
+svggpssignal(3)
+svggpssignal(4)
+svggpssignal(5)
+svggpssignal(6)
+svggpssignal(7)
+svggpssignal(8)
+svggpssignal(9)
+svggpssignal(10)
+svggpssignal(11)
++gpssatellitesused

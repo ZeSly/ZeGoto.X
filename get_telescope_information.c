@@ -29,6 +29,7 @@
 #include "dec_motor.h"
 #include "lx200_protocol.h"
 #include "rtcc.h"
+#include "gps.h"
 
 BOOL LX200Precise = FALSE;
 
@@ -268,8 +269,6 @@ void GetStepTargetDeclination()
 
 double tsmh_h;
 double angle_horaire;
-double Latitude = 45.2448;
-double Longitude = -5.63314;
 
 void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
 {
@@ -464,14 +463,19 @@ void LX200Dec2DMS(double d)
     fract = fabs(modf(d, &deg));
     fract = modf(fract * 60.0, &min);
     sec = fract * 60.0;
+    if (sec >= 60.0)
+    {
+        min += 1.0;
+        sec = 0.0;
+    }
     s = deg < 0 ? '-' : '+';
     if (LX200Precise)
     {
-        sprintf(LX200Response, "%c%3.0f*%2.0f:%2.0f#", s, fabs(deg), min, sec);
+        sprintf(LX200Response, "%c%02.0f*%02.0f:%02.0f#", s, fabs(deg), min, sec);
     }
     else
     {
-        sprintf(LX200Response, "%c%3.0f*%2.0f#", s, fabs(deg), min);
+        sprintf(LX200Response, "%c%02.0f*%02.0f#", s, fabs(deg), min);
     }
 }
 

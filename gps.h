@@ -21,24 +21,40 @@
 
 typedef struct
 {
+    int Elevation;
+    int Azimuth;
+    int SNR;
+    char Id[3];
+} gps_satellite_t;
+
+typedef struct
+{
+    char ON;
     char UTCTime[13];
-    char Latitute[11];
+    char Latitude[11];
     char NSIndicator;
     char Longitude[12];
     char EWIndicator;
     char PositionFixIndicator;
     char SatellitesUsed;
+    char SatellitesInView;
     char Status;
     char Date[9];
     //double MSLAltitude;
     char MSLAltitude[8];
+    gps_satellite_t Satellites[32];
 } gps_t;
 
 extern gps_t GPS;
+extern double Latitude;
+extern double Longitude;
 
 void GPSStart();
 void GPSTCPServer(void);
 void GPSDecodeFrame();
+int DMSToDec(double *dec, char *str);
 
+void GPSon();
+void GPSoff();
 
 #endif	/* GPS_H */

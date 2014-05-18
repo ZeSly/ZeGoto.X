@@ -27,6 +27,7 @@
 #include "telescope_movement_commands.h"
 #include "slew_rate_commands.h"
 #include "telescope_set_commands.h"
+#include "gps.h"
 
 char LX200String[16];
 char LX200Response[64];
@@ -108,6 +109,9 @@ LX200Command LX200CommandTab[] =
 
     { "Sg", 2, SetCurrentSiteLongitude},
     { "St", 2, SetCurrentSiteLatitude},
+
+    { "g+", 2, GPSon},
+    { "g-", 2, GPSoff},
 
     { "ZGR", 3, GetStepRA},
     { "ZGD", 3, GetStepDeclination},

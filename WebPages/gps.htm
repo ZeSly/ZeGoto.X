@@ -1,0 +1,62 @@
+~inc:header.inc~
+<h2>GPS Status</h2>
+<div id="TEXT">
+<p><b>Position</b></p>
+~gpsdata~
+</div>
+<div id="TEXT">
+<p><b>Satellites signals</b></p>
+<p>In view: ~gpssatellitesinview~<br/>Used: ~gpssatellitesused~</p>
+    <script type="text/javascript">
+    document.write('<svg height="120px" border="1">');
+    document.write('<rect style="fill:none;stroke:#fff;" width="680" height="100" x="0" y="0"/>');
+    var Satellites = new Array(~svggpssignal~);
+    width = 680 / Satellites.length * 4;
+    for(i = 0; i < Satellites.length; i+=4)
+    {
+        heigth = Satellites[i+3]
+        x = width * i / 4;
+        y = 100 - heigth;
+        document.write('<rect style="fill:#00f;stroke:#fff;" width="'+width+'" height="'+heigth+'" x="'+x+'" y="'+y+'"/>');
+        document.write('<text style="fill:#fff;" x="' + (x+15) +'" y="120">' + Satellites[i] + '</text>');
+    }
+    document.write('</svg>');
+    </script>    
+</svg>
+</div>
+<div id="TEXT">
+    <p><b>Azimuth and Elevation</b></p>
+    <script type="text/javascript">
+    document.write('<svg height="440px" border="1">');
+    document.write('<circle style="fill:000;stroke:#fff;" cx="340" cy="220" r="220"/>');
+    document.write('<circle style="stroke:#fff;" cx="340" cy="220" r="200"/>');
+    document.write('<circle style="stroke:#fff;stroke-dasharray:5,5" cx="340" cy="220" r="133"/>');
+    document.write('<circle style="stroke:#fff;stroke-dasharray:5,5" cx="340" cy="220" r="66"/>');
+    for (i = 1 ; i <= 12 ; i++)
+    {
+        x2 = Math.sin(Math.PI/6*i)*200 + 340;
+        y2 = Math.cos(Math.PI/6*i)*200 + 220;
+        document.write('<line style="fill:none;stroke:#fff;stroke-width:1;stroke-dasharray:5,5" x1="340" y1="220" x2="'+x2+'" y2="'+y2+'"/>');
+        x =  Math.sin(Math.PI/6*i)*180 + 340;
+        y = -Math.cos(Math.PI/6*i)*180 + 220;
+        document.write('<text style="fill:#fff;font-size:10" x="'+x+'" y="'+y+'">' + (i*30) + '&deg;</text>');
+    }
+    for(i = 0; i < Satellites.length; i+=4)
+    {
+        x =  Math.sin(Math.PI * (Satellites[i+2] / 180)) * ((90 - Satellites[i+1]) * 2.2) + 340;
+        y = -Math.cos(Math.PI * (Satellites[i+2] / 180)) * ((90 - Satellites[i+1]) * 2.2) + 220;
+        if (Satellites[i+3] > 0)
+        {
+            document.write('<circle style="fill:0f0;stroke:#fff;" cx="'+x+'" cy="'+y+'" r="2"/>');
+            document.write('<text style="fill:#0f0;font-size:10" x="'+(x+5)+'" y="'+y+'">' + Satellites[i] + '</text>');
+        }
+        else
+        {
+            document.write('<circle style="fill:f00;stroke:#fff;" cx="'+x+'" cy="'+y+'" r="2"/>');
+            document.write('<text style="fill:#f00;font-size:10" x="'+(x+5)+'" y="'+y+'">' + Satellites[i] + '</text>');
+        }
+    }
+    document.write('</svg>');
+    </script>    
+</div>
+~inc:footer.inc~
