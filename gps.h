@@ -30,6 +30,7 @@ typedef struct
 typedef struct
 {
     char ON;
+    char Available;
     char UTCTime[13];
     char Latitude[11];
     char NSIndicator;

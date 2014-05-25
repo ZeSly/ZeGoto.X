@@ -343,7 +343,7 @@ void GetSystemDateTime(datetime_t *datetime)
     datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
     datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
     datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
-    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRTEN;
+    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
     datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
     datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
 }
@@ -359,7 +359,7 @@ void GetUTCDateTime(datetime_t *datetime)
     datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
     datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
     datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
-    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRTEN;
+    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
     datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
     datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
 

@@ -302,6 +302,7 @@ void GPSDecodeFrame()
         i = 1;
         if (strcmp("$GPGGA", fields[0]) == 0)
         {
+            GPS.Available = 1;
             GPSDecodeUTCTime(fields[i++]);
             GPSDecodeLatitude(fields[i++]);
             GPS.NSIndicator = fields[i++][0];
@@ -310,12 +311,12 @@ void GPSDecodeFrame()
             GPS.PositionFixIndicator = fields[i++][0];
             GPS.SatellitesUsed = atoi(fields[i++]);
             i++;
-            //            GPS.MSLAltitude = atof(fields[i++]);
             strncpy(GPS.MSLAltitude, fields[i], sizeof (GPS.MSLAltitude));
         }
 
         else if (strcmp("$GPGLL", fields[0]) == 0)
         {
+            GPS.Available = 1;
             GPSDecodeLatitude(fields[i++]);
             GPS.NSIndicator = fields[i++][0];
             GPSDecodeLongitude(fields[i++]);
@@ -326,6 +327,7 @@ void GPSDecodeFrame()
 
         else if (strcmp("$GPRMC", fields[0]) == 0)
         {
+            GPS.Available = 1;
             GPSDecodeUTCTime(fields[i++]);
             GPS.Status = fields[i++][0];
             GPSDecodeLatitude(fields[i++]);
@@ -351,7 +353,7 @@ void GPSDecodeFrame()
                 GPS.Satellites[j + o].Azimuth = atoi(fields[i++]);
                 GPS.Satellites[j + o].SNR = atoi(fields[i++]);
             }
-//            GPS.SatellitesInView = j + o;
+            GPS.Available = 1;
         }
 
         if (GPS.ON && GPS.PositionFixIndicator > '0')
@@ -450,4 +452,5 @@ void GPSon()
 void GPSoff()
 {
     GPS.ON = 0;
+    GPS.Available = 0;
 }

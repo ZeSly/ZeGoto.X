@@ -733,6 +733,8 @@ void HTTPPrint_gpsdata(void)
     TCPFlush(sktHTTP);
     p = str;
     p += sprintf(p, "Setting : %f %f<br/>\n", Latitude, Longitude);
+    if (GPS.Available)
+    {
     if (GPS.Status == 'A')
     {
         p += sprintf(p, "Latitude: %s %c ", GPS.Latitude, GPS.NSIndicator);
@@ -773,8 +775,16 @@ void HTTPPrint_gpsdata(void)
     case '8':
         p += sprintf(p, "8, Simulator Mode<br/>\n");
         break;
+    default:
+        p += sprintf(p, "No GPS<br/>\n");
+        break;
     }
     p += sprintf(p, "UTC %s %s<br/>", GPS.UTCTime, GPS.Date);
+    }
+    else
+    {
+        p += sprintf(p, "No GPS<br/>\n");
+    }
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 
