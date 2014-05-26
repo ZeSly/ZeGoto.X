@@ -84,6 +84,7 @@
 #include "lx200_protocol.h"
 #include "rtcc.h"
 #include "gps.h"
+#include "reticule.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -129,6 +130,8 @@ int main(void)
     // Initialize core stack layers (MAC, ARP, TCP, UDP) and
     // application modules (HTTP, SNMP, etc.)
     StackInit();
+
+    ReticuleInit();
 
     // Start RA motor at sideral rate
     RAStart();
@@ -541,6 +544,8 @@ static void InitializeBoard(void)
     // Configure UART1 Rx and Tx pins for GPS
     RPINR18bits.U1RXR = 10; // Assign RP10 to U1RX (input), TX on GPS
     RPOR8bits.RP17R = 3;    // Assign RP17 to U1TX (output), RX on GPS
+
+    RPOR4bits.RP9R = 18;    // Assign LED1 to OC1 (output)
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
 #endif

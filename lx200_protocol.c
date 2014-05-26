@@ -28,6 +28,7 @@
 #include "slew_rate_commands.h"
 #include "telescope_set_commands.h"
 #include "gps.h"
+#include "reticule.h"
 
 char LX200String[16];
 char LX200Response[64];
@@ -113,6 +114,9 @@ LX200Command LX200CommandTab[] =
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},
 
+    { "B+", 2, IncreaseReticuleBrightness},
+    { "B-", 2, DecreaseReticuleBrightness},
+
     { "ZGR", 3, GetStepRA},
     { "ZGD", 3, GetStepDeclination},
     { "ZGr", 3, GetStepTargetRA},
@@ -121,7 +125,7 @@ LX200Command LX200CommandTab[] =
     { "ZSr", 3, SetStepTargetRA},
     { "ZSd", 3, SetStepTargetDeclination},
 
-    { "ZGs", 3, DumpSpeedList },
+//    { "ZGs", 3, DumpSpeedList },
 
     { NULL, 0, NULL}
 };

@@ -86,6 +86,7 @@
       <itemPath>rtcc.h</itemPath>
       <itemPath>slew_rate_commands.h</itemPath>
       <itemPath>telescope_set_commands.h</itemPath>
+      <itemPath>reticule.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -171,6 +172,7 @@
       <itemPath>mount.c</itemPath>
       <itemPath>gps.c</itemPath>
       <itemPath>gps.h</itemPath>
+      <itemPath>reticule.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

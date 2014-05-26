@@ -30,6 +30,7 @@ void RAAccelerate(void);
 void RADecelerate(void);
 void RAStop(void);
 void RASetDirection(uint8_t dir);
+void RAChangeDirection();
 void UpdateRAStepPosition();
 
 /* Position variables */

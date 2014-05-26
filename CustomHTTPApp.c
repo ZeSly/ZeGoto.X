@@ -70,6 +70,8 @@
 #include "rtcc.h"
 #include <math.h>
 #include "gps.h"
+#include "mount.h"
+#include "reticule.h"
 
 /****************************************************************************
   Section:
@@ -111,16 +113,33 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
     MPFSGetFilename(curHTTP.file, filename, 20);
 
     // If its the forms.htm page
-    if (!memcmppgm2ram(filename, "forms.htm", 9))
+    if (!memcmppgm2ram(filename, "mount.htm", 9))
     {
         // Seek out each of the two LED strings, and if it exists set the LED states
-        ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE *) "led2");
+        ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE *) "invertedra");
         if (ptr)
-            LED2_IO = (*ptr == '1');
+        {
+            Mount.Config.RADefaultDirection = (*ptr == '1');
+        }
+        else
+        {
+            Mount.Config.RADefaultDirection = 0;
+        }
+        Mount.WestDirection = Mount.Config.RADefaultDirection;
+        Mount.EastDirection = !Mount.Config.RADefaultDirection;
+        RAChangeDirection();
 
-        ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE *) "led1");
+        ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE *) "inverteddec");
         if (ptr)
-            LED1_IO = (*ptr == '1');
+        {
+            Mount.Config.DecDefaultDirection = (*ptr == '1');
+        }
+        else
+        {
+            Mount.Config.DecDefaultDirection = 0;
+        }
+        Mount.NorthDirection = Mount.Config.DecDefaultDirection;
+        Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
     }
 
         // If it's the LED updater file
@@ -134,6 +153,8 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
         {
         case '1':
             LED1_IO ^= 1;
+            if (LED1_IO) ReticuleOn();
+            else ReticuleOff();
             break;
         case '2':
             LED2_IO ^= 1;
@@ -823,5 +844,59 @@ void HTTPPrint_svggpssignal()
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 
+void HTTPPrint_mountconfig_inverteddec(void)
+{
+    if (Mount.NorthDirection)
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "checked");
+    return;
+}
+
+void HTTPPrint_mountconfig_invertedra(void)
+{
+    if (Mount.WestDirection)
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "checked");
+    return;
+}
+
+void HTTPPrint_mountconfig_nbmaxstep(void)
+{
+    char str[16];
+
+    sprintf(str, "%li", Mount.Config.NbStepMax);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_sideralperiod(void)
+{
+    char str[16];
+
+    sprintf(str, "%lu", Mount.Config.SideralPeriod);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_maxrate(void)
+{
+    char str[16];
+
+    sprintf(str, "%u", Mount.Config.MaxSpeed);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_centeringrate(void)
+{
+    char str[16];
+
+    sprintf(str, "%u", Mount.Config.CenteringSpeed);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_guidingrate(void)
+{
+//    char str[16];
+
+//    sprintf(str, "%lu", Mount.Config.SideralPeriod);
+//    TCPPutString(sktHTTP, (BYTE *) str);
+    TCPPutROMString(sktHTTP, (ROM BYTE*) "0.5");
+}
 
 #endif

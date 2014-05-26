@@ -52,7 +52,6 @@ extern HTTP_STUB httpStubs[MAX_HTTP_CONNECTIONS];
 extern BYTE curHTTPID;
 
 void HTTPPrint(DWORD callbackID);
-void HTTPPrint_ledSelected(WORD,WORD);
 void HTTPPrint_version(void);
 void HTTPPrint_builddate(void);
 void HTTPPrint_led(WORD);
@@ -79,6 +78,13 @@ void HTTPPrint_gpsdata(void);
 void HTTPPrint_svggpssignal(void);
 void HTTPPrint_gpssatellitesinview(void);
 void HTTPPrint_gpssatellitesused(void);
+void HTTPPrint_mountconfig_inverteddec(void);
+void HTTPPrint_mountconfig_invertedra(void);
+void HTTPPrint_mountconfig_nbmaxstep(void);
+void HTTPPrint_mountconfig_sideralperiod(void);
+void HTTPPrint_mountconfig_maxrate(void);
+void HTTPPrint_mountconfig_centeringrate(void);
+void HTTPPrint_mountconfig_guidingrate(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -86,18 +92,6 @@ void HTTPPrint(DWORD callbackID)
 	{
         case 0x00000000:
 			HTTPIncFile((ROM BYTE*)"header.inc");
-			break;
-        case 0x00000001:
-			HTTPPrint_ledSelected(2,TRUE);
-			break;
-        case 0x00000002:
-			HTTPPrint_ledSelected(2,FALSE);
-			break;
-        case 0x00000003:
-			HTTPPrint_ledSelected(1,TRUE);
-			break;
-        case 0x00000004:
-			HTTPPrint_ledSelected(1,FALSE);
 			break;
         case 0x00000006:
 			HTTPIncFile((ROM BYTE*)"footer.inc");
@@ -203,6 +197,27 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x00000055:
 			HTTPPrint_gpssatellitesused();
+			break;
+        case 0x00000056:
+			HTTPPrint_mountconfig_inverteddec();
+			break;
+        case 0x00000057:
+			HTTPPrint_mountconfig_invertedra();
+			break;
+        case 0x00000058:
+			HTTPPrint_mountconfig_nbmaxstep();
+			break;
+        case 0x00000059:
+			HTTPPrint_mountconfig_sideralperiod();
+			break;
+        case 0x0000005a:
+			HTTPPrint_mountconfig_maxrate();
+			break;
+        case 0x0000005b:
+			HTTPPrint_mountconfig_centeringrate();
+			break;
+        case 0x0000005c:
+			HTTPPrint_mountconfig_guidingrate();
 			break;
 		default:
 			// Output notification for undefined values

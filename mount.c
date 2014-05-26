@@ -29,7 +29,6 @@ void MountInit()
     /* Mecanic setting */
     Mount.Config.NbStepMax = 8640000UL;
     Mount.Config.SideralPeriod = 159563UL;
-    Mount.SideralHalfPeriod = Mount.Config.SideralPeriod  / 2;
     Mount.Config.MaxSpeed = 120;
     Mount.Config.CenteringSpeed = 10;
 
@@ -37,14 +36,18 @@ void MountInit()
     Mount.Config.AccelTime = 4; // seconds
     Mount.Config.DecelTime = 1; // seconds
 
+    /* Directions */
+    Mount.Config.RADefaultDirection = 0;
+    Mount.Config.DecDefaultDirection = 0;
+
     Mount.CurrentMaxSpeed = Mount.Config.MaxSpeed;
     Mount.AccelPeriod = GetPeripheralClock() / Mount.Config.MaxSpeed * Mount.Config.AccelTime;
     Mount.DecelPeriod = GetPeripheralClock() / Mount.Config.MaxSpeed * Mount.Config.DecelTime;
 
-    /* Directions */
-    Mount.WestDirection = 0;
-    Mount.EastDirection = 1;
-    Mount.NorthDirection = 0;
-    Mount.SouthDirection = 1;
+    Mount.SideralHalfPeriod = Mount.Config.SideralPeriod / 2;
+    Mount.WestDirection = Mount.Config.RADefaultDirection;
+    Mount.EastDirection = !Mount.Config.RADefaultDirection;
+    Mount.NorthDirection = Mount.Config.DecDefaultDirection;
+    Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
 
 }

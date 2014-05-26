@@ -172,6 +172,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
             {
                 RAState = MOTOR_STOP;
                 CurrentMove &= ~MOVE_RA;
+                RA_DIR_IO = Mount.WestDirection;
             }
 
             
@@ -218,7 +219,7 @@ void RAMotorInit(void)
 
     RA_SLEEP_IO = 0;
     RA_MODE_IO = 1; // 8 microsteps / step
-    RA_DIR_IO = 0;
+    RA_DIR_IO = Mount.Config.RADefaultDirection;
     RA_STEP_IO = 0;
 
     MotorTimerPeriod = Mount.SideralHalfPeriod;
@@ -286,7 +287,7 @@ void RAAccelerate(void)
         
     }
 }
-
+/*
 void DumpSpeedList()
 {
 //    t_speedlist *p;
@@ -317,7 +318,7 @@ void DumpSpeedList()
         CDCTxService();
     }
     while (!USBUSARTIsTxTrfReady());
-}
+}*/
 
 void RADecelerate(void)
 {
@@ -338,6 +339,14 @@ void RAStop(void)
 void RASetDirection(uint8_t dir)
 {
     RANextDirection = dir;
+}
+
+void RAChangeDirection()
+{
+    if (RAState == MOTOR_STOP)
+    {
+        RA_DIR_IO = Mount.WestDirection;
+    }
 }
 
 void UpdateRAStepPosition()

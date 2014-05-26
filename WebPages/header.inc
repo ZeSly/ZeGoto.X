@@ -10,7 +10,7 @@
   <img src="/images/opengoto.png">
   <ul>
     <li><a href="/protect/config.htm">Network Configuration</a></li>
-    <li><a href="/forms.htm">Form Processing</a></li>
+    <li><a href="/mount.htm">Mount Setting</a></li>
     <li><a href="/gps.htm">GPS Status</a></li>
     <li><a href="/index.htm">Home</a></li></li>
   </ul>

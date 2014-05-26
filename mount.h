@@ -40,6 +40,11 @@ typedef struct
     /* Acceleration/decelation settings */
     int32_t AccelTime; // seconds
     int32_t DecelTime; // seconds
+
+    /* Directions */
+    unsigned RADefaultDirection : 1;
+    unsigned DecDefaultDirection : 1;
+
 } mountconfig_t;
 
 typedef struct

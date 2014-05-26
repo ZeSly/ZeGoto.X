@@ -59,32 +59,38 @@ fieldset {
 	margin:10px 40px 10px 40px;
 	padding: 8px;
 	border: 1px dotted #999;
-	text-align:center;
 	background:#333;
 }
 
-fieldset div {	padding: 2px 0px 2px 150px;}
+fieldset div {	padding: 2px 0px 2px 250px;}
 
 fieldset div label {
-	margin-left: -140px;
+	margin-left: -160px;
 	padding-top: 2px;
-	width: 135px;
 	font-weight: bold;
 	position: absolute;
 }
 
 fieldset input {
-	width: 250px;
     color: white;
+    width: 180px;
     background:#222;
     border: 1px solid #999;
     padding: 2px;
 }
 
+fieldset input:disabled {
+    color: #888;
+}
+
 fieldset input.sm {
-	width: auto;
+	width: 100px;
     border: 2px outset;
     border-color: #999;
+}
+
+fieldset input.chk {
+	width: auto;
 }
 
 fieldset textarea {

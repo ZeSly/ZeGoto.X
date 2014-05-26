@@ -27,6 +27,7 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "telescope_movement_commands.h"
+#include "reticule.h"
 
 pad_t PadState;
 
@@ -184,6 +185,15 @@ void UpdatePadState()
                     Mount.NorthDirection = Mount.NorthDirection ? 0 : 1;
                     Mount.SouthDirection = Mount.SouthDirection ? 0 : 1;
                 }
+            }
+
+            if (PadState.PAD_S1 == 1 && PadState.PAD_S5 == 1)
+            {
+                IncreaseReticuleBrightness();
+            }
+            if (PadState.PAD_S1 == 1 && PadState.PAD_S6 == 1)
+            {
+                DecreaseReticuleBrightness();
             }
         }
     }

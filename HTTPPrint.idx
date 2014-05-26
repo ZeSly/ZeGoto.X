@@ -1,8 +1,8 @@
 +inc:header.inc
-+ledSelected(2,TRUE)
-+ledSelected(2,FALSE)
-+ledSelected(1,TRUE)
-+ledSelected(1,FALSE)
+ledSelected(2,TRUE)
+ledSelected(2,FALSE)
+ledSelected(1,TRUE)
+ledSelected(1,FALSE)
 hellomsg
 +inc:footer.inc
 +version
@@ -84,3 +84,10 @@ svggpssignal(9)
 svggpssignal(10)
 svggpssignal(11)
 +gpssatellitesused
++mountconfig_inverteddec
++mountconfig_invertedra
++mountconfig_nbmaxstep
++mountconfig_sideralperiod
++mountconfig_maxrate
++mountconfig_centeringrate
++mountconfig_guidingrate
