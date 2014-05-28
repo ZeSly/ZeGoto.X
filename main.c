@@ -131,6 +131,15 @@ int main(void)
     // application modules (HTTP, SNMP, etc.)
     StackInit();
 
+    // Motors
+    MountInit();
+    RAMotorInit();
+    DecMotorInit();
+
+    // Button
+    InputsInit();
+
+    // Polar Reticule
     ReticuleInit();
 
     // Start RA motor at sideral rate
@@ -482,12 +491,33 @@ static void InitializeBoard(void)
     AD1PCFGL = 0xFFFF;
     //    AD1PCFGLbits.PCFG10 = 0;    // Power sense on AN10
 
-    // Sleep mode for the 2 DRV8824
-    RA_SLEEP_TRIS = OUTPUT_PIN;
-    RA_SLEEP_IO = 0;
-    DEC_SLEEP_TRIS = OUTPUT_PIN;
-    DEC_SLEEP_IO = 0;
+    // RA motos pins
+    RA_HOME_PULLUP = 1;
+    RA_FAULT_PULLUP = 1;
 
+    RA_HOME_TRIS = INPUT_PIN;
+    RA_FAULT_TRIS = INPUT_PIN;
+
+    RA_SLEEP_TRIS = OUTPUT_PIN;
+    RA_DIR_TRIS = OUTPUT_PIN;
+    RA_STEP_TRIS = OUTPUT_PIN;
+    RA_MODE_TRIS = OUTPUT_PIN;
+
+    // Dec motos pins
+    DEC_HOME_PULLUP = 1;
+    DEC_FAULT_PULLUP = 1;
+
+    DEC_HOME_TRIS = INPUT_PIN;
+    DEC_FAULT_TRIS = INPUT_PIN;
+
+    DEC_SLEEP_TRIS = OUTPUT_PIN;
+    DEC_DIR_TRIS = OUTPUT_PIN;
+    DEC_STEP_TRIS = OUTPUT_PIN;
+    DEC_MODE_TRIS = OUTPUT_PIN;
+
+    // Sleep mode for the 2 DRV8824
+    RA_SLEEP_IO = 0;
+    DEC_SLEEP_IO = 0;
 
     // LEDs
     LED1_TRIS = 0;
@@ -495,14 +525,6 @@ static void InitializeBoard(void)
 
     XEEInit();
     RTCCInit();
-
-    // Motors
-    MountInit();
-    RAMotorInit();
-    DecMotorInit();
-
-    // Button
-    InputsInit();
 
     // Deassert all chip select lines so there isn't any problem with
     // initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16,
@@ -700,6 +722,7 @@ static void InitAppConfig(void)
                 SPIFlashReadArray(sizeof (NVMValidationStruct), (BYTE*) & AppConfig, sizeof (AppConfig));
             }
 #endif
+            adrMountConfig = sizeof (NVMValidationStruct) + sizeof (AppConfig);
 
             // Check EEPROM/Flash validitity.  If it isn't valid, set a flag so 
             // that we will save the ROM default values on the next loop 
@@ -747,7 +770,7 @@ void SaveAppConfig(const APP_CONFIG *ptrAppConfig)
     // store the entire AppConfig structure.  If you get stuck in this while(1) 
     // trap, it means you have a design time misconfiguration in TCPIPConfig.h.
     // You must increase MPFS_RESERVE_BLOCK to allocate more space.
-#if defined(STACK_USE_MPFS2)
+#if defined(STACK_USE_MPFS2) && defined(MPFS_USE_EEPROM) && defined(MPFS_USE_SPI_FLASH)
     if (sizeof (NVMValidationStruct) + sizeof (AppConfig) > MPFS_RESERVE_BLOCK)
         while (1);
 #endif

@@ -182,8 +182,10 @@ void UpdatePadState()
                 }
                 if (PadState.PAD_S2 == 1)
                 {
-                    Mount.NorthDirection = Mount.NorthDirection ? 0 : 1;
-                    Mount.SouthDirection = Mount.SouthDirection ? 0 : 1;
+                    Mount.Config.DecDefaultDirection = !Mount.Config.DecDefaultDirection;
+                    Mount.NorthDirection = Mount.Config.DecDefaultDirection;
+                    Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
+                    SaveMountConfig(&Mount.Config);
                 }
             }
 

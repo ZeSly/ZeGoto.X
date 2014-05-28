@@ -91,3 +91,5 @@ svggpssignal(11)
 +mountconfig_maxrate
 +mountconfig_centeringrate
 +mountconfig_guidingrate
++result
++result_text

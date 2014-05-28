@@ -207,16 +207,6 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 
 void RAMotorInit(void)
 {
-    RA_HOME_PULLUP = 1;
-    RA_FAULT_PULLUP = 1;
-    RA_HOME_TRIS = INPUT_PIN;
-    RA_FAULT_TRIS = INPUT_PIN;
-
-    RA_SLEEP_TRIS = OUTPUT_PIN;
-    RA_DIR_TRIS = OUTPUT_PIN;
-    RA_STEP_TRIS = OUTPUT_PIN;
-    RA_MODE_TRIS = OUTPUT_PIN;
-
     RA_SLEEP_IO = 0;
     RA_MODE_IO = 1; // 8 microsteps / step
     RA_DIR_IO = Mount.Config.RADefaultDirection;
@@ -385,4 +375,9 @@ void UpdateRAStepPosition()
         RTCCWriteArray(RTCC_RAM, (BYTE*) &RA.StepPosition, sizeof (RA.StepPosition));
         SavePosition = FALSE;
     }
+}
+
+inline int RAIsMotorStop()
+{
+    return (RAState == MOTOR_STOP);
 }

@@ -19,6 +19,7 @@
 #ifndef MOUNT_H
 #define	MOUNT_H
 
+#include "GenericTypeDefs.h"
 #include <stdint.h>
 
 typedef enum
@@ -36,6 +37,7 @@ typedef struct
     uint32_t SideralPeriod;
     uint16_t MaxSpeed;
     uint16_t CenteringSpeed;
+    uint16_t GuideSpeed;
 
     /* Acceleration/decelation settings */
     int32_t AccelTime; // seconds
@@ -68,7 +70,9 @@ typedef struct
 } mount_t;
 
 extern mount_t Mount;
+extern DWORD adrMountConfig;
 
 void MountInit();
+void SaveMountConfig(const mountconfig_t *ptrMountConfig);
 
 #endif	/* MOUNT_H */

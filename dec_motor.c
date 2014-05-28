@@ -173,17 +173,6 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 
 void DecMotorInit(void)
 {
-    DEC_HOME_PULLUP = 1;
-    DEC_FAULT_PULLUP = 1;
-
-    DEC_HOME_TRIS = INPUT_PIN;
-    DEC_FAULT_TRIS = INPUT_PIN;
-
-    DEC_SLEEP_TRIS = OUTPUT_PIN;
-    DEC_DIR_TRIS = OUTPUT_PIN;
-    DEC_STEP_TRIS = OUTPUT_PIN;
-    DEC_MODE_TRIS = OUTPUT_PIN;
-
     DEC_SLEEP_IO = 0;
     DEC_MODE_IO = 1; // 8 microsteps / step
     DEC_DIR_IO = 0;
@@ -304,3 +293,7 @@ void UpdateDecStepPosition()
     }
 }
 
+inline int DecIsMotorStop()
+{
+    return (DecState == MOTOR_STOP);
+}

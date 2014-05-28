@@ -85,6 +85,8 @@ void HTTPPrint_mountconfig_sideralperiod(void);
 void HTTPPrint_mountconfig_maxrate(void);
 void HTTPPrint_mountconfig_centeringrate(void);
 void HTTPPrint_mountconfig_guidingrate(void);
+void HTTPPrint_result(void);
+void HTTPPrint_result_text(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -218,6 +220,12 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000005c:
 			HTTPPrint_mountconfig_guidingrate();
+			break;
+        case 0x0000005d:
+			HTTPPrint_result();
+			break;
+        case 0x0000005e:
+			HTTPPrint_result_text();
 			break;
 		default:
 			// Output notification for undefined values

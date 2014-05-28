@@ -72,6 +72,7 @@
 #include "gps.h"
 #include "mount.h"
 #include "reticule.h"
+#include <ctype.h>
 
 /****************************************************************************
   Section:
@@ -82,6 +83,7 @@
 extern APP_CONFIG AppConfig;
 static HTTP_IO_RESULT HTTPPostConfig(void);
 #endif
+static HTTP_IO_RESULT HTTPPostMount(void);
 #endif
 
 // Sticky status message variable.
@@ -90,6 +92,7 @@ static HTTP_IO_RESULT HTTPPostConfig(void);
 // POST operation redirects.  This lets the application provide status messages
 // after a redirect, when connection instance data has already been lost.
 static BOOL lastFailure = FALSE;
+static int  lastResultMsg;
 
 /****************************************************************************
   Section:
@@ -140,6 +143,7 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
         }
         Mount.NorthDirection = Mount.Config.DecDefaultDirection;
         Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
+        SaveMountConfig(&Mount.Config);
     }
 
         // If it's the LED updater file
@@ -164,7 +168,6 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
 
     return HTTP_IO_DONE;
 }
-
 
 /****************************************************************************
   Section:
@@ -192,6 +195,8 @@ HTTP_IO_RESULT HTTPExecutePost(void)
     if (!memcmppgm2ram(filename, "protect/config.htm", 18))
         return HTTPPostConfig();
 #endif
+    if (!memcmppgm2ram(filename, "mount.htm", 9))
+        return HTTPPostMount();
 
     return HTTP_IO_DONE;
 }
@@ -396,6 +401,178 @@ ConfigFailure:
 
 #endif //(use_post)
 
+/*****************************************************************************
+  Function:
+        static HTTP_IO_RESULT HTTPPostMount(void)
+
+  Summary:
+        Processes the configuration form mount.htm
+
+  Description:
+        Accepts configuration parameters from the form, saves them to a
+        temporary location in RAM, then eventually saves the data to EEPROM or
+        external Flash.
+
+        When complete, this function redirects to config/reboot.htm, which will
+        display information on reconnecting to the board.
+
+        This function creates a shadow copy of the AppConfig structure in
+        RAM and then overwrites incoming data there as it arrives.  For each
+        name/value pair, the name is first read to curHTTP.data[0:5].  Next, the
+        value is read to newAppConfig.  Once all data has been read, the new
+        AppConfig is saved back to EEPROM and the browser is redirected to
+        reboot.htm.  That file includes an AJAX call to reboot.cgi, which
+        performs the actual reboot of the machine.
+
+        If an IP address cannot be parsed, too much data is POSTed, or any other
+        parsing error occurs, the browser reloads config.htm and displays an error
+        message at the top.
+
+  Precondition:
+        None
+
+  Parameters:
+        None
+
+  Return Values:
+        HTTP_IO_DONE - all parameters have been processed
+        HTTP_IO_NEED_DATA - data needed by this function has not yet arrived
+ ***************************************************************************/
+static HTTP_IO_RESULT HTTPPostMount(void)
+{
+    mountconfig_t newMountConfig;
+    char *ptr;
+
+    lastFailure = TRUE; // always true for displaying the result of the mount config
+    lastResultMsg = 1;  // default error message
+
+    // Check to see if the browser is attempting to submit more data than we
+    // can parse at once.  This function needs to receive all updated
+    // parameters and validate them all before committing them to memory so that
+    // orphaned configuration parameters do not get written (for example, if a
+    // static IP address is given, but the subnet mask fails parsing, we
+    // should not use the static IP address).  Everything needs to be processed
+    // in a single transaction.  If this is impossible, fail and notify the user.
+    // As a web devloper, if you add parameters to AppConfig and run into this
+    // problem, you could fix this by to splitting your update web page into two
+    // seperate web pages (causing two transactional writes).  Alternatively,
+    // you could fix it by storing a static shadow copy of AppConfig someplace
+    // in memory and using it instead of newAppConfig.  Lastly, you could
+    // increase the TCP RX FIFO size for the HTTP server.  This will allow more
+    // data to be POSTed by the web browser before hitting this limit.
+    if (curHTTP.byteCount > TCPIsGetReady(sktHTTP) + TCPGetRxFIFOFree(sktHTTP))
+        goto ConfigFailure;
+
+    // Ensure that all data is waiting to be parsed.  If not, keep waiting for
+    // all of it to arrive.
+    if (TCPIsGetReady(sktHTTP) < curHTTP.byteCount)
+        return HTTP_IO_NEED_DATA;
+
+
+    // Use current config in non-volatile memory as defaults
+#if defined(EEPROM_CS_TRIS) || defined(EEPROM_I2CCON)
+    XEEReadArray(adrMountConfig, (BYTE*) & newMountConfig, sizeof (newMountConfig));
+#elif defined(SPIFLASH_CS_TRIS)
+    SPIFlashReadArray(adrMountConfig, (BYTE*) & newMountConfig, sizeof (newMountConfig));
+#endif
+
+    // Read all browser POST data
+    while (curHTTP.byteCount)
+    {
+        // Read a form field name
+        if (HTTPReadPostName(curHTTP.data, 12) != HTTP_READ_OK)
+            goto ConfigFailure;
+
+        // Read a form field value
+        if (HTTPReadPostValue(curHTTP.data + 12, sizeof (curHTTP.data) - 12 - 2) != HTTP_READ_OK)
+            goto ConfigFailure;
+
+        // Parse the value that was read
+        if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "nbmaxstep"))
+        {
+            newMountConfig.NbStepMax = strtoul((char*)curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.NbStepMax == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "period"))
+        {
+            newMountConfig.SideralPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.SideralPeriod == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "maxrate"))
+        {
+            newMountConfig.MaxSpeed = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.MaxSpeed == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "centerrate"))
+        {
+            newMountConfig.CenteringSpeed = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.CenteringSpeed == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "guiderate"))
+        {
+            char *p = (char*) curHTTP.data + 12;
+            if (!isdigit(*p)) goto ConfigFailure;
+            newMountConfig.GuideSpeed = (*p++ - '0') * 10;
+            if (*p++ == '.')
+            {
+                if (!isdigit(*p)) goto ConfigFailure;
+                newMountConfig.GuideSpeed += (*p - '0');
+            }
+        }
+    }
+
+    if (!DecIsMotorStop() || ! RAIsMotorStop())
+    {
+        lastResultMsg = 2;
+        goto ConfigFailure;
+    }
+
+    // All parsing complete!  Save new settings and force a reboot
+    memcpy(&Mount.Config, &newMountConfig, sizeof (Mount.Config));
+    SaveMountConfig(&newMountConfig);
+
+    RAStop();
+    RAMotorInit();
+    DecMotorInit();
+    RAStart();
+
+    strcpypgm2ram((char*) curHTTP.data, "/mount.htm");
+    lastResultMsg = 0;
+    curHTTP.httpStatus = HTTP_REDIRECT;
+
+    return HTTP_IO_DONE;
+
+
+ConfigFailure:
+    strcpypgm2ram((char*) curHTTP.data, "/mount.htm");
+    curHTTP.httpStatus = HTTP_REDIRECT;
+
+    return HTTP_IO_DONE;
+}
+
+void HTTPPrint_result(void)
+{
+    if (lastResultMsg == 0)
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "ok");
+    else
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "fail");
+}
+
+void HTTPPrint_result_text(void)
+{
+    switch (lastResultMsg)
+    {
+    case 0:
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "New mechanical mount setting saved.");
+        break;
+    case 1:
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "ERROR: A field was unparsable or too much data was POSTed. Try again.");
+        break;
+    case 2:
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "ERROR: Unable to change mechanical mount setting while moving. Wait for the motor to stop and try again");
+        break;
+    }
+}
 
 /****************************************************************************
   Section:
@@ -892,11 +1069,10 @@ void HTTPPrint_mountconfig_centeringrate(void)
 
 void HTTPPrint_mountconfig_guidingrate(void)
 {
-//    char str[16];
+    char str[16];
 
-//    sprintf(str, "%lu", Mount.Config.SideralPeriod);
-//    TCPPutString(sktHTTP, (BYTE *) str);
-    TCPPutROMString(sktHTTP, (ROM BYTE*) "0.5");
+    sprintf(str, "%.1f", (double)Mount.Config.GuideSpeed / 10.0);
+    TCPPutString(sktHTTP, (BYTE *) str);
 }
 
 #endif
