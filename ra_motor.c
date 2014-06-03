@@ -82,7 +82,6 @@ void Timer2Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
 {
-    BOOL MakeOneStep = FALSE;
     BOOL NewMotorPeriod = FALSE;
 
     if (tmodulo != 0)
@@ -94,7 +93,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            MakeOneStep = TRUE;
+            RA_STEP_IO ^= 1;
 
             tint_cnt = tlap;
             PR2 = 0xFFFF;
@@ -102,12 +101,11 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     }
     else
     {
-        MakeOneStep = TRUE;
+        RA_STEP_IO ^= 1;
     }
 
-    if (MakeOneStep == TRUE)
+    if (RA_STEP_IO == 1)
     {
-        RA_STEP_IO ^= 1;
         if (RAState != MOTOR_STOP)
         {
             RARelativeStepPosition++;

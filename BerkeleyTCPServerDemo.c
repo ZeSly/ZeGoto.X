@@ -51,7 +51,8 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Aseem Swalah         4/21/08  	Original
  ********************************************************************/
- 
+
+#include "lx200_protocol.h"
 #include "TCPIPConfig.h" 
 
 #if defined(STACK_USE_BERKELEY_API)
@@ -59,9 +60,8 @@
 #include "TCPIP Stack/TCPIP.h"
 
 
-#define PORTNUM 9764
-#define MAX_CLIENT (3) // Maximum number of simultanous connections accepted by the server.
-
+#define PORTNUM 4030
+#define MAX_CLIENT (1) // Maximum number of simultanous connections accepted by the server.
 
 /*********************************************************************
  * Function:        void BerkeleyTCPServerDemo(void)
@@ -80,94 +80,145 @@
  ********************************************************************/
 void BerkeleyTCPServerDemo(void)
 {
-    static SOCKET bsdServerSocket;   
+    static SOCKET bsdServerSocket;
     static SOCKET ClientSock[MAX_CLIENT];
     struct sockaddr_in addr;
     struct sockaddr_in addRemote;
-    int addrlen = sizeof(struct sockaddr_in);
-    char bfr[15];
-    int length;
+    int addrlen = sizeof (struct sockaddr_in);
+    char TCP_In_Buffer[15];
+    char TCP_Out_Buffer[15];
+    int length, len_to_send;
     int i;
+
     static enum
     {
-	    BSD_INIT = 0,
+        BSD_INIT = 0,
         BSD_CREATE_SOCKET,
         BSD_BIND,
         BSD_LISTEN,
         BSD_OPERATION
     } BSDServerState = BSD_INIT;
 
-    switch(BSDServerState)
+    switch (BSDServerState)
     {
-	    case BSD_INIT:
-        	// Initialize all client socket handles so that we don't process 
-        	// them in the BSD_OPERATION state
-        	for(i = 0; i < MAX_CLIENT; i++)
-        		ClientSock[i] = INVALID_SOCKET;
-        		
-        	BSDServerState = BSD_CREATE_SOCKET;
-        	// No break needed
-	    
-        case BSD_CREATE_SOCKET:
-            // Create a socket for this server to listen and accept connections on
-            bsdServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
-            if(bsdServerSocket == INVALID_SOCKET)
-                return;
-            
-            BSDServerState = BSD_BIND;
-            // No break needed
+    case BSD_INIT:
+        // Initialize all client socket handles so that we don't process
+        // them in the BSD_OPERATION state
+        for (i = 0; i < MAX_CLIENT; i++)
+            ClientSock[i] = INVALID_SOCKET;
 
-        case BSD_BIND:
-            // Bind socket to a local port
-            addr.sin_port = PORTNUM;
-            addr.sin_addr.S_un.S_addr = IP_ADDR_ANY;
-            if( bind( bsdServerSocket, (struct sockaddr*)&addr, addrlen ) == SOCKET_ERROR )
-                return;
-            
-            BSDServerState = BSD_LISTEN;
-            // No break needed
-         
-      case BSD_LISTEN:
-            if(listen(bsdServerSocket, MAX_CLIENT) == 0)
-	            BSDServerState = BSD_OPERATION;
+        BSDServerState = BSD_CREATE_SOCKET;
+        // No break needed
 
-			// No break.  If listen() returns SOCKET_ERROR it could be because 
-			// MAX_CLIENT is set to too large of a backlog than can be handled 
-			// by the underlying TCP socket count (TCP_PURPOSE_BERKELEY_SERVER 
-			// type sockets in TCPIPConfig.h).  However, in this case, it is 
-			// possible that some of the backlog is still handleable, in which 
-			// case we should try to accept() connections anyway and proceed 
-			// with normal operation.
-         
-      case BSD_OPERATION:
-            for(i=0; i<MAX_CLIENT; i++)
+    case BSD_CREATE_SOCKET:
+        // Create a socket for this server to listen and accept connections on
+        bsdServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (bsdServerSocket == INVALID_SOCKET)
+            return;
+
+        BSDServerState = BSD_BIND;
+        // No break needed
+
+    case BSD_BIND:
+        // Bind socket to a local port
+        addr.sin_port = PORTNUM;
+        addr.sin_addr.S_un.S_addr = IP_ADDR_ANY;
+        if (bind(bsdServerSocket, (struct sockaddr*) &addr, addrlen) == SOCKET_ERROR)
+            return;
+
+        BSDServerState = BSD_LISTEN;
+        // No break needed
+
+    case BSD_LISTEN:
+        if (listen(bsdServerSocket, MAX_CLIENT) == 0)
+            BSDServerState = BSD_OPERATION;
+
+        // No break.  If listen() returns SOCKET_ERROR it could be because
+        // MAX_CLIENT is set to too large of a backlog than can be handled
+        // by the underlying TCP socket count (TCP_PURPOSE_BERKELEY_SERVER
+        // type sockets in TCPIPConfig.h).  However, in this case, it is
+        // possible that some of the backlog is still handleable, in which
+        // case we should try to accept() connections anyway and proceed
+        // with normal operation.
+
+    case BSD_OPERATION:
+        for (i = 0; i < MAX_CLIENT; i++)
+        {
+            static char LX200Cmd[32];
+            static int j = 0;
+            static BOOL getting_cmd = FALSE;
+            int k;
+
+            // Accept any pending connection requests, assuming we have a place to store the socket descriptor
+            if (ClientSock[i] == INVALID_SOCKET)
+                ClientSock[i] = accept(bsdServerSocket, (struct sockaddr*) &addRemote, &addrlen);
+
+            // If this socket is not connected then no need to process anything
+            if (ClientSock[i] != INVALID_SOCKET)
             {
-	            // Accept any pending connection requests, assuming we have a place to store the socket descriptor
-                if(ClientSock[i] == INVALID_SOCKET)
-                    ClientSock[i] = accept(bsdServerSocket, (struct sockaddr*)&addRemote, &addrlen);
-                
-                // If this socket is not connected then no need to process anything
-                if(ClientSock[i] == INVALID_SOCKET)
-                	continue;
 
-	            // For all connected sockets, receive and send back the data
-                length = recv( ClientSock[i], bfr, sizeof(bfr), 0);
-         
-                if( length > 0 )
+                // For all connected sockets, receive and send back the data
+                length = recv(ClientSock[i], TCP_Out_Buffer, sizeof (TCP_Out_Buffer), 0);
+//                if (length > 0)
+//                {
+//                    TCP_Out_Buffer[length] = '\0';
+//                    send(ClientSock[i], TCP_Out_Buffer, strlen(TCP_Out_Buffer), 0);
+//                }
+//                else
+                if (length < 0)
                 {
-                    bfr[length] = '\0';
-                    send(ClientSock[i], bfr, strlen(bfr), 0);
-                }
-                else if( length < 0 )
-                {
-                    closesocket( ClientSock[i] );
+                    closesocket(ClientSock[i]);
                     ClientSock[i] = INVALID_SOCKET;
                 }
+
+                len_to_send = 0;
+
+                for (k = 0; k < length; k++)
+                {
+                    if (TCP_Out_Buffer[k] == 6) // NACK
+                    {
+                        TCP_In_Buffer[0] = 'P';
+                        len_to_send = 1;
+                    }
+                    else if (TCP_Out_Buffer[k] == ':' && getting_cmd == FALSE) // start of a LX200 command
+                    {
+                        j = 0;
+                        getting_cmd = TRUE;
+                    }
+                    else if (TCP_Out_Buffer[k] == '#') // end of a LX200 command
+                    {
+                        if (j > 0)
+                        {
+                            LX200Cmd[j++] = '#';
+                            LX200Cmd[j] = '\0';
+                            LX200ProcessCommand(LX200Cmd);
+                            if (LX200Response[0] != '\0')
+                            {
+                                strcpy(TCP_In_Buffer, LX200Response);
+                                len_to_send = strlen(TCP_In_Buffer);
+                            }
+                            LX200Response[0] = '\0';
+                        }
+                        j = 0;
+                        getting_cmd = FALSE;
+                    }
+                    else
+                    {
+                        LX200Cmd[j++] = TCP_Out_Buffer[k];
+                    }
+
+                }
+
+                if (len_to_send)
+                {
+                    send(ClientSock[i], TCP_In_Buffer, len_to_send, 0);
+                }
             }
-            break;
-         
-        default:
-            return;
+        }
+        break;
+
+    default:
+        return;
     }
     return;
 }

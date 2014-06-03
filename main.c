@@ -232,7 +232,7 @@ int main(void)
 #endif
 
 #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
-        //GenericTCPServer();
+//        GenericTCPServer();
 #endif
         GPSTCPServer();
         GPSDecodeFrame();
@@ -265,9 +265,9 @@ int main(void)
 #endif
 
 #if defined(STACK_USE_BERKELEY_API)
-        BerkeleyTCPClientDemo();
+//        BerkeleyTCPClientDemo();
         BerkeleyTCPServerDemo();
-        BerkeleyUDPClientDemo();
+//        BerkeleyUDPClientDemo();
 #endif
 
         ProcessIO();
@@ -403,14 +403,14 @@ static void ProcessIO(void)
     if (USBUSARTIsTxTrfReady())
     {
         static char LX200Cmd[32];
-        static BYTE j = 0;
+        static int j = 0;
         static BOOL getting_cmd = FALSE;
 
         numBytesWrite = 0;
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
         if (numBytesRead != 0)
         {
-            BYTE i;
+            int i;
 
             for (i = 0; i < numBytesRead; i++)
             {

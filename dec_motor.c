@@ -67,7 +67,6 @@ void Timer3Init(void)
 
 void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
-    BOOL MakeOneStep = FALSE;
     BOOL NewMotorPeriod = FALSE;
 
     if (tmodulo != 0)
@@ -79,7 +78,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         }
         else if (tint_cnt == 0xFFFF)
         {
-            MakeOneStep = TRUE;
+            DEC_STEP_IO ^= 1;
 
             tint_cnt = tlap;
             PR3 = 0xFFFF;
@@ -87,12 +86,12 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     }
     else
     {
-        MakeOneStep = TRUE;
+        DEC_STEP_IO ^= 1;
     }
 
-    if (MakeOneStep == TRUE)
+    if (DEC_STEP_IO == 1)
     {
-        DEC_STEP_IO ^= 1;
+        
         DecRelativeStepPosition++;
         if (Dec.NumberStep)
         {
