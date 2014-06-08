@@ -32,67 +32,117 @@ char CurrentMove;
 
 void Halt()
 {
-    switch (LX200String[1])
+    if (Mount.IsGuiding == FALSE)
     {
-    case 'e':
-        CurrentMove &= ~MOVE_TO_EAST;
-        RADecelerate();
-        break;
-    case 'w':
-        CurrentMove &= ~MOVE_TO_WEST;
-        RADecelerate();
-        break;
-    case 'n':
-        CurrentMove &= ~MOVE_TO_NORTH;
-        DecDecelerate();
-        break;
-    case 's':
-        CurrentMove &= ~MOVE_TO_SOUTH;
-        DecDecelerate();
-        break;
-    default:
-        CurrentMove = 0;
-        RADecelerate();
-        DecDecelerate();
-        break;
+        switch (LX200String[1])
+        {
+        case 'e':
+            CurrentMove &= ~MOVE_TO_EAST;
+            RADecelerate();
+            break;
+        case 'w':
+            CurrentMove &= ~MOVE_TO_WEST;
+            RADecelerate();
+            break;
+        case 'n':
+            CurrentMove &= ~MOVE_TO_NORTH;
+            DecDecelerate();
+            break;
+        case 's':
+            CurrentMove &= ~MOVE_TO_SOUTH;
+            DecDecelerate();
+            break;
+        default:
+            CurrentMove = 0;
+            RADecelerate();
+            DecDecelerate();
+            break;
+        }
+    }
+    else
+    {
+        switch (LX200String[1])
+        {
+        case 'e':
+        case 'w':
+            RAGuideStop();
+            break;
+        case 'n':
+        case 's':
+            DecGuideStop();
+            break;
+        default:
+            RAGuideStop();
+            DecGuideStop();
+            break;
+        }
+
     }
 }
 
 void MoveEast()
 {
-    CurrentMove |= MOVE_TO_EAST;
-    CurrentMove &= ~MOVE_TO_WEST;
-    RASetDirection(Mount.EastDirection);
-    RAAccelerate();
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_EAST;
+        CurrentMove &= ~MOVE_TO_WEST;
+        RASetDirection(Mount.EastDirection);
+        RAAccelerate();
+    }
+    else
+    {
+        RAGuideEast();
+    }
 }
 
 void MoveNorth()
 {
-    CurrentMove |= MOVE_TO_NORTH;
-    CurrentMove &= ~MOVE_TO_SOUTH;
-    DecSetDirection(Mount.NorthDirection);
-    DecAccelerate();
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_NORTH;
+        CurrentMove &= ~MOVE_TO_SOUTH;
+        DecSetDirection(Mount.NorthDirection);
+        DecAccelerate();
+    }
+    else
+    {
+        DecGuideNorth();
+    }
 }
 
 void MoveSouth()
 {
-    CurrentMove |= MOVE_TO_SOUTH;
-    CurrentMove &= ~MOVE_TO_NORTH;
-    DecSetDirection(Mount.SouthDirection);
-    DecAccelerate();
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_SOUTH;
+        CurrentMove &= ~MOVE_TO_NORTH;
+        DecSetDirection(Mount.SouthDirection);
+        DecAccelerate();
+    }
+    else
+    {
+        DecGuideSouth();
+    }
 }
 
 void MoveWest()
 {
-    CurrentMove |= MOVE_TO_WEST;
-    CurrentMove &= ~MOVE_TO_EAST;
-    RASetDirection(Mount.WestDirection);
-    RAAccelerate();
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_WEST;
+        CurrentMove &= ~MOVE_TO_EAST;
+        RASetDirection(Mount.WestDirection);
+        RAAccelerate();
+    }
+    else
+    {
+        RAGuideWest();
+    }
 }
 
 int32_t int32abs(int32_t a)
 {
-   return a < 0 ? -a : a;
+    return a < 0 ? -a : a;
 }
 
 void SlewToTarget()
@@ -101,10 +151,10 @@ void SlewToTarget()
     {
         RA.NumberStep = int32abs(RA.StepTarget - RA.StepPosition);
         RA.DecelPositon = RA.NumberStep / 2L;
-//        if (RA.NumberStep % 2L == 0)
-//        {
-//            RA.DecelPositon--;
-//        }
+        //        if (RA.NumberStep % 2L == 0)
+        //        {
+        //            RA.DecelPositon--;
+        //        }
 
         if (RA.StepPosition < RA.StepTarget)
         {
@@ -120,10 +170,10 @@ void SlewToTarget()
     {
         Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
         Dec.DecelPositon = Dec.NumberStep / 2L;
-//        if (Dec.NumberStep % 2L == 0)
-//        {
-//            Dec.DecelPositon++;
-//        }
+        //        if (Dec.NumberStep % 2L == 0)
+        //        {
+        //            Dec.DecelPositon++;
+        //        }
 
         if (Dec.StepPosition < Dec.StepTarget)
         {

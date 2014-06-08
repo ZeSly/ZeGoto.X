@@ -56,30 +56,72 @@ void InputsInit(void)
     CNPU1bits.CN4PUE = 1; // pull-up
     PadState.i = 0;
 
+    GUIDE_RAP_TRIS = INPUT_PIN;
+    GUIDE_RAM_TRIS = INPUT_PIN;
+    GUIDE_DECP_TRIS = INPUT_PIN;
+    GUIDE_DECM_TRIS = INPUT_PIN;
+
+    GUIDE_RAP_PULLUP = 1;
+    GUIDE_RAM_PULLUP = 1;
+    GUIDE_DECP_PULLUP = 1;
+    GUIDE_DECM_PULLUP = 1;
+
+    GUIDE_RAP_CN = 1;
+    GUIDE_RAM_CN = 1;
+    GUIDE_DECP_CN = 1;
+    GUIDE_DECM_CN = 1;
+
     IFS1bits.CNIF = 0;
     IPC4bits.CNIP = 7;
     IEC1bits.CNIE = 1;
-
-    TRISBbits.TRISB12 = 1;  // DEC+
-    TRISBbits.TRISB13 = 1;  // RA+
-    TRISBbits.TRISB14 = 1;  // RA-
-    TRISBbits.TRISB15 = 1;  // DEC-
-
 }
 
 void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void)
 {
+    BOOL fault = FALSE;
+
     if (RA_FAULT_IO == 0 && RA_SLEEP_IO == 1)
     {
         T2CONbits.TON = 0;
         RA_SLEEP_IO = 0;
         LED2_IO = 1;
+        fault = TRUE;
     }
     if (DEC_FAULT_IO == 0 && DEC_SLEEP_IO == 1)
     {
         T3CONbits.TON = 0;
         DEC_SLEEP_IO = 0;
         LED2_IO = 1;
+        fault = TRUE;
+    }
+
+    if (fault == FALSE)
+    {
+        if (GUIDE_RAP_IO == 0)
+        {
+            RAGuideWest();
+        }
+        if (GUIDE_RAM_IO == 0)
+        {
+            RAGuideEast();
+        }
+        if (GUIDE_RAP_IO == 1 && GUIDE_RAM_IO == 1)
+        {
+            RAGuideStop();
+        }
+
+        if (GUIDE_DECP_IO == 0)
+        {
+            DecGuideNorth();
+        }
+        if (GUIDE_DECM_IO == 0)
+        {
+            DecGuideSouth();
+        }
+        if (GUIDE_DECP_IO == 1 && GUIDE_DECM_IO == 1)
+        {
+            DecGuideStop();
+        }
     }
 
     IFS1bits.CNIF = 0;
@@ -174,8 +216,8 @@ void UpdatePadState()
                     }
 
                     if (PadState.PAD_S3 == 0 && PadState.PAD_S4 == 0 &&
-                        PadState.PAD_S5 == 0 && PadState.PAD_S6 == 0 &&
-                        SavedMaxSpeed != 0)
+                            PadState.PAD_S5 == 0 && PadState.PAD_S6 == 0 &&
+                            SavedMaxSpeed != 0)
                     {
                         Mount.CurrentMaxSpeed = SavedMaxSpeed;
                     }

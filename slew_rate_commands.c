@@ -22,20 +22,24 @@
 
 void SetCenteringRate()
 {
+    Mount.IsGuiding = FALSE;
     Mount.CurrentMaxSpeed = Mount.Config.CenteringSpeed;
 }
 
 void SetGuidingRate()
 {
+    Mount.IsGuiding = TRUE;
 }
 
 void SetFindRate()
 {
+    Mount.IsGuiding = FALSE;
     Mount.CurrentMaxSpeed = Mount.Config.MaxSpeed / 2;
 }
 
 void SetMaxRate()
 {
+    Mount.IsGuiding = FALSE;
     Mount.CurrentMaxSpeed = Mount.Config.MaxSpeed;
 }
 

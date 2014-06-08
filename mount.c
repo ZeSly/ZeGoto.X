@@ -100,6 +100,8 @@ void MountInit()
     Mount.EastDirection = !Mount.Config.RADefaultDirection;
     Mount.NorthDirection = Mount.Config.DecDefaultDirection;
     Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
+
+    Mount.IsGuiding = FALSE;
 }
 
 void SaveMountConfig(const mountconfig_t *ptrMountConfig)

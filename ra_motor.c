@@ -51,19 +51,6 @@ static int32_t accel_decel_cnt;
 void Timer2Init(void)
 {
     T2CON = 0x0000; // 16 bit time, 1:1 prescale, internal clock
-    if (MotorTimerPeriod > 0xFFFF)
-    {
-        tlap = MotorTimerPeriod / 0xFFFF;
-        tint_cnt = tlap;
-        tmodulo = MotorTimerPeriod % 0xFFFF;
-        PR2 = 0xFFFF;
-    }
-    else
-    {
-        tint_cnt = 0;
-        tmodulo = 0;
-        PR2 = MotorTimerPeriod;
-    }
     IPC1bits.T2IP = 6; // Interrupt priority 6 (high)
     IFS0bits.T2IF = 0;
     IEC0bits.T2IE = 1;
@@ -203,6 +190,23 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     IFS0bits.T2IF = 0;
 }
 
+static void UpdateMotorTimerPeriod()
+{
+    if (MotorTimerPeriod > 0xFFFF)
+    {
+        tlap = MotorTimerPeriod / 0xFFFF;
+        tint_cnt = tlap;
+        tmodulo = MotorTimerPeriod % 0xFFFF;
+        PR2 = 0xFFFF;
+    }
+    else
+    {
+        tint_cnt = 0;
+        tmodulo = 0;
+        PR2 = MotorTimerPeriod;
+    }
+}
+
 void RAMotorInit(void)
 {
     RA_SLEEP_IO = 0;
@@ -211,6 +215,7 @@ void RAMotorInit(void)
     RA_STEP_IO = 0;
 
     MotorTimerPeriod = Mount.SideralHalfPeriod;
+    UpdateMotorTimerPeriod();
 
     RTCCReadArray(RTCC_RAM, (BYTE *)&RA.StepPosition, sizeof (RA.StepPosition));
     if (RA.StepPosition < 0 || RA.StepPosition > Mount.Config.NbStepMax)
@@ -226,7 +231,6 @@ void RAMotorInit(void)
 
 void RAStart(void)
 {
-    LED2_IO = 0;
     RA_SLEEP_IO = 1;
     RA_FAULT_CN = 1;
     CurrentSpeed = 1;
@@ -245,19 +249,7 @@ void RAAccelerate(void)
 
         CurrentSpeed++;
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
-        if (MotorTimerPeriod > 0xFFFF)
-        {
-            tlap = MotorTimerPeriod / 0xFFFF;
-            tint_cnt = tlap;
-            tmodulo = MotorTimerPeriod % 0xFFFF;
-            PR2 = 0xFFFF;
-        }
-        else
-        {
-            tint_cnt = 0;
-            tmodulo = 0;
-            PR2 = MotorTimerPeriod;
-        }
+        UpdateMotorTimerPeriod();
 
         accel_decel_cnt = Mount.AccelPeriod;
         RAState = MOTOR_ACCEL;
@@ -320,8 +312,8 @@ void RADecelerate(void)
 void RAStop(void)
 {
     T2CONbits.TON = 0;
-    RA_FAULT_CN = 0;
     RA_SLEEP_IO = 0;
+    RA_FAULT_CN = 0;
 }
 
 void RASetDirection(uint8_t dir)
@@ -378,4 +370,22 @@ void UpdateRAStepPosition()
 inline int RAIsMotorStop()
 {
     return (RAState == MOTOR_STOP);
+}
+
+void RAGuideWest()
+{
+    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    UpdateMotorTimerPeriod();
+}
+
+void RAGuideEast()
+{
+    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed + 10) / 10;
+    UpdateMotorTimerPeriod();
+}
+
+void RAGuideStop()
+{
+    MotorTimerPeriod = Mount.SideralHalfPeriod;
+    UpdateMotorTimerPeriod();
 }

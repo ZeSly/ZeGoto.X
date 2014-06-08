@@ -86,12 +86,6 @@
 #define LED2_TRIS       (TRISBbits.TRISB11)
 #define LED2_IO         (LATBbits.LATB11)
 
-// Momentary push buttons
-#define	BUTTON0_IO      (PORTBbits.RB6)
-#define	BUTTON1_IO      (PORTBbits.RB1)
-#define	BUTTON2_IO      (PORTBbits.RB8)
-#define	BUTTON3_IO      (PORTBbits.RB0)
-
 /** ENC28J60 *******************************************************/
 #define ENC_CS_TRIS         (TRISGbits.TRISG9)	// Comment this line out if you are using the ENC424J600/624J600, MRF24WB0M, or other network controller.
 #define ENC_CS_IO           (LATGbits.LATG9)
@@ -148,32 +142,18 @@
 /** LED ************************************************************/
 #define mLED_1              LED1_IO
 #define mLED_2              LED2_IO
-#define mLED_3
-#define mLED_4
 
 #define mGetLED_1()         mLED_1
 #define mGetLED_2()         mLED_2
-#define mGetLED_3()         mLED_3
-#define mGetLED_4()         mLED_4
 
 #define mLED_1_On()         mLED_1 = 1;
 #define mLED_2_On()         mLED_2 = 1;
-#define mLED_3_On()         mLED_3 = 1;
-#define mLED_4_On()         mLED_4 = 1;
 
 #define mLED_1_Off()        mLED_1 = 0;
 #define mLED_2_Off()        mLED_2 = 0;
-#define mLED_3_Off()        mLED_3 = 0;
-#define mLED_4_Off()        mLED_4 = 0;
 
 #define mLED_1_Toggle()     mLED_1 = !mLED_1;
 #define mLED_2_Toggle()     mLED_2 = !mLED_2;
-#define mLED_3_Toggle()     mLED_3 = !mLED_3;
-#define mLED_4_Toggle()     mLED_4 = !mLED_4;
-
-/** SWITCH *********************************************************/
-#define sw2                 BUTTON1_IO
-#define sw3                 BUTTON2_IO
 
 /** I/O pin definitions ********************************************/
 #define INPUT_PIN 1
@@ -183,14 +163,19 @@
 #define RA_HOME_TRIS        (TRISEbits.TRISE4)
 #define RA_HOME_IO          (PORTEbits.RE4)
 #define RA_HOME_PULLUP      (CNPU4bits.CN62PUE)
+
 #define RA_SLEEP_TRIS       (TRISEbits.TRISE6)
 #define RA_SLEEP_IO         (LATEbits.LATE6)
+
 #define RA_DIR_TRIS         (TRISEbits.TRISE1)
 #define RA_DIR_IO           (LATEbits.LATE1)
+
 #define RA_STEP_TRIS        (TRISEbits.TRISE2)
 #define RA_STEP_IO          (LATEbits.LATE2)
+
 #define RA_MODE_TRIS        (TRISEbits.TRISE3)
 #define RA_MODE_IO          (LATEbits.LATE3)
+
 #define RA_FAULT_TRIS       (TRISEbits.TRISE5)
 #define RA_FAULT_IO         (PORTEbits.RE5)
 #define RA_FAULT_CN         (CNEN4bits.CN63IE)
@@ -200,21 +185,48 @@
 #define DEC_HOME_TRIS       (TRISDbits.TRISD1)
 #define DEC_HOME_IO         (PORTDbits.RD1)
 #define DEC_HOME_PULLUP     (CNPU4bits.CN50PUE)
+
 #define DEC_SLEEP_TRIS      (TRISFbits.TRISF1)
 #define DEC_SLEEP_IO        (LATFbits.LATF1)
+
 #define DEC_DIR_TRIS        (TRISDbits.TRISD4)
 #define DEC_DIR_IO          (LATDbits.LATD4)
+
 #define DEC_STEP_TRIS       (TRISDbits.TRISD3)
 #define DEC_STEP_IO         (LATDbits.LATD3)
+
 #define DEC_MODE_TRIS       (TRISDbits.TRISD2)
 #define DEC_MODE_IO         (LATDbits.LATD2)
+
 #define DEC_FAULT_TRIS      (TRISEbits.TRISE0)
 #define DEC_FAULT_IO        (PORTEbits.RE0)
 #define DEC_FAULT_CN        (CNEN4bits.CN58IE)
 #define DEC_FAULT_PULLUP    (CNPU4bits.CN58PUE)
 
+/** Autoguiding port */
+#define GUIDE_RAP_TRIS      (TRISBbits.TRISB13)
+#define GUIDE_RAP_IO        (PORTBbits.RB13)
+#define GUIDE_RAP_CN        (CNEN2bits.CN31IE)
+#define GUIDE_RAP_PULLUP    (CNPU2bits.CN31PUE)
+
+#define GUIDE_RAM_TRIS      (TRISBbits.TRISB14)
+#define GUIDE_RAM_IO        (PORTBbits.RB14)
+#define GUIDE_RAM_CN        (CNEN3bits.CN32IE)
+#define GUIDE_RAM_PULLUP    (CNPU3bits.CN32PUE)
+
+#define GUIDE_DECP_TRIS     (TRISBbits.TRISB12)
+#define GUIDE_DECP_IO       (PORTBbits.RB12)
+#define GUIDE_DECP_CN       (CNEN2bits.CN30IE)
+#define GUIDE_DECP_PULLUP   (CNPU2bits.CN30PUE)
+
+#define GUIDE_DECM_TRIS     (TRISBbits.TRISB15)
+#define GUIDE_DECM_IO       (PORTBbits.RB15)
+#define GUIDE_DECM_CN       (CNEN1bits.CN12IE)
+#define GUIDE_DECM_PULLUP   (CNPU1bits.CN12PUE)
+
+/** A pin for testing things... *************************************/
 #define TEST_PIN_TRIS       (TRISDbits.TRISD7)
-#define TEST_PIN_OUT        (LATDbits.LATD7);
+#define TEST_PIN_OUT        (LATDbits.LATD7)
 #define TEST_PIN_IN         (PORTDbits.RD7);
 
 

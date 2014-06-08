@@ -66,6 +66,8 @@ typedef struct
     unsigned NorthDirection : 1;
     unsigned SouthDirection : 1;
 
+    BOOL IsGuiding;
+
 
 } mount_t;
 

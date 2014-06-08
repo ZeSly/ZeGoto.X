@@ -30,6 +30,10 @@ void DecSetDirection(uint8_t dir);
 void UpdateDecStepPosition();
 int DecIsMotorStop();
 
+void DecGuideNorth();
+void DecGuideSouth();
+#define DecGuideStop DecStop
+
 typedef struct
 {
     /* Mount specific variables */

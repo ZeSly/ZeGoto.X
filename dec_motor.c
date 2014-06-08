@@ -47,19 +47,6 @@ static int32_t accel_decel_cnt;
 void Timer3Init(void)
 {
     T3CON = 0x0000; // 16 bit time, 1:1 prescale, internal clock
-    if (MotorTimerPeriod > 0xFFFF)
-    {
-        tlap = MotorTimerPeriod / 0xFFFF;
-        tint_cnt = tlap;
-        tmodulo = MotorTimerPeriod % 0xFFFF;
-        PR3 = 0xFFFF;
-    }
-    else
-    {
-        tint_cnt = 0;
-        tmodulo = 0;
-        PR3 = MotorTimerPeriod;
-    }
     IPC2bits.T3IP = 6; // Interrupt priority 6 (high)
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
@@ -91,7 +78,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 
     if (DEC_STEP_IO == 1)
     {
-        
+
         DecRelativeStepPosition++;
         if (Dec.NumberStep)
         {
@@ -107,8 +94,6 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     switch (DecState)
     {
     case MOTOR_STOP:
-        T3CONbits.TON = 0;
-        DEC_SLEEP_IO = 0;
         break;
 
     case MOTOR_ACCEL:
@@ -139,6 +124,9 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             {
                 DecState = MOTOR_STOP;
                 CurrentMove &= ~MOVE_DEC;
+                T3CONbits.TON = 0;
+                DEC_SLEEP_IO = 0;
+                DEC_FAULT_CN = 0;
             }
 
         }
@@ -170,6 +158,23 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     IFS0bits.T3IF = 0;
 }
 
+static void UpdateMotorTimerPeriod()
+{
+    if (MotorTimerPeriod > 0xFFFF)
+    {
+        tlap = MotorTimerPeriod / 0xFFFF;
+        tint_cnt = tlap;
+        tmodulo = MotorTimerPeriod % 0xFFFF;
+        PR3 = 0xFFFF;
+    }
+    else
+    {
+        tint_cnt = 0;
+        tmodulo = 0;
+        PR3 = MotorTimerPeriod;
+    }
+}
+
 void DecMotorInit(void)
 {
     DEC_SLEEP_IO = 0;
@@ -195,6 +200,14 @@ void DecMotorInit(void)
     Timer3Init();
 }
 
+void DecStart(void)
+{
+    DEC_SLEEP_IO = 1;
+    DEC_FAULT_CN = 1;
+    CurrentSpeed = 1;
+    T3CONbits.TON = 1;
+}
+
 void DecAccelerate(void)
 {
     if (DecState == MOTOR_STOP)
@@ -211,19 +224,7 @@ void DecAccelerate(void)
 
         CurrentSpeed = 1;
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
-        if (MotorTimerPeriod > 0xFFFF)
-        {
-            tlap = MotorTimerPeriod / 0xFFFF;
-            tint_cnt = tlap;
-            tmodulo = MotorTimerPeriod % 0xFFFF;
-            PR3 = 0xFFFF;
-        }
-        else
-        {
-            tint_cnt = 0;
-            tmodulo = 0;
-            PR3 = MotorTimerPeriod;
-        }
+        UpdateMotorTimerPeriod();
 
         accel_decel_cnt = Mount.AccelPeriod;
         DecState = MOTOR_ACCEL;
@@ -244,8 +245,8 @@ void DecDecelerate(void)
 void DecStop(void)
 {
     T3CONbits.TON = 0;
-    DEC_FAULT_CN = 0;
     DEC_SLEEP_IO = 0;
+    DEC_FAULT_CN = 0;
 }
 
 void DecSetDirection(uint8_t dir)
@@ -295,4 +296,20 @@ void UpdateDecStepPosition()
 inline int DecIsMotorStop()
 {
     return (DecState == MOTOR_STOP);
+}
+
+void DecGuideNorth()
+{
+    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    UpdateMotorTimerPeriod();
+    DEC_DIR_IO = Mount.NorthDirection;
+    DecStart();
+}
+
+void DecGuideSouth()
+{
+    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    UpdateMotorTimerPeriod();
+    DEC_DIR_IO = Mount.SouthDirection;
+    DecStart();
 }

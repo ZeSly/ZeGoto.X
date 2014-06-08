@@ -34,6 +34,10 @@ void RAChangeDirection();
 void UpdateRAStepPosition();
 int RAIsMotorStop();
 
+void RAGuideWest();
+void RAGuideEast();
+void RAGuideStop();
+
 /* Position variables */
 typedef struct
 {

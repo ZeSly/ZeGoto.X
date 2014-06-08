@@ -436,12 +436,6 @@ static void ProcessIO(void)
                             strcpy(USB_In_Buffer, LX200Response);
                             numBytesWrite = strlen(USB_In_Buffer);
                         }
-                        //                        else
-                        //                        {
-                        //                            USB_In_Buffer[0] = '.';
-                        //                            USB_In_Buffer[1] = '\0';
-                        //                            numBytesWrite = 1;
-                        //                        }
                         LX200Response[0] = '\0';
                     }
                     j = 0;
@@ -567,7 +561,7 @@ static void InitializeBoard(void)
     RPINR18bits.U1RXR = 10; // Assign RP10 to U1RX (input), TX on GPS
     RPOR8bits.RP17R = 3;    // Assign RP17 to U1TX (output), RX on GPS
 
-    RPOR4bits.RP9R = 18;    // Assign LED1 to OC1 (output)
+    RPOR4bits.RP9R = 22;    // Assign LED1 to OC5 (output)
 
     __builtin_write_OSCCONL(OSCCON | 0x40); // Lock PPS
 #endif
