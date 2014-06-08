@@ -85,6 +85,7 @@
 #include "rtcc.h"
 #include "gps.h"
 #include "reticule.h"
+#include "telescope_movement_commands.h"
 
 // Declare AppConfig structure and some other supporting stack variables
 APP_CONFIG AppConfig;
@@ -141,6 +142,8 @@ int main(void)
 
     // Polar Reticule
     ReticuleInit();
+
+    GuidingTimerInit();
 
     // Start RA motor at sideral rate
     RAStart();

@@ -27,6 +27,8 @@
 #define MOVE_RA         (MOVE_TO_EAST | MOVE_TO_WEST)
 #define MOVE_DEC        (MOVE_TO_NORTH | MOVE_TO_SOUTH)
 
+void GuidingTimerInit();
+
 void Halt();
 void MoveEast();
 void MoveNorth();

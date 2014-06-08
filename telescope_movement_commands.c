@@ -27,8 +27,76 @@
 #include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"
+#include "HardwareProfile.h"
 
 char CurrentMove;
+
+static int DecPulseGuideTime = 0;
+static int RAPulseGuideTime = 0;
+
+void GuidingTimerInit()
+{
+    OC2CON1 = 0;
+    OC2CON2 = 0;
+    OC2CON1bits.OCTSEL = 0x07;
+    OC2R = 0;
+    OC2RS = 16000;
+    OC2CON2bits.OCTRIS = 1;
+    OC2CON2bits.SYNCSEL = 0x1F;
+    OC2CON1bits.OCM = 0;
+
+    IPC1bits.OC2IP = 5;
+    IFS0bits.OC2IF = 0;
+    IEC0bits.OC2IE = 1;
+
+    OC3CON1 = 0;
+    OC3CON2 = 0;
+    OC3CON1bits.OCTSEL = 0x07;
+    OC3R = 0;
+    OC3RS = 16000;
+    OC3CON2bits.OCTRIS = 1;
+    OC3CON2bits.SYNCSEL = 0x1F;
+    OC3CON1bits.OCM = 0;
+
+    IPC6bits.OC3IP = 5;
+    IFS1bits.OC3IF = 0;
+    IEC1bits.OC3IE = 1;
+
+    TEST_PIN_TRIS = OUTPUT_PIN;
+    TEST_PIN_OUT = 0;
+}
+
+void __attribute__((interrupt, no_auto_psv)) _OC2Interrupt(void)
+{
+    if (RAPulseGuideTime)
+    {
+        RAPulseGuideTime--;
+        if (RAPulseGuideTime == 0)
+        {
+            RAGuideStop();
+            OC2CON1bits.OCM = 0;
+            TEST_PIN_OUT = 0;
+        }
+    }
+
+    IFS0bits.OC2IF = 0;
+}
+
+void __attribute__((interrupt, no_auto_psv)) _OC3Interrupt(void)
+{
+    if (DecPulseGuideTime)
+    {
+        DecPulseGuideTime--;
+        if (DecPulseGuideTime == 0)
+        {
+            DecGuideStop();
+            OC3CON1bits.OCM = 0;
+            TEST_PIN_OUT = 0;
+        }
+    }
+
+    IFS1bits.OC3IF = 0;
+}
 
 void Halt()
 {
@@ -82,61 +150,101 @@ void Halt()
 
 void MoveEast()
 {
-    if (Mount.IsGuiding == FALSE)
+    RAPulseGuideTime = atoi(LX200String + 2);
+    if (RAPulseGuideTime != 0)
     {
-        CurrentMove |= MOVE_TO_EAST;
-        CurrentMove &= ~MOVE_TO_WEST;
-        RASetDirection(Mount.EastDirection);
-        RAAccelerate();
+        OC2CON1bits.OCM = 3;
+        RAGuideEast();
+        TEST_PIN_OUT = 1;
     }
     else
     {
-        RAGuideEast();
+        if (Mount.IsGuiding == FALSE)
+        {
+            CurrentMove |= MOVE_TO_EAST;
+            CurrentMove &= ~MOVE_TO_WEST;
+            RASetDirection(Mount.EastDirection);
+            RAAccelerate();
+        }
+        else
+        {
+            RAGuideEast();
+        }
     }
 }
 
 void MoveNorth()
 {
-    if (Mount.IsGuiding == FALSE)
+    DecPulseGuideTime = atoi(LX200String + 2);
+    if (DecPulseGuideTime != 0)
     {
-        CurrentMove |= MOVE_TO_NORTH;
-        CurrentMove &= ~MOVE_TO_SOUTH;
-        DecSetDirection(Mount.NorthDirection);
-        DecAccelerate();
+        OC3CON1bits.OCM = 3;
+        DecGuideNorth();
+        TEST_PIN_OUT = 1;
     }
     else
     {
-        DecGuideNorth();
+        if (Mount.IsGuiding == FALSE)
+        {
+            CurrentMove |= MOVE_TO_NORTH;
+            CurrentMove &= ~MOVE_TO_SOUTH;
+            DecSetDirection(Mount.NorthDirection);
+            DecAccelerate();
+        }
+        else
+        {
+            DecGuideNorth();
+        }
     }
 }
 
 void MoveSouth()
 {
-    if (Mount.IsGuiding == FALSE)
+    DecPulseGuideTime = atoi(LX200String + 2);
+    if (DecPulseGuideTime != 0)
     {
-        CurrentMove |= MOVE_TO_SOUTH;
-        CurrentMove &= ~MOVE_TO_NORTH;
-        DecSetDirection(Mount.SouthDirection);
-        DecAccelerate();
+        OC3CON1bits.OCM = 3;
+        DecGuideSouth();
+        TEST_PIN_OUT = 1;
     }
     else
     {
-        DecGuideSouth();
+        if (Mount.IsGuiding == FALSE)
+        {
+            CurrentMove |= MOVE_TO_SOUTH;
+            CurrentMove &= ~MOVE_TO_NORTH;
+            DecSetDirection(Mount.SouthDirection);
+            DecAccelerate();
+        }
+        else
+        {
+            DecGuideSouth();
+        }
     }
 }
 
 void MoveWest()
 {
-    if (Mount.IsGuiding == FALSE)
+    RAPulseGuideTime = atoi(LX200String + 2);
+    if (RAPulseGuideTime != 0)
     {
-        CurrentMove |= MOVE_TO_WEST;
-        CurrentMove &= ~MOVE_TO_EAST;
-        RASetDirection(Mount.WestDirection);
-        RAAccelerate();
+        OC2CON1bits.OCM = 3;
+        RAGuideWest();
+        TEST_PIN_OUT = 1;
     }
     else
     {
-        RAGuideWest();
+        if (Mount.IsGuiding == FALSE)
+        {
+            CurrentMove |= MOVE_TO_WEST;
+            CurrentMove &= ~MOVE_TO_EAST;
+            RASetDirection(Mount.WestDirection);
+            RAAccelerate();
+        }
+        else
+        {
+            RAGuideWest();
+        }
     }
 }
 
