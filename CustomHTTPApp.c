@@ -930,7 +930,7 @@ void HTTPPrint_gpsdata(void)
 
     TCPFlush(sktHTTP);
     p = str;
-    p += sprintf(p, "Setting : %f %f<br/>\n", Latitude, Longitude);
+    p += sprintf(p, "Setting : %f %f %.1fm<br/>\n", Mount.Config.Latitude, Mount.Config.Longitude, Mount.Config.Elevation);
     if (GPS.Available)
     {
     if (GPS.Status == 'A')

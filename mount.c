@@ -51,6 +51,12 @@ void MountInit()
         Mount.Config.RADefaultDirection = 0;
         Mount.Config.DecDefaultDirection = 0;
 
+        Mount.Config.Latitude = 45.2448;
+        Mount.Config.Longitude = -5.63314;
+        Mount.Config.Elevation = 200.0;
+        Mount.Config.UTCOffset = +2.0;
+
+
         wOriginalMountConfigChecksum = CalcIPChecksum((BYTE *) &Mount.Config, sizeof(Mount.Config));
 
         NVM_VALIDATION_STRUCT NVMValidationStruct;

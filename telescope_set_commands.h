@@ -32,5 +32,6 @@ void SetUTCOffsetTime();
 
 void SetCurrentSiteLongitude();
 void SetCurrentSiteLatitude();
+void SetCurrentSiteAltitude();
 
 #endif	/* TELESCOPE_SET_COMMANDS_H */

@@ -47,6 +47,11 @@ typedef struct
     unsigned RADefaultDirection : 1;
     unsigned DecDefaultDirection : 1;
 
+    double Latitude;
+    double Longitude;
+    double Elevation;
+
+    double UTCOffset;
 } mountconfig_t;
 
 typedef struct

@@ -44,6 +44,7 @@ void GetCalendarFormat();
 
 void GetCurrentSiteLongitude();
 void GetCurrentSiteLatitude();
+void GetCurrentSiteAltitude();
 
 void GetStepRA();
 void GetStepDeclination();

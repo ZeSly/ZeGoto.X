@@ -31,6 +31,7 @@
 
 #define USE_AND_OR /* To enable AND_OR mask setting */
 #include "uart.h"
+#include "mount.h"
 #include "gps.h"
 
 #define GPS_BAUDRATE    9600ul
@@ -65,17 +66,17 @@ void GPSStart()
     IFS0bits.U1RXIF = 0; // clear interrupt flag
 
     GPS.ON = 1;
-//    frame_complete = 0;
-//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,1,12,24,79,359,22,12,55,241,33,15,42,176,44,17,30,053,25*7E");
-//    GPSDecodeFrame();
-//
-//    frame_complete = 1;
-//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,2,12,25,17,239,28,18,15,254,,14,15,317,,22,15,291,15*7B");
-//    GPSDecodeFrame();
-//
-//    frame_complete = 0;
-//    strcpy(GPSRxData[frame_complete], "$GPGSV,3,3,12,26,11,152,35,04,00,103,,33,33,208,38,42,42,666,88*4A");
-//    GPSDecodeFrame();
+    //    frame_complete = 0;
+    //    strcpy(GPSRxData[frame_complete], "$GPGSV,3,1,12,24,79,359,22,12,55,241,33,15,42,176,44,17,30,053,25*7E");
+    //    GPSDecodeFrame();
+    //
+    //    frame_complete = 1;
+    //    strcpy(GPSRxData[frame_complete], "$GPGSV,3,2,12,25,17,239,28,18,15,254,,14,15,317,,22,15,291,15*7B");
+    //    GPSDecodeFrame();
+    //
+    //    frame_complete = 0;
+    //    strcpy(GPSRxData[frame_complete], "$GPGSV,3,3,12,26,11,152,35,04,00,103,,33,33,208,38,42,42,666,88*4A");
+    //    GPSDecodeFrame();
 }
 
 static volatile unsigned char start_ptr = 0;
@@ -127,8 +128,6 @@ void __attribute__((interrupt, no_auto_psv)) _U1RXInterrupt(void)
 }
 
 gps_t GPS;
-double Latitude = 45.2448;
-double Longitude = -5.63314;
 
 /******************************************************************************
  * Function:        int DMSToDec(double *dec, char *str)
@@ -346,7 +345,7 @@ void GPSDecodeFrame()
 
             //o = 0;
             GPS.SatellitesInView = atoi(fields[i++]);
-            for (j = 0 ; j < 4 && j + o < GPS.SatellitesInView ; j++)
+            for (j = 0; j < 4 && j + o < GPS.SatellitesInView; j++)
             {
                 strcpy(GPS.Satellites[j + o].Id, fields[i++]);
                 GPS.Satellites[j + o].Elevation = atoi(fields[i++]);
@@ -358,6 +357,10 @@ void GPSDecodeFrame()
 
         if (GPS.ON && GPS.PositionFixIndicator > '0')
         {
+            double Longitude = Mount.Config.Longitude;
+            double Latitude = Mount.Config.Latitude;
+            double Elevation = Mount.Config.Elevation;
+
             if (GPS.Latitude[0])
             {
                 DMSToDec(&Latitude, GPS.Latitude);
@@ -374,10 +377,37 @@ void GPSDecodeFrame()
                     Longitude = -Longitude;
                 }
             }
-        }
+            if (GPS.MSLAltitude[0])
+            {
+                double f = 1;
+                int z;
 
-        frame_complete = -1;
+                Elevation = 0;
+                for (z = 0; GPS.MSLAltitude[z] && GPS.MSLAltitude[z] != '.'; z++)
+                {
+                    Elevation *= f;
+                    Elevation += GPS.MSLAltitude[z] - '0';
+                    f = 10;
+                }
+                if (GPS.MSLAltitude[z] == '.')
+                {
+                    for (z += 1; GPS.MSLAltitude[z]; z++)
+                    {
+                        Elevation += GPS.MSLAltitude[z] - '0';
+                        Elevation /= 10;
+                    }
+                }
+
+            }
+
+            Mount.Config.Longitude = Longitude;
+            Mount.Config.Latitude = Latitude;
+            Mount.Config.Elevation = Elevation;
+
+        }
     }
+
+    frame_complete = -1;
 }
 
 /******************************************************************************

@@ -20,6 +20,7 @@
 #include <xc.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <ctype.h>
 
 #include "lx200_protocol.h"
 #include "get_telescope_information.h"
@@ -261,12 +262,14 @@ void SetUTCOffsetTime()
     {
         if (LX200String[2] == '-')
         {
-            UTCOffset = -ut;
+            Mount.Config.UTCOffset = -ut;
+            SaveMountConfig(&Mount.Config);
             LX200Response[0] = '1';
         }
         else if (LX200String[2] == '+')
         {
-            UTCOffset = ut;
+            Mount.Config.UTCOffset = ut;
+            SaveMountConfig(&Mount.Config);
             LX200Response[0] = '1';
         }
     }
@@ -280,7 +283,7 @@ void SetUTCOffsetTime()
  * Output:          None
  * Side Effects:    None
  * Overview:        :SGsHH.H#
- *                  Set the number of hours added to local time to yield UTC
+ *                  Set current site longitude
  *****************************************************************************/
 void SetCurrentSiteLongitude()
 {
@@ -288,7 +291,8 @@ void SetCurrentSiteLongitude()
 
     while (LX200String[p] == ' ')
         p++;
-    LX200Response[0] = DMSToDec(&Longitude, LX200String + p) + '0';
+    LX200Response[0] = DMSToDec(&Mount.Config.Longitude, LX200String + p) + '0';
+    if (LX200Response[0] == '1') SaveMountConfig(&Mount.Config);
     LX200Response[1] = '\0';
 }
 
@@ -299,7 +303,7 @@ void SetCurrentSiteLongitude()
  * Output:          None
  * Side Effects:    None
  * Overview:        :SGsHH.H#
- *                  Set the number of hours added to local time to yield UTC
+ *                  Set current site latitude
  *****************************************************************************/
 void SetCurrentSiteLatitude()
 {
@@ -307,6 +311,42 @@ void SetCurrentSiteLatitude()
 
     while (LX200String[p] == ' ')
         p++;
-    LX200Response[0] = DMSToDec(&Latitude, LX200String + p) + '0';
+    LX200Response[0] = DMSToDec(&Mount.Config.Latitude, LX200String + p) + '0';
+    if (LX200Response[0] == '1') SaveMountConfig(&Mount.Config);
+    LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void SetCurrentSiteAltitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :Sedddd#
+ *                  Set current site altitude ~ OpenGoto Specific ~
+ *****************************************************************************/
+void SetCurrentSiteAltitude()
+{
+    double Elevation = 0;
+    double f = 1;
+    int z;
+
+    for (z = 0; z < 4 && isdigit(LX200String[z + 2]); z++)
+    {
+        Elevation *= f;
+        Elevation += LX200String[z + 2] - '0';
+        f = 10;
+    }
+
+    if (z < 4)
+    {
+        LX200Response[0] = '0';
+    }
+    else
+    {
+        LX200Response[0] = '1';
+        Mount.Config.Elevation = Elevation;
+        SaveMountConfig(&Mount.Config);
+        }
     LX200Response[1] = '\0';
 }

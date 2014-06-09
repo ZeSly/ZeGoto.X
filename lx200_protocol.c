@@ -78,6 +78,7 @@ LX200Command LX200CommandTab[] =
 
     { "Gg", 2, GetCurrentSiteLongitude},
     { "Gt", 2, GetCurrentSiteLatitude},
+    { "Ge", 2, GetCurrentSiteAltitude},
 
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
@@ -110,6 +111,7 @@ LX200Command LX200CommandTab[] =
 
     { "Sg", 2, SetCurrentSiteLongitude},
     { "St", 2, SetCurrentSiteLatitude},
+    { "Se", 2, SetCurrentSiteAltitude},
 
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},

@@ -47,8 +47,6 @@ typedef struct
 } gps_t;
 
 extern gps_t GPS;
-extern double Latitude;
-extern double Longitude;
 
 void GPSStart();
 void GPSTCPServer(void);

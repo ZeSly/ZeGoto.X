@@ -281,11 +281,11 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
     double h = datetime.hour + datetime.minute / 60.0 + datetime.second / 3600.0;
     double n = JulianDay - 2415384.5;
     double ts = 23750.3 + 236.555362 * n;
-    tsmh_h = ts / 3600.0 + h - (Longitude / 15.0);
+    tsmh_h = ts / 3600.0 + h - (Mount.Config.Longitude / 15.0);
     angle_horaire = tsmh_h - ra;
 
     double ah = angle_horaire * 15.0;
-    double cos_z = sin(DEGREES(Latitude)) * sin(DEGREES(dec)) + cos(DEGREES(Latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
+    double cos_z = sin(DEGREES(Mount.Config.Latitude)) * sin(DEGREES(dec)) + cos(DEGREES(Mount.Config.Latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
     double z = acos(cos_z);
     double sin_a = cos(DEGREES(dec)) * sin(DEGREES(ah)) / sin(z);
 
@@ -388,7 +388,8 @@ void GetLocalTime()
     LX200Response[i++] = ':';
     LX200Response[i++] = Timekeeping.rtcsec.SECTEN + '0';
     LX200Response[i++] = Timekeeping.rtcsec.SECONE + '0';
-    LX200Response[i] = '#';
+    LX200Response[i++] = '#';
+    LX200Response[i] = '\0';
 }
 
 /******************************************************************************
@@ -403,7 +404,7 @@ void GetUTCOffsetTime()
 {
     int i;
 
-    sprintf(LX200Response, "%c%04.1f#", UTCOffset < 0 ? '-' : '+', fabs(UTCOffset));
+    sprintf(LX200Response, "%c%04.1f#", Mount.Config.UTCOffset < 0 ? '-' : '+', fabs(Mount.Config.UTCOffset));
     for (i = 0 ; LX200Response[i] != '#' ; i++)
         ;
     if (LX200Response[i- 1] == '0')
@@ -438,6 +439,7 @@ void GetCurrentDate()
     LX200Response[i++] = Timekeeping.rtcyear.YRTEN + '0';
     LX200Response[i++] = Timekeeping.rtcyear.YRONE + '0';
     LX200Response[i++] = '#';
+    LX200Response[i] = '\0';
 }
 
 /******************************************************************************
@@ -490,7 +492,7 @@ void LX200Dec2DMS(double d)
  *****************************************************************************/
 void GetCurrentSiteLongitude()
 {
-    LX200Dec2DMS(Longitude);
+    LX200Dec2DMS(Mount.Config.Longitude);
 }
 
 /******************************************************************************
@@ -504,5 +506,18 @@ void GetCurrentSiteLongitude()
  *****************************************************************************/
 void GetCurrentSiteLatitude()
 {
-    LX200Dec2DMS(Latitude);
+    LX200Dec2DMS(Mount.Config.Latitude);
+}
+/******************************************************************************
+ * Function:        void GetCurrentSiteAltitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :Ge# Get Current Site Altitude ~ OpenGoto Specific ~
+ *                  Returns: dddd#
+ *****************************************************************************/
+void GetCurrentSiteAltitude()
+{
+    sprintf(LX200Response,"%04.0f#", Mount.Config.Elevation);
 }
