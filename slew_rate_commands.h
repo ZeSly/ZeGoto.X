@@ -23,5 +23,6 @@ void SetCenteringRate();
 void SetGuidingRate();
 void SetFindRate();
 void SetMaxRate();
+void SetSpecificRate();
 
 #endif	/* SLEW_RATE_COMMANDS_H */

@@ -163,24 +163,6 @@ BOOL RTCCReadArray(BYTE address, BYTE *buffer, WORD length)
 }
 
 /******************************************************************************
- * Function:        void RTCCInit()
- * PreCondition:    I2C initialized
- * Input:           Nono
- * Output:          None
- * Side Effects:    None
- * Overview:        Set RTCC VBATEN bits to activate battery backup
- *****************************************************************************/
-void RTCCInit()
-{
-    RTCWKDAYbits rtcwkday;
-
-    RTCCReadArray(RTCWKDAY, (BYTE *) & rtcwkday, 1);
-    if (rtcwkday.VBATEN == 0)
-        rtcwkday.VBATEN = 1;
-    RTCCWriteArray(RTCWKDAY, (BYTE *) & rtcwkday, 1);
-}
-
-/******************************************************************************
  * Function:        XEE_RESULT RTCCBeginWrite(BYTE address)
  * PreCondition:    I2C initialized
  * Input:           Nono
@@ -262,7 +244,7 @@ BOOL RTCCGetTimekeeping(RTCCMapTimekeeping *timekeeping)
  *****************************************************************************/
 BOOL RTCCSetTimekeeping(RTCCMapTimekeeping *timekeeping)
 {
-    BYTE rtccmap[8];
+    BYTE rtccmap[7];
 
     // clering ST bit before writing new date
     RTCSECbits rtcsec;
@@ -281,16 +263,20 @@ BOOL RTCCSetTimekeeping(RTCCMapTimekeeping *timekeeping)
         while (rtcwkday.OSCRUN);
 
         // writing new time
+        timekeeping->rtcsec.ST = 0;
         rtccmap[0] = timekeeping->rtcsec.b;
         rtccmap[1] = timekeeping->rtcmin.b;
         rtccmap[2] = timekeeping->rtchour.b;
+        timekeeping->rtcwkday.OSCRUN = 0;
+        timekeeping->rtcwkday.PWRFAIL = 0;
+        timekeeping->rtcwkday.VBATEN = 1;
         rtccmap[3] = timekeeping->rtcwkday.b;
         rtccmap[4] = timekeeping->rtcdate.b;
         rtccmap[5] = timekeeping->rtcmth.b;
         rtccmap[6] = timekeeping->rtcyear.b;
         RTCCWriteArray(0, rtccmap, sizeof (rtccmap));
 
-        // setting ST bit before writing new date
+        // setting ST bit after writing new date
         timekeeping->rtcsec.ST = 1;
         RTCCWriteArray(RTCSEC, &timekeeping->rtcsec.b, 1);
         return TRUE;
@@ -337,34 +323,79 @@ void JulianDayToDate(double jj, datetime_t *datetime)
     datetime->second = floor((mindec - datetime->minute) * 60);
 }
 
-void GetSystemDateTime(datetime_t *datetime)
-{
-    RTCCMapTimekeeping tk;
-
-    RTCCGetTimekeeping(&tk);
-    datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
-    datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
-    datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
-    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
-    datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
-    datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
-}
-
 double JulianDay;
 
-void GetUTCDateTime(datetime_t *datetime)
+BOOL GetUTCDateTime(datetime_t *datetime)
+{
+    BOOL ret;
+    RTCCMapTimekeeping tk;
+
+    ret = RTCCGetTimekeeping(&tk);
+    if (ret == TRUE)
+    {
+        datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
+        datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
+        datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
+        datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
+        datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
+        datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
+    }
+    return ret;
+}
+
+BOOL GetLocalDateTime(datetime_t *datetime)
+{
+    BOOL ret;
+    RTCCMapTimekeeping tk;
+
+    ret = RTCCGetTimekeeping(&tk);
+    if (ret == TRUE)
+    {
+        datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
+        datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
+        datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
+        datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
+        datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
+        datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
+
+        JulianDay = DateToJulianDay(datetime);
+        JulianDay += Mount.Config.UTCOffset / 24.0;
+        JulianDayToDate(JulianDay, datetime);
+    }
+    return ret;
+}
+
+BOOL SetUTCDateTime(datetime_t *datetime)
 {
     RTCCMapTimekeeping tk;
 
-    RTCCGetTimekeeping(&tk);
-    datetime->year = tk.rtcyear.YRTEN * 10 + tk.rtcyear.YRONE + 2000;
-    datetime->month = tk.rtcmth.MTHTEN * 10 + tk.rtcmth.MTHONE;
-    datetime->day = tk.rtcdate.DATETEN * 10 + tk.rtcdate.DATEONE;
-    datetime->hour = tk.rtchour.HRTEN * 10 + tk.rtchour.HRONE;
-    datetime->minute = tk.rtcmin.MINTEN * 10 + tk.rtcmin.MINONE;
-    datetime->second = tk.rtcsec.SECTEN * 10 + tk.rtcsec.SECONE;
+    tk.rtcyear.YRTEN = (datetime->year - 2000) / 10;
+    tk.rtcyear.YRONE = datetime->year % 10;
 
+    tk.rtcmth.MTHTEN = datetime->month / 10;
+    tk.rtcmth.MTHONE = datetime->month % 10;
+
+    tk.rtcdate.DATETEN = datetime->day / 10;
+    tk.rtcdate.DATEONE = datetime->day % 10;
+
+    tk.rtchour.B12_24 = 0; // The RTCC wil always be set in 24h format
+    tk.rtchour.HRTEN = datetime->hour / 10;
+    tk.rtchour.HRONE = datetime->hour % 10;
+
+    tk.rtcmin.MINTEN = datetime->minute / 10;
+    tk.rtcmin.MINONE = datetime->minute % 10;
+
+    tk.rtcsec.SECTEN = datetime->second / 10;
+    tk.rtcsec.SECONE = datetime->second % 10;
+
+    return RTCCSetTimekeeping(&tk);
+}
+
+BOOL SetLocalDateTime(datetime_t *datetime)
+{
     JulianDay = DateToJulianDay(datetime);
     JulianDay -= Mount.Config.UTCOffset / 24.0;
     JulianDayToDate(JulianDay, datetime);
+
+    return SetUTCDateTime(datetime);
 }

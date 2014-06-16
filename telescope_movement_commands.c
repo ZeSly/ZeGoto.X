@@ -148,103 +148,107 @@ void Halt()
     }
 }
 
-void MoveEast()
+void GuideNorth()
 {
-    RAPulseGuideTime = atoi(LX200String + 2);
-    if (RAPulseGuideTime != 0)
-    {
-        OC2CON1bits.OCM = 3;
-        RAGuideEast();
-        TEST_PIN_OUT = 1;
-    }
-    else
-    {
-        if (Mount.IsGuiding == FALSE)
-        {
-            CurrentMove |= MOVE_TO_EAST;
-            CurrentMove &= ~MOVE_TO_WEST;
-            RASetDirection(Mount.EastDirection);
-            RAAccelerate();
-        }
-        else
-        {
-            RAGuideEast();
-        }
-    }
-}
-
-void MoveNorth()
-{
-    DecPulseGuideTime = atoi(LX200String + 2);
+    DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
         OC3CON1bits.OCM = 3;
         DecGuideNorth();
         TEST_PIN_OUT = 1;
     }
+}
+
+void MoveNorth()
+{
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_NORTH;
+        CurrentMove &= ~MOVE_TO_SOUTH;
+        DecSetDirection(Mount.NorthDirection);
+        DecAccelerate();
+    }
     else
     {
-        if (Mount.IsGuiding == FALSE)
-        {
-            CurrentMove |= MOVE_TO_NORTH;
-            CurrentMove &= ~MOVE_TO_SOUTH;
-            DecSetDirection(Mount.NorthDirection);
-            DecAccelerate();
-        }
-        else
-        {
-            DecGuideNorth();
-        }
+        DecGuideNorth();
     }
 }
 
-void MoveSouth()
+void GuideSouth()
 {
-    DecPulseGuideTime = atoi(LX200String + 2);
+    DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
         OC3CON1bits.OCM = 3;
         DecGuideSouth();
         TEST_PIN_OUT = 1;
     }
+}
+
+void MoveSouth()
+{
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_SOUTH;
+        CurrentMove &= ~MOVE_TO_NORTH;
+        DecSetDirection(Mount.SouthDirection);
+        DecAccelerate();
+    }
     else
     {
-        if (Mount.IsGuiding == FALSE)
-        {
-            CurrentMove |= MOVE_TO_SOUTH;
-            CurrentMove &= ~MOVE_TO_NORTH;
-            DecSetDirection(Mount.SouthDirection);
-            DecAccelerate();
-        }
-        else
-        {
-            DecGuideSouth();
-        }
+        DecGuideSouth();
     }
 }
 
-void MoveWest()
+void GuideEast()
 {
-    RAPulseGuideTime = atoi(LX200String + 2);
+    RAPulseGuideTime = atoi(LX200String + 3);
+    if (RAPulseGuideTime != 0)
+    {
+        OC2CON1bits.OCM = 3;
+        RAGuideEast();
+        TEST_PIN_OUT = 1;
+    }
+}
+
+void MoveEast()
+{
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_EAST;
+        CurrentMove &= ~MOVE_TO_WEST;
+        RASetDirection(Mount.EastDirection);
+        RAAccelerate();
+    }
+    else
+    {
+        RAGuideEast();
+    }
+}
+
+void GuideWest()
+{
+    RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
     {
         OC2CON1bits.OCM = 3;
         RAGuideWest();
         TEST_PIN_OUT = 1;
     }
+}
+
+void MoveWest()
+{
+    if (Mount.IsGuiding == FALSE)
+    {
+        CurrentMove |= MOVE_TO_WEST;
+        CurrentMove &= ~MOVE_TO_EAST;
+        RASetDirection(Mount.WestDirection);
+        RAAccelerate();
+    }
     else
     {
-        if (Mount.IsGuiding == FALSE)
-        {
-            CurrentMove |= MOVE_TO_WEST;
-            CurrentMove &= ~MOVE_TO_EAST;
-            RASetDirection(Mount.WestDirection);
-            RAAccelerate();
-        }
-        else
-        {
-            RAGuideWest();
-        }
+        RAGuideWest();
     }
 }
 

@@ -78,7 +78,7 @@
 //#define STACK_USE_SNMPV3_SERVER			// Simple Network Management Protocol v3 Agent
 //#define STACK_USE_TFTP_CLIENT			// Trivial File Transfer Protocol client
 //#define STACK_USE_GENERIC_TCP_CLIENT_EXAMPLE	// HTTP Client example in GenericTCPClient.c
-#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
+//#define STACK_USE_GENERIC_TCP_SERVER_EXAMPLE	// ToUpper server example in GenericTCPServer.c
 //#define STACK_USE_TELNET_SERVER			// Telnet server
 #define STACK_USE_ANNOUNCE				// Microchip Embedded Ethernet Device Discoverer server/client
 #define STACK_USE_DNS					// Domain Name Service Client for resolving hostname strings to IP addresses
@@ -103,7 +103,7 @@
  *   applications.  If your custom application requires it
  *   otherwise, uncomment the appropriate selection.
  */
-//#define STACK_USE_MPFS2
+#define STACK_USE_MPFS2
 
 /* MPFS Storage Location
  *   If html pages are stored in internal program memory,
@@ -233,7 +233,7 @@
  */
 	// Allocate how much total RAM (in bytes) you want to allocate
 	// for use by your TCP TCBs, RX FIFOs, and TX FIFOs.
-	#define TCP_ETH_RAM_SIZE					(722ul)
+	#define TCP_ETH_RAM_SIZE					(820ul)
 	#define TCP_PIC_RAM_SIZE					(2096ul)
 	#define TCP_SPI_RAM_SIZE					(0ul)
 	#define TCP_SPI_RAM_BASE_ADDRESS			(0x00)
@@ -277,7 +277,7 @@
 		} TCPSocketInitializer[] = 
 		{
 			//{TCP_PURPOSE_GENERIC_TCP_CLIENT, TCP_ETH_RAM, 125, 100},
-			{TCP_PURPOSE_GENERIC_TCP_SERVER, TCP_ETH_RAM, 20, 20},
+			//{TCP_PURPOSE_GENERIC_TCP_SERVER, TCP_ETH_RAM, 20, 20},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
 			//{TCP_PURPOSE_TELNET, TCP_ETH_RAM, 200, 150},
@@ -291,7 +291,8 @@
 			{TCP_PURPOSE_DEFAULT, TCP_ETH_RAM, 200, 200},
 			{TCP_PURPOSE_BERKELEY_SERVER, TCP_ETH_RAM, 25, 20},
 			{TCP_PURPOSE_BERKELEY_SERVER, TCP_ETH_RAM, 25, 20},
-			//{TCP_PURPOSE_BERKELEY_SERVER, TCP_ETH_RAM, 25, 20},
+			{TCP_PURPOSE_BERKELEY_SERVER, TCP_ETH_RAM, 25, 20},
+			{TCP_PURPOSE_BERKELEY_SERVER, TCP_ETH_RAM, 25, 20},
 			//{TCP_PURPOSE_BERKELEY_CLIENT, TCP_ETH_RAM, 125, 100},
 		};
 		#define END_OF_TCP_CONFIGURATION
@@ -315,7 +316,7 @@
  *   Berkeley Sockets are disabled.  Set this value as low as your application
  *   requires to avoid waisting RAM.
  */
-#define BSD_SOCKET_COUNT (5u)
+#define BSD_SOCKET_COUNT (4u)
 
 
 // =======================================================================

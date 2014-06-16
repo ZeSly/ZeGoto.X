@@ -30,10 +30,17 @@
 void GuidingTimerInit();
 
 void Halt();
-void MoveEast();
+
 void MoveNorth();
 void MoveSouth();
+void MoveEast();
 void MoveWest();
+
+void GuideNorth();
+void GuideSouth();
+void GuideEast();
+void GuideWest();
+
 void SlewToTarget();
 
 extern char CurrentMove;

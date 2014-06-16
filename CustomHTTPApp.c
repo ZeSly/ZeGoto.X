@@ -92,7 +92,7 @@ static HTTP_IO_RESULT HTTPPostMount(void);
 // POST operation redirects.  This lets the application provide status messages
 // after a redirect, when connection instance data has already been lost.
 static BOOL lastFailure = FALSE;
-static int  lastResultMsg;
+static int lastResultMsg;
 
 /****************************************************************************
   Section:
@@ -444,7 +444,7 @@ static HTTP_IO_RESULT HTTPPostMount(void)
     char *ptr;
 
     lastFailure = TRUE; // always true for displaying the result of the mount config
-    lastResultMsg = 1;  // default error message
+    lastResultMsg = 1; // default error message
 
     // Check to see if the browser is attempting to submit more data than we
     // can parse at once.  This function needs to receive all updated
@@ -490,7 +490,7 @@ static HTTP_IO_RESULT HTTPPostMount(void)
         // Parse the value that was read
         if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "nbmaxstep"))
         {
-            newMountConfig.NbStepMax = strtoul((char*)curHTTP.data + 12, &ptr, 10);
+            newMountConfig.NbStepMax = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.NbStepMax == 0) goto ConfigFailure;
         }
         else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "period"))
@@ -512,7 +512,7 @@ static HTTP_IO_RESULT HTTPPostMount(void)
         {
             char *p = (char*) curHTTP.data + 12;
             if (!isdigit(*p)) goto ConfigFailure;
-            newMountConfig.GuideSpeed = (*p++ - '0') * 10;
+            newMountConfig.GuideSpeed = (*p++ -'0') * 10;
             if (*p++ == '.')
             {
                 if (!isdigit(*p)) goto ConfigFailure;
@@ -521,7 +521,7 @@ static HTTP_IO_RESULT HTTPPostMount(void)
         }
     }
 
-    if (!DecIsMotorStop() || ! RAIsMotorStop())
+    if (!DecIsMotorStop() || !RAIsMotorStop())
     {
         lastResultMsg = 2;
         goto ConfigFailure;
@@ -841,9 +841,11 @@ void HTTPPrint_datetime(void)
 {
     RTCCMapTimekeeping Timekeeping;
     char datetime[32];
-    BYTE i = 0;
+    BYTE i = 4;
 
     RTCCGetTimekeeping(&Timekeeping);
+
+    strcpy(datetime, "UTC ");
 
     // 0123456789012345678
     // dd/mm/yyyy hh:mn:ss
@@ -908,15 +910,15 @@ void HTTPPrint_azimuthcoord(void)
     ComputeAzimuthalCoord(&Altitude, &Azimuth);
 
     p = str;
-    p += sprintf(p, "Julian day: %f<br/>\n", JulianDay);
-    JulianDayToDate(JulianDay, &datetime);
-    p += sprintf(p, "%02d/%02d/%04d %02d:%02d:%02d UT<br/>\n",
-                 datetime.day, datetime.month, datetime.year,
-                 datetime.hour, datetime.minute, datetime.second);
     p += sprintf(p, "Azimut :");
     p += Dec2DMS(Azimuth, p);
-    p += sprintf(p, "<br/>\nAltitude :");
+    p += sprintf(p, " Altitude :");
     p += Dec2DMS(Altitude, p);
+    p += sprintf(p, "\n<br/><br/>Julian day: %f<br/>\n", JulianDay);
+    GetLocalDateTime(&datetime);
+    p += sprintf(p, "Local time: %02d/%02d/%04d %02d:%02d:%02d<br/>\n",
+                 datetime.day, datetime.month, datetime.year,
+                 datetime.hour, datetime.minute, datetime.second);
 
     TCPPutString(sktHTTP, (BYTE *) str);
 }
@@ -933,51 +935,51 @@ void HTTPPrint_gpsdata(void)
     p += sprintf(p, "Setting : %f %f %.1fm<br/>\n", Mount.Config.Latitude, Mount.Config.Longitude, Mount.Config.Elevation);
     if (GPS.Available)
     {
-    if (GPS.Status == 'A')
-    {
-        p += sprintf(p, "Latitude: %s %c ", GPS.Latitude, GPS.NSIndicator);
-        p += sprintf(p, "Longitude: %s %c <br/>\n", GPS.Longitude, GPS.EWIndicator);
-        p += sprintf(p, "Altitude: %s <br/>\n", GPS.MSLAltitude);
-    }
-    else
-    {
-        p += sprintf(p, "Position not valid<br/>\n");
-    }
-    p += sprintf(p, "Position fix indicator: ");
-    switch (GPS.PositionFixIndicator)
-    {
-    case '0':
-        p += sprintf(p, "0, position fix unavailable<br/>\n");
-        break;
-    case '1':
-        p += sprintf(p, "1, valid position fix, SPS mode<br/>\n");
-        break;
-    case '2':
-        p += sprintf(p, "2, valid position fix, differential GPS mode<br/>\n");
-        break;
-    case '3':
-        p += sprintf(p, "3, GPS PPS Mode, fix valid<br/>\n");
-        break;
-    case '4':
-        p += sprintf(p, "4, Real Time Kinematic. System used in RTK mode with fixed integers<br/>\n");
-        break;
-    case '5':
-        p += sprintf(p, "5, Float RTK. Satellite system used in RTK mode. Floating integers<br/>\n");
-        break;
-    case '6':
-        p += sprintf(p, "6, Estimated(dead reckoning) Mode<br/>\n");
-        break;
-    case '7':
-        p += sprintf(p, "7, Manual Input Mode<br/>\n");
-        break;
-    case '8':
-        p += sprintf(p, "8, Simulator Mode<br/>\n");
-        break;
-    default:
-        p += sprintf(p, "No GPS<br/>\n");
-        break;
-    }
-    p += sprintf(p, "UTC %s %s<br/>", GPS.UTCTime, GPS.Date);
+        if (GPS.Status == 'A')
+        {
+            p += sprintf(p, "Latitude: %s %c ", GPS.Latitude, GPS.NSIndicator);
+            p += sprintf(p, "Longitude: %s %c <br/>\n", GPS.Longitude, GPS.EWIndicator);
+            p += sprintf(p, "Altitude: %s <br/>\n", GPS.MSLAltitude);
+        }
+        else
+        {
+            p += sprintf(p, "Position not valid<br/>\n");
+        }
+        p += sprintf(p, "Position fix indicator: ");
+        switch (GPS.PositionFixIndicator)
+        {
+        case '0':
+            p += sprintf(p, "0, position fix unavailable<br/>\n");
+            break;
+        case '1':
+            p += sprintf(p, "1, valid position fix, SPS mode<br/>\n");
+            break;
+        case '2':
+            p += sprintf(p, "2, valid position fix, differential GPS mode<br/>\n");
+            break;
+        case '3':
+            p += sprintf(p, "3, GPS PPS Mode, fix valid<br/>\n");
+            break;
+        case '4':
+            p += sprintf(p, "4, Real Time Kinematic. System used in RTK mode with fixed integers<br/>\n");
+            break;
+        case '5':
+            p += sprintf(p, "5, Float RTK. Satellite system used in RTK mode. Floating integers<br/>\n");
+            break;
+        case '6':
+            p += sprintf(p, "6, Estimated(dead reckoning) Mode<br/>\n");
+            break;
+        case '7':
+            p += sprintf(p, "7, Manual Input Mode<br/>\n");
+            break;
+        case '8':
+            p += sprintf(p, "8, Simulator Mode<br/>\n");
+            break;
+        default:
+            p += sprintf(p, "No GPS<br/>\n");
+            break;
+        }
+        p += sprintf(p, "UTC %s %s<br/>", GPS.Date, GPS.UTCTime);
     }
     else
     {
@@ -1071,7 +1073,7 @@ void HTTPPrint_mountconfig_guidingrate(void)
 {
     char str[16];
 
-    sprintf(str, "%.1f", (double)Mount.Config.GuideSpeed / 10.0);
+    sprintf(str, "%.1f", (double) Mount.Config.GuideSpeed / 10.0);
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 

@@ -66,7 +66,7 @@
 //void GenericTCPClient(void);
 void GenericTCPServer(void);
 //void BerkeleyTCPClientDemo(void);
-void BerkeleyTCPServerDemo(void);
+void BerkeleyTCPServerLX200(void);
 //void BerkeleyUDPClientDemo(void);
 
 

@@ -78,7 +78,7 @@ LX200Command LX200CommandTab[] =
 
     { "Gg", 2, GetCurrentSiteLongitude},
     { "Gt", 2, GetCurrentSiteLatitude},
-    { "Ge", 2, GetCurrentSiteAltitude},
+    { "Gu", 2, GetCurrentSiteAltitude},
 
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
@@ -95,12 +95,17 @@ LX200Command LX200CommandTab[] =
     { "Mn", 2, MoveNorth},
     { "Ms", 2, MoveSouth},
     { "Mw", 2, MoveWest},
+    { "Mge", 3, GuideEast},
+    { "Mgn", 3, GuideNorth},
+    { "Mgs", 3, GuideSouth},
+    { "Mgw", 3, GuideWest},
     { "MS", 2, SlewToTarget},
 
     { "RC", 2, SetCenteringRate},
     { "RG", 2, SetGuidingRate},
     { "RM", 2, SetFindRate},
     { "RS", 2, SetMaxRate},
+    { "Rs", 2, SetSpecificRate},
 
     { "Sr", 2, SetTargetObjectRA},
     { "Sd", 2, SetTargetObjectDeclination},
@@ -111,7 +116,7 @@ LX200Command LX200CommandTab[] =
 
     { "Sg", 2, SetCurrentSiteLongitude},
     { "St", 2, SetCurrentSiteLatitude},
-    { "Se", 2, SetCurrentSiteAltitude},
+    { "Su", 2, SetCurrentSiteAltitude},
 
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},
@@ -123,9 +128,6 @@ LX200Command LX200CommandTab[] =
     { "ZGD", 3, GetStepDeclination},
     { "ZGr", 3, GetStepTargetRA},
     { "ZGd", 3, GetStepTargetDeclination},
-
-    { "ZSr", 3, SetStepTargetRA},
-    { "ZSd", 3, SetStepTargetDeclination},
 
 //    { "ZGs", 3, DumpSpeedList },
 

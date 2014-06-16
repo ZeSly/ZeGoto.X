@@ -186,7 +186,6 @@ typedef struct
 
 void RTCCWriteArray(uint8_t address, uint8_t *val, WORD wLen);
 BOOL RTCCReadArray(uint8_t address, uint8_t *buffer, WORD length);
-void RTCCInit();
 BOOL RTCCReadMacAddress(uint8_t *MacAddress);
 
 BOOL RTCCGetTimekeeping(RTCCMapTimekeeping *timekeeping);
@@ -195,12 +194,14 @@ BOOL RTCCSetTimekeeping(RTCCMapTimekeeping *timekeeping);
 double DateToJulianDay(datetime_t *datetime);
 void JulianDayToDate(double jj, datetime_t *datetime);
 
-void GetSystemDateTime(datetime_t *datetime);
-void GetUTCDateTime(datetime_t *datetime);
+BOOL GetUTCDateTime(datetime_t *datetime);
+BOOL GetLocalDateTime(datetime_t *datetime);
+
+BOOL SetUTCDateTime(datetime_t *datetime);
+BOOL SetLocalDateTime(datetime_t *datetime);
 
 /******* V A R I A B L E S ***************************************************/
 
-extern double UTCOffset;
 extern double JulianDay;
 
 #endif	/* RTCC_H */

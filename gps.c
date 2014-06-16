@@ -21,6 +21,7 @@
 #include "HardwareProfile.h"
 #include "TCPIPConfig.h"
 #include "TCPIP Stack/TCPIP.h"
+#include "rtcc.h"
 
 #include <string.h>
 #include <stdlib.h>
@@ -404,11 +405,57 @@ void GPSDecodeFrame()
             Mount.Config.Latitude = Latitude;
             Mount.Config.Elevation = Elevation;
 
+            if (GPS.UTCTime[0] && GPS.Date[0])
+            {
+                datetime_t utctime, systemdate;
+                int p;
+
+                p = 0;
+                utctime.day = (GPS.Date[p++] - '0') * 10;
+                utctime.day += (GPS.Date[p++] - '0');
+                p++;
+                utctime.month = (GPS.Date[p++] - '0') * 10;
+                utctime.month += (GPS.Date[p++] - '0');
+                p++;
+                utctime.year = (GPS.Date[p++] - '0') * 10;
+                utctime.year += (GPS.Date[p++] - '0');
+                utctime.year += 2000;
+
+                p = 0;
+                utctime.hour = (GPS.UTCTime[p++] - '0') * 10;
+                utctime.hour += (GPS.UTCTime[p++] - '0');
+                p++;
+                utctime.minute = (GPS.UTCTime[p++] - '0') * 10;
+                utctime.minute += (GPS.UTCTime[p++] - '0');
+                p++;
+                utctime.second = (GPS.UTCTime[p++] - '0') * 10;
+                utctime.second += (GPS.UTCTime[p++] - '0');
+
+                GetUTCDateTime(&systemdate);
+                if (memcmp(&utctime, &systemdate, sizeof(utctime)) != 0)
+                {
+                    SetUTCDateTime(&utctime);
+                }
+            }
+
         }
     }
 
     frame_complete = -1;
 }
+
+void GPSon()
+{
+    GPS.ON = 1;
+}
+
+void GPSoff()
+{
+    GPS.ON = 0;
+    GPS.Available = 0;
+}
+
+#if defined(USE_GENERIC_TCP_SERVER_GPS)
 
 /******************************************************************************
  * Function:        void GPSTCPServer(void)
@@ -474,13 +521,124 @@ void GPSTCPServer(void)
     }
 }
 
-void GPSon()
+#elif defined(STACK_USE_BERKELEY_API)
+
+#define PORTNUM 9300
+#define MAX_CLIENT (3) // Maximum number of simultanous connections accepted by the server.
+
+/*********************************************************************
+ * Function:        void BerkeleyTCPServerGPS(void)
+ *
+ * PreCondition:    Stack is initialized
+ *
+ * Input:           None
+ *
+ * Output:          None
+ *
+ * Side Effects:    None
+ *
+ * Overview:        None
+ *
+ * Note:            None
+ ********************************************************************/
+void BerkeleyTCPServerGPS(void)
 {
-    GPS.ON = 1;
+    static SOCKET bsdServerSocket;
+    static SOCKET ClientSock[MAX_CLIENT];
+    struct sockaddr_in addr;
+    struct sockaddr_in addRemote;
+    int addrlen = sizeof (struct sockaddr_in);
+    char TCP_In_Buffer[15];
+    char TCP_Out_Buffer[15];
+    int length;
+    int i, n;
+
+    static enum
+    {
+        BSD_INIT = 0,
+        BSD_CREATE_SOCKET,
+        BSD_BIND,
+        BSD_LISTEN,
+        BSD_OPERATION
+    } BSDServerState = BSD_INIT;
+
+    switch (BSDServerState)
+    {
+    case BSD_INIT:
+        // Initialize all client socket handles so that we don't process
+        // them in the BSD_OPERATION state
+        for (i = 0; i < MAX_CLIENT; i++)
+            ClientSock[i] = INVALID_SOCKET;
+
+        BSDServerState = BSD_CREATE_SOCKET;
+        // No break needed
+
+    case BSD_CREATE_SOCKET:
+        // Create a socket for this server to listen and accept connections on
+        bsdServerSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+        if (bsdServerSocket == INVALID_SOCKET)
+            return;
+
+        BSDServerState = BSD_BIND;
+        // No break needed
+
+    case BSD_BIND:
+        // Bind socket to a local port
+        addr.sin_port = PORTNUM;
+        addr.sin_addr.S_un.S_addr = IP_ADDR_ANY;
+        if (bind(bsdServerSocket, (struct sockaddr*) &addr, addrlen) == SOCKET_ERROR)
+            return;
+
+        BSDServerState = BSD_LISTEN;
+        // No break needed
+
+    case BSD_LISTEN:
+        if (listen(bsdServerSocket, MAX_CLIENT) == 0)
+            BSDServerState = BSD_OPERATION;
+
+        // No break.  If listen() returns SOCKET_ERROR it could be because
+        // MAX_CLIENT is set to too large of a backlog than can be handled
+        // by the underlying TCP socket count (TCP_PURPOSE_BERKELEY_SERVER
+        // type sockets in TCPIPConfig.h).  However, in this case, it is
+        // possible that some of the backlog is still handleable, in which
+        // case we should try to accept() connections anyway and proceed
+        // with normal operation.
+
+    case BSD_OPERATION:
+        for (i = 0; i < MAX_CLIENT; i++)
+        {
+            // Accept any pending connection requests, assuming we have a place to store the socket descriptor
+            if (ClientSock[i] == INVALID_SOCKET)
+                ClientSock[i] = accept(bsdServerSocket, (struct sockaddr*) &addRemote, &addrlen);
+
+            // If this socket is not connected then no need to process anything
+            if (ClientSock[i] == INVALID_SOCKET)
+                continue;
+
+            for (n = 0; n < sizeof (TCP_In_Buffer) && start_ptr != end_ptr; n++)
+            {
+                TCP_In_Buffer[n] = buf_rx[start_ptr++];
+                if (start_ptr == sizeof (buf_rx)) start_ptr = 0;
+            }
+            send(ClientSock[i], TCP_In_Buffer, n, 0);
+
+            length = recv(ClientSock[i], TCP_Out_Buffer, sizeof (TCP_Out_Buffer), 0);
+
+            if (length > 0)
+            {
+                if (TCP_Out_Buffer[0] == 27) // Escape received
+                {
+                    closesocket(ClientSock[i]);
+                    ClientSock[i] = INVALID_SOCKET;
+                }
+            }
+        }
+        break;
+
+    default:
+        return;
+    }
+    return;
 }
 
-void GPSoff()
-{
-    GPS.ON = 0;
-    GPS.Available = 0;
-}
+#endif

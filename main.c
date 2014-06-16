@@ -235,11 +235,9 @@ int main(void)
 #endif
 
 #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
-//        GenericTCPServer();
-#endif
+        //        GenericTCPServer();
         GPSTCPServer();
-        GPSDecodeFrame();
-
+#endif
 
 #if defined(STACK_USE_SMTP_CLIENT)
         SMTPDemo();
@@ -268,11 +266,11 @@ int main(void)
 #endif
 
 #if defined(STACK_USE_BERKELEY_API)
-//        BerkeleyTCPClientDemo();
-        BerkeleyTCPServerDemo();
-//        BerkeleyUDPClientDemo();
+        BerkeleyTCPServerLX200();
+        BerkeleyTCPServerGPS();
 #endif
 
+        GPSDecodeFrame();
         ProcessIO();
 
         // If the local IP address has changed (ex: due to DHCP lease change)
@@ -521,7 +519,7 @@ static void InitializeBoard(void)
     LED2_TRIS = 0;
 
     XEEInit();
-    RTCCInit();
+    //RTCCInit();
 
     // Deassert all chip select lines so there isn't any problem with
     // initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16,

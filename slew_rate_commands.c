@@ -18,7 +18,9 @@
 
 /* Device header file */
 #include <xc.h>
+#include <stdlib.h>
 #include "mount.h"
+#include "lx200_protocol.h"
 
 void SetCenteringRate()
 {
@@ -44,3 +46,8 @@ void SetMaxRate()
 }
 
 
+void SetSpecificRate()
+{
+    Mount.IsGuiding = FALSE;
+    Mount.CurrentMaxSpeed = atoi(LX200String + 2);
+}

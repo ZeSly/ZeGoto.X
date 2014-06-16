@@ -49,11 +49,16 @@ typedef struct
 extern gps_t GPS;
 
 void GPSStart();
-void GPSTCPServer(void);
 void GPSDecodeFrame();
 int DMSToDec(double *dec, char *str);
 
 void GPSon();
 void GPSoff();
+
+#if defined(USE_GENERIC_TCP_SERVER_GPS)
+void GPSTCPServer(void);
+#elif defined(STACK_USE_BERKELEY_API)
+void BerkeleyTCPServerGPS(void);
+#endif
 
 #endif	/* GPS_H */

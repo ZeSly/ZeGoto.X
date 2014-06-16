@@ -183,23 +183,23 @@ void SyncWithCurrentTarget()
  *****************************************************************************/
 void SetDate()
 {
-    RTCCMapTimekeeping Timekeeping;
+    datetime_t localtime;
     BYTE p = 2;
 
     LX200Response[0] = '0';
-    if (RTCCGetTimekeeping(&Timekeeping) == TRUE)
+    if (GetLocalDateTime(&localtime))
     {
-
-        Timekeeping.rtcmth.MTHTEN = LX200String[p++] - '0';
-        Timekeeping.rtcmth.MTHONE = LX200String[p++] - '0';
+        localtime.month = (LX200String[p++] - '0') * 10;
+        localtime.month += (LX200String[p++] - '0');
         p++;
-        Timekeeping.rtcdate.DATETEN = LX200String[p++] - '0';
-        Timekeeping.rtcdate.DATEONE = LX200String[p++] - '0';
+        localtime.day = (LX200String[p++] - '0') * 10;
+        localtime.day += (LX200String[p++] - '0');
         p++;
-        Timekeeping.rtcyear.YRTEN = LX200String[p++] - '0';
-        Timekeeping.rtcyear.YRONE = LX200String[p++] - '0';
+        localtime.year = (LX200String[p++] - '0') * 10;
+        localtime.year += (LX200String[p++] - '0');
+        localtime.year += 2000;
 
-        if (RTCCSetTimekeeping(&Timekeeping) == TRUE)
+        if (SetLocalDateTime(&localtime) == TRUE)
         {
             LX200Response[0] = '1';
         }
@@ -217,23 +217,22 @@ void SetDate()
  *****************************************************************************/
 void SetLocalTime()
 {
-    RTCCMapTimekeeping Timekeeping;
+    datetime_t localtime;
     BYTE p = 2;
 
     LX200Response[0] = '0';
-    if (RTCCGetTimekeeping(&Timekeeping) == TRUE)
+    if (GetLocalDateTime(&localtime))
     {
-        Timekeeping.rtchour.B12_24 = 0; // The RTCC wil always be set in 24h format
-        Timekeeping.rtchour.HRTEN = LX200String[p++] - '0';
-        Timekeeping.rtchour.HRONE = LX200String[p++] - '0';
+        localtime.hour = (LX200String[p++] - '0') * 10;
+        localtime.hour += (LX200String[p++] - '0');
         p++;
-        Timekeeping.rtcmin.MINTEN = LX200String[p++] - '0';
-        Timekeeping.rtcmin.MINONE = LX200String[p++] - '0';
+        localtime.minute = (LX200String[p++] - '0') * 10;
+        localtime.minute += (LX200String[p++] - '0');
         p++;
-        Timekeeping.rtcsec.SECTEN = LX200String[p++] - '0';
-        Timekeeping.rtcsec.SECONE = LX200String[p++] - '0';
+        localtime.second = (LX200String[p++] - '0') * 10;
+        localtime.second += (LX200String[p++] - '0');
 
-        if (RTCCSetTimekeeping(&Timekeeping) == TRUE)
+        if (SetLocalDateTime(&localtime) == TRUE)
         {
             LX200Response[0] = '1';
         }
@@ -347,6 +346,6 @@ void SetCurrentSiteAltitude()
         LX200Response[0] = '1';
         Mount.Config.Elevation = Elevation;
         SaveMountConfig(&Mount.Config);
-        }
+    }
     LX200Response[1] = '\0';
 }
