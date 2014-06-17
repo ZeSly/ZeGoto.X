@@ -110,6 +110,9 @@ LX200Command LX200CommandTab[] =
     { "Sr", 2, SetTargetObjectRA},
     { "Sd", 2, SetTargetObjectDeclination},
 
+    { "Sa", 2, SetTargetObjectAltitude },
+    { "Sz", 2, SetTargetObjectAzimuth },
+
     { "SC", 2, SetDate},
     { "SL", 2, SetLocalTime},
     { "SG", 2, SetUTCOffsetTime},

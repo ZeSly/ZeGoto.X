@@ -378,6 +378,7 @@ int main(void)
  * Note:            None
  *******************************************************************/
 #include "telescope_movement_commands.h"
+#include <libpic30.h>
 
 static void ProcessIO(void)
 {
@@ -408,6 +409,7 @@ static void ProcessIO(void)
         static BOOL getting_cmd = FALSE;
 
         numBytesWrite = 0;
+        USB_In_Buffer[0] = '\0';
         numBytesRead = getsUSBUSART(USB_Out_Buffer, 64);
         if (numBytesRead != 0)
         {
@@ -434,7 +436,7 @@ static void ProcessIO(void)
                         LX200ProcessCommand(LX200Cmd);
                         if (LX200Response[0] != '\0')
                         {
-                            strcpy(USB_In_Buffer, LX200Response);
+                            strcat(USB_In_Buffer, LX200Response);
                             numBytesWrite = strlen(USB_In_Buffer);
                         }
                         LX200Response[0] = '\0';
@@ -446,13 +448,14 @@ static void ProcessIO(void)
                 {
                     LX200Cmd[j++] = USB_Out_Buffer[i];
                 }
-
-                if (numBytesWrite)
-                {
-                    putUSBUSART(USB_In_Buffer, numBytesWrite);
-                }
             }
-
+            
+            if (numBytesWrite)
+            {
+                int32_t d = GetInstructionClock() / 1000 * 200;
+                __delay32(d);   // skychart compatibility
+                putUSBUSART(USB_In_Buffer, numBytesWrite);
+            }
         }
     }
 

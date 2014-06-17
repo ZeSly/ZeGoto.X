@@ -193,6 +193,7 @@ void DecMotorInit(void)
     {
         Dec.StepPosition = Mount.Config.NbStepMax / 4; // Set default position to north celestial pole
     }
+    Dec.StepTarget = Dec.StepPosition;
 
     Dec.StepStart = Dec.StepPosition;
     Dec.NorthPoleOVerflow = FALSE;

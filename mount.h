@@ -47,6 +47,10 @@ typedef struct
     unsigned RADefaultDirection : 1;
     unsigned DecDefaultDirection : 1;
 
+    unsigned ParkEast : 1;
+    double ParkAltitude;
+    double ParkAzimuth;
+
     double Latitude;
     double Longitude;
     double Elevation;

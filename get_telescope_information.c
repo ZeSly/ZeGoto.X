@@ -320,7 +320,7 @@ void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double 
 
     double hour_angle = asin(sin_ha) * 180.0 / PI;
     hour_angle /= 15.0;
-    *ra = tsmh_h - hour_angle;
+    *ra = fmod(tsmh_h - hour_angle, 24.0);
     *dec = asin(sin_dec) * 180.0 / PI;
 }
 
@@ -374,11 +374,11 @@ void GetTelescopeAltitude()
 
     if (LX200Precise)
     {
-        sprintf(LX200Response, "%c%03.0f*%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes);
+        sprintf(LX200Response, "%c%02.0f*%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes);
     }
     else
     {
-        sprintf(LX200Response, "%c%03.0f*%02.0f'%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes, seconds);
+        sprintf(LX200Response, "%c%02.0f*%02.0f'%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes, seconds);
     }
 }
 

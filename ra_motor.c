@@ -216,14 +216,15 @@ void RAMotorInit(void)
 
     MotorTimerPeriod = Mount.SideralHalfPeriod;
     UpdateMotorTimerPeriod();
+    RA.StepPerSec = Mount.Config.NbStepMax / (24L * 3600L);
 
     RTCCReadArray(RTCC_RAM, (BYTE *)&RA.StepPosition, sizeof (RA.StepPosition));
     if (RA.StepPosition < 0 || RA.StepPosition > Mount.Config.NbStepMax)
     {
         RA.StepPosition = 0; // Set default position to north celestial pole
     }
+    RA.StepTarget = RA.StepPosition;
 
-    RA.StepPerSec = Mount.Config.NbStepMax / (24L * 3600L);
     RA.StepStart = RA.StepPosition;
 
     Timer2Init();

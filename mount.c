@@ -51,6 +51,12 @@ void MountInit()
         Mount.Config.RADefaultDirection = 0;
         Mount.Config.DecDefaultDirection = 0;
 
+        /* Park coordinates */
+        Mount.Config.ParkEast = 0;
+        Mount.Config.ParkAltitude = 0;
+        Mount.Config.ParkAzimuth = 0;
+
+        /* Site location */
         Mount.Config.Latitude = 45.2448;
         Mount.Config.Longitude = -5.63314;
         Mount.Config.Elevation = 200.0;

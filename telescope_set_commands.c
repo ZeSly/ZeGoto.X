@@ -321,7 +321,7 @@ void SetCurrentSiteLatitude()
  * Input:           None
  * Output:          None
  * Side Effects:    None
- * Overview:        :Sedddd#
+ * Overview:        :Sudddd#
  *                  Set current site altitude ~ OpenGoto Specific ~
  *****************************************************************************/
 void SetCurrentSiteAltitude()
@@ -348,4 +348,60 @@ void SetCurrentSiteAltitude()
         SaveMountConfig(&Mount.Config);
     }
     LX200Response[1] = '\0';
+}
+
+/******************************************************************************
+ * Function:        void SetTargetObjectAltitude()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SasDD*MM# or :SasDD*MM"SS#
+ *                  Set target object altitude
+ *****************************************************************************/
+void SetTargetObjectAltitude()
+{
+    double ra, dec;
+    double azimuth, altitude;
+    int p = 2;
+
+    while (LX200String[p] == ' ')
+        p++;
+
+    ComputeAzimuthalCoord(&altitude, &azimuth);
+
+    LX200Response[0] = DMSToDec(&altitude, LX200String + p) + '0';
+    LX200Response[1] = '\0';
+
+    ComputeEquatorialCoord(altitude, azimuth, &ra, &dec);
+    RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+    Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
+}
+
+/******************************************************************************
+ * Function:        void SetTargetObjectAzimuth()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        :SasDD*MM# or :SasDD*MM"SS#
+ *                  Set target object altitude
+ *****************************************************************************/
+void SetTargetObjectAzimuth()
+{
+    double ra, dec;
+    double azimuth, altitude;
+    int p = 2;
+
+    while (LX200String[p] == ' ')
+        p++;
+
+    ComputeAzimuthalCoord(&altitude, &azimuth);
+
+    LX200Response[0] = DMSToDec(&azimuth, LX200String + p) + '0';
+    LX200Response[1] = '\0';
+
+    ComputeEquatorialCoord(altitude, azimuth, &ra, &dec);
+    RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+    Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
 }

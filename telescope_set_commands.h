@@ -34,4 +34,7 @@ void SetCurrentSiteLongitude();
 void SetCurrentSiteLatitude();
 void SetCurrentSiteAltitude();
 
+void SetTargetObjectAltitude();
+void SetTargetObjectAzimuth();
+
 #endif	/* TELESCOPE_SET_COMMANDS_H */

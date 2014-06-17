@@ -55,5 +55,6 @@ void GetRAString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
 void GetDecString(int32_t StepPosition_P, BOOL Precise_P, char *Str_P);
 
 void ComputeAzimuthalCoord(double *Altitude, double *Azimuth);
+void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double *dec);
 
 #endif	/* GET_TELESCOPE_INFORMATION_H */
