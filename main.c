@@ -146,7 +146,7 @@ int main(void)
     GuidingTimerInit();
 
     // Start RA motor at sideral rate
-    RAStart();
+    if (Mount.Config.IsParked == 0) RAStart();
 
     GPSStart();
 

@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#include "utils.h"
 #include "lx200_protocol.h"
 #include "get_telescope_information.h"
 #include "mount.h"

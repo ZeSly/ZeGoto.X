@@ -89,6 +89,8 @@
       <itemPath>reticule.h</itemPath>
       <itemPath>gps.h</itemPath>
       <itemPath>mount.h</itemPath>
+      <itemPath>home_position_commands.h</itemPath>
+      <itemPath>utils.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -173,6 +175,8 @@
       <itemPath>reticule.c</itemPath>
       <itemPath>BerkeleyTCPServerLX200.c</itemPath>
       <itemPath>delay32.s</itemPath>
+      <itemPath>home_position_commands.c</itemPath>
+      <itemPath>utils.c</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"

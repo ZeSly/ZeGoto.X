@@ -158,6 +158,13 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
                 RAState = MOTOR_STOP;
                 CurrentMove &= ~MOVE_RA;
                 RA_DIR_IO = Mount.WestDirection;
+                if (RA.IsParking == PARKING)
+                {
+                    // stop motor after slewing to park position
+                    T2CONbits.TON = 0;
+                    RA_SLEEP_IO = 0;
+                    RA_FAULT_CN = 0;
+                }
             }
 
             
@@ -228,10 +235,20 @@ void RAMotorInit(void)
     RA.StepStart = RA.StepPosition;
 
     Timer2Init();
+
+    if (Mount.Config.IsParked == 1)
+    {
+        RA.IsParking = PARKED;
+    }
+    else
+    {
+        RA.IsParking = UNPARKED;
+    }
 }
 
 void RAStart(void)
 {
+    RA.IsParking = UNPARKED;
     RA_SLEEP_IO = 1;
     RA_FAULT_CN = 1;
     CurrentSpeed = 1;
@@ -365,6 +382,16 @@ void UpdateRAStepPosition()
     {
         RTCCWriteArray(RTCC_RAM, (BYTE*) &RA.StepPosition, sizeof (RA.StepPosition));
         SavePosition = FALSE;
+    }
+
+    if (RA.IsParking == PARKING && RAState == MOTOR_STOP)
+    {
+        RA.IsParking = PARKED;
+        if (Dec.IsParking == PARKED)
+        {
+            Mount.Config.IsParked = TRUE;
+            SaveMountConfig(&Mount.Config);
+        }
     }
 }
 

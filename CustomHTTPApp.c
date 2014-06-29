@@ -61,6 +61,7 @@
 #include "main.h"		// Needed for SaveAppConfig() prototype
 #include "USB/usb.h"
 
+#include "utils.h"
 #include "mount.h"
 #include "inputs.h"
 #include "ra_motor.h"
@@ -887,17 +888,6 @@ void HTTPPrint_datetime(void)
     datetime[i++] = '\0';
 
     TCPPutString(sktHTTP, (BYTE *) datetime);
-}
-
-int Dec2DMS(double d, char *s)
-{
-    double fract;
-    double deg, min, sec;
-
-    fract = fabs(modf(d, &deg));
-    fract = modf(fract * 60.0, &min);
-    sec = fract * 60.0;
-    return sprintf(s, "%.0f&deg;%.0f'%.2f''", deg, min, sec);
 }
 
 void HTTPPrint_azimuthcoord(void)

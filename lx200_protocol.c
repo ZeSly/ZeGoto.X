@@ -28,6 +28,7 @@
 #include "slew_rate_commands.h"
 #include "telescope_set_commands.h"
 #include "gps.h"
+#include "home_position_commands.h"
 #include "reticule.h"
 
 char LX200String[16];
@@ -62,8 +63,7 @@ typedef struct
 
 void DumpSpeedList();
 
-LX200Command LX200CommandTab[] =
-{
+LX200Command LX200CommandTab[] ={
     { "GR", 2, GetTelescopeRA},
     { "Gr", 2, GetCurrentTargetRA},
     { "GD", 2, GetTelescopeDeclination},
@@ -79,9 +79,6 @@ LX200Command LX200CommandTab[] =
     { "Gg", 2, GetCurrentSiteLongitude},
     { "Gt", 2, GetCurrentSiteLatitude},
     { "Gu", 2, GetCurrentSiteAltitude},
-
-    { "U", 1, PrecisionToggle},
-    { "P", 1, GetPrecision},
 
     { "CM", 2, SyncWithCurrentTarget},
 
@@ -110,8 +107,8 @@ LX200Command LX200CommandTab[] =
     { "Sr", 2, SetTargetObjectRA},
     { "Sd", 2, SetTargetObjectDeclination},
 
-    { "Sa", 2, SetTargetObjectAltitude },
-    { "Sz", 2, SetTargetObjectAzimuth },
+    { "Sa", 2, SetTargetObjectAltitude},
+    { "Sz", 2, SetTargetObjectAzimuth},
 
     { "SC", 2, SetDate},
     { "SL", 2, SetLocalTime},
@@ -120,6 +117,11 @@ LX200Command LX200CommandTab[] =
     { "Sg", 2, SetCurrentSiteLongitude},
     { "St", 2, SetCurrentSiteLatitude},
     { "Su", 2, SetCurrentSiteAltitude},
+
+    { "hS", 2, homeSetParkPosition},
+    { "hP", 2, homeSlewToParkPosition},
+    { "hW", 2, homeUnpark},
+//    { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
 
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},
@@ -132,7 +134,12 @@ LX200Command LX200CommandTab[] =
     { "ZGr", 3, GetStepTargetRA},
     { "ZGd", 3, GetStepTargetDeclination},
 
-//    { "ZGs", 3, DumpSpeedList },
+    { "U", 1, PrecisionToggle},
+    { "P", 1, GetPrecision},
+    { "V", 1, GetTelescopeFirmwareNumber},
+//    { "V", 1, AstroPhysicsVersion},   
+
+    //    { "ZGs", 3, DumpSpeedList },
 
     { NULL, 0, NULL}
 };

@@ -47,6 +47,7 @@ typedef struct
     int32_t StepTarget;
     int32_t NumberStep;
     int32_t DecelPositon;
+    park_mode_t IsParking;
 } ra_t;
 
 extern ra_t RA;

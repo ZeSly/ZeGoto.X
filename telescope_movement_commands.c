@@ -28,6 +28,7 @@
 #include "ra_motor.h"
 #include "dec_motor.h"
 #include "HardwareProfile.h"
+#include "utils.h"
 
 char CurrentMove;
 
@@ -150,6 +151,8 @@ void Halt()
 
 void GuideNorth()
 {
+    if (Mount.Config.IsParked) return;
+
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
@@ -161,6 +164,8 @@ void GuideNorth()
 
 void MoveNorth()
 {
+    if (Mount.Config.IsParked) return;
+
     if (Mount.IsGuiding == FALSE)
     {
         CurrentMove |= MOVE_TO_NORTH;
@@ -176,6 +181,8 @@ void MoveNorth()
 
 void GuideSouth()
 {
+    if (Mount.Config.IsParked) return;
+
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
@@ -187,6 +194,8 @@ void GuideSouth()
 
 void MoveSouth()
 {
+    if (Mount.Config.IsParked) return;
+
     if (Mount.IsGuiding == FALSE)
     {
         CurrentMove |= MOVE_TO_SOUTH;
@@ -202,6 +211,8 @@ void MoveSouth()
 
 void GuideEast()
 {
+    if (Mount.Config.IsParked) return;
+
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
     {
@@ -213,6 +224,8 @@ void GuideEast()
 
 void MoveEast()
 {
+    if (Mount.Config.IsParked) return;
+
     if (Mount.IsGuiding == FALSE)
     {
         CurrentMove |= MOVE_TO_EAST;
@@ -228,6 +241,8 @@ void MoveEast()
 
 void GuideWest()
 {
+    if (Mount.Config.IsParked) return;
+
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
     {
@@ -239,6 +254,8 @@ void GuideWest()
 
 void MoveWest()
 {
+    if (Mount.Config.IsParked) return;
+
     if (Mount.IsGuiding == FALSE)
     {
         CurrentMove |= MOVE_TO_WEST;
@@ -252,13 +269,19 @@ void MoveWest()
     }
 }
 
-int32_t int32abs(int32_t a)
-{
-    return a < 0 ? -a : a;
-}
-
+/******************************************************************************
+ * Function:        void SlewToTarget()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Slew to RA and dec target position
+ *                  LX200 MS and hP (park) command
+ *****************************************************************************/
 void SlewToTarget()
 {
+    if (Mount.Config.IsParked) return;
+
     if (RA.StepTarget)
     {
         RA.NumberStep = int32abs(RA.StepTarget - RA.StepPosition);

@@ -2,7 +2,7 @@
  *
  *      ~ OpenGoto ~
  *
- *  Right Ascension motor setup and control
+ *  Input PAD and Guide port
  *
  *********************************************************************
  * FileName:        input.c
@@ -28,6 +28,7 @@
 #include "dec_motor.h"
 #include "telescope_movement_commands.h"
 #include "reticule.h"
+#include "home_position_commands.h"
 
 pad_t PadState;
 
@@ -173,6 +174,12 @@ void UpdatePadState()
 
                 if (PadState.PAD_S1 == 0 && PadState.PAD_S2 == 0)
                 {
+                    if (Mount.Config.IsParked == 1 && PadState.PAD_SWITCH == 0)
+                    {
+                        // Unpark when a directionnal key pad is pressed
+                        homeUnpark();
+                    }
+
                     if (PadState.PAD_S3 == 1)
                     {
                         SavedMaxSpeed = Mount.CurrentMaxSpeed;

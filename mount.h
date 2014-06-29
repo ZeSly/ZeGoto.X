@@ -30,6 +30,13 @@ typedef enum
     MOTOR_DECEL,
 } motor_state_t;
 
+typedef enum
+{
+    UNPARKED,
+    PARKING,
+    PARKED
+} park_mode_t;
+
 typedef struct
 {
     /* Mount specific settings */
@@ -47,7 +54,9 @@ typedef struct
     unsigned RADefaultDirection : 1;
     unsigned DecDefaultDirection : 1;
 
+    unsigned IsParked : 1;
     unsigned ParkEast : 1;
+    unsigned ParkPostion : 2;
     double ParkAltitude;
     double ParkAzimuth;
 
@@ -76,8 +85,6 @@ typedef struct
     unsigned SouthDirection : 1;
 
     BOOL IsGuiding;
-
-
 } mount_t;
 
 extern mount_t Mount;

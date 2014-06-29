@@ -19,6 +19,9 @@
 #ifndef DEC_MOTOR_H
 #define	DEC_MOTOR_H
 
+#include "mount.h"
+
+
 #define Dec_EI (IEC0bits.T3IE = 1)
 #define Dec_DI (IEC0bits.T3IE = 0)
 
@@ -49,6 +52,7 @@ typedef struct
     int32_t DecelPositon;
 
     BOOL NorthPoleOVerflow;
+    park_mode_t IsParking;
 } dec_t;
 
 extern dec_t Dec;

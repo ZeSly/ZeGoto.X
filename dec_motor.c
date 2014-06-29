@@ -27,6 +27,7 @@
 #include "dec_motor.h"
 #include "rtcc.h"
 #include "telescope_movement_commands.h"
+#include "ra_motor.h"
 
 dec_t Dec;
 
@@ -199,6 +200,15 @@ void DecMotorInit(void)
     Dec.NorthPoleOVerflow = FALSE;
 
     Timer3Init();
+
+    if (Mount.Config.IsParked == 1)
+    {
+        Dec.IsParking = PARKED;
+    }
+    else
+    {
+        Dec.IsParking = UNPARKED;
+    }
 }
 
 void DecStart(void)
@@ -291,6 +301,11 @@ void UpdateDecStepPosition()
     {
         RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & Dec.StepPosition, sizeof (Dec.StepPosition));
         SavePosition = FALSE;
+    }
+
+    if (Dec.IsParking == PARKING && DecState == MOTOR_STOP)
+    {
+        Dec.IsParking = PARKED;
     }
 }
 
