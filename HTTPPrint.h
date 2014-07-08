@@ -87,6 +87,7 @@ void HTTPPrint_mountconfig_centeringrate(void);
 void HTTPPrint_mountconfig_guidingrate(void);
 void HTTPPrint_result(void);
 void HTTPPrint_result_text(void);
+void HTTPPrint_sideofpier(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -226,6 +227,9 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000005e:
 			HTTPPrint_result_text();
+			break;
+        case 0x0000005f:
+			HTTPPrint_sideofpier();
 			break;
 		default:
 			// Output notification for undefined values

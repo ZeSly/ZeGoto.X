@@ -30,6 +30,7 @@
 #include "dec_motor.h"
 #include "lx200_protocol.h"
 #include "telescope_movement_commands.h"
+#include "utils.h"
 
 /* Position structure */
 ra_t RA;
@@ -349,6 +350,8 @@ void RAChangeDirection()
 
 void UpdateRAStepPosition()
 {
+    double ra, lst;
+
     static BOOL LastNorthPoleOVerflow = FALSE;
     int32_t p;
     static BOOL SavePosition = TRUE;
@@ -393,6 +396,25 @@ void UpdateRAStepPosition()
             SaveMountConfig(&Mount.Config);
         }
     }
+
+    lst = ComputeSideralTime();
+    ra = (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
+    if (ra < lst + 6)
+    {
+        Mount.SideOfPier = PIER_WEST_POLL_WEST;
+    }
+    if (ra < lst)
+    {
+        Mount.SideOfPier = PIER_EAST_POLL_EAST;
+    }
+    if (ra < lst - 6)
+    {
+        Mount.SideOfPier = PIER_WEST_POLL_EAST;
+    }
+    if (ra < lst - 12 || ra >= lst + 12)
+    {
+        Mount.SideOfPier = PIER_EAST_POLL_WEST;
+    }
 }
 
 inline int RAIsMotorStop()
@@ -402,7 +424,7 @@ inline int RAIsMotorStop()
 
 void RAGuideWest()
 {
-    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    MotorTimerPeriod = Mount.SideralHalfPeriod * Mount.Config.GuideSpeed / 10;
     UpdateMotorTimerPeriod();
 }
 

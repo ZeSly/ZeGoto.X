@@ -37,6 +37,11 @@ typedef enum
     PARKED
 } park_mode_t;
 
+#define PIER_EAST_POLL_EAST 0 //00
+#define PIER_EAST_POLL_WEST 1 //01
+#define PIER_WEST_POLL_EAST 2 //10
+#define PIER_WEST_POLL_WEST 3 //11
+
 typedef struct
 {
     /* Mount specific settings */
@@ -83,6 +88,8 @@ typedef struct
     unsigned EastDirection : 1;
     unsigned NorthDirection : 1;
     unsigned SouthDirection : 1;
+
+    unsigned SideOfPier : 2;
 
     BOOL IsGuiding;
 } mount_t;
