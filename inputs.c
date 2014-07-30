@@ -22,7 +22,7 @@
 #include "HardwareProfile.h"
 #include "GenericTypeDefs.h"
 #include "inputs.h"
-#include "TCPIP Stack/Tick.h"
+#include "TCPIP_Stack/Tick.h"
 #include "mount.h"
 #include "ra_motor.h"
 #include "dec_motor.h"

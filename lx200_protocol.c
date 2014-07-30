@@ -121,7 +121,9 @@ LX200Command LX200CommandTab[] ={
     { "hS", 2, homeSetParkPosition},
     { "hP", 2, homeSlewToParkPosition},
     { "hW", 2, homeUnpark},
-//    { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
+    
+    { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
+    { "pS", 2, SideOfPier}, // ASTRO-PHYSICS GTO compatibility
 
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},

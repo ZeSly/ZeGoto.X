@@ -277,11 +277,11 @@ void GetTelescopeAzimuth()
 
     if (LX200Precise)
     {
-        sprintf(LX200Response, "%03.0f*%02.0f#", degrees, minutes);
+        sprintf(LX200Response, "%03.0f*%02.0f'%02.0f#", degrees, minutes, seconds);
     }
     else
     {
-        sprintf(LX200Response, "%03.0f*%02.0f'%02.0f#", degrees, minutes, seconds);
+        sprintf(LX200Response, "%03.0f*%02.0f#", degrees, minutes);
     }
 }
 
@@ -306,11 +306,11 @@ void GetTelescopeAltitude()
 
     if (LX200Precise)
     {
-        sprintf(LX200Response, "%c%02.0f*%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes);
+        sprintf(LX200Response, "%c%02.0f*%02.0f'%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes, seconds);
     }
     else
     {
-        sprintf(LX200Response, "%c%02.0f*%02.0f'%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes, seconds);
+        sprintf(LX200Response, "%c%02.0f*%02.0f#", Altitude < 0 ? '-' : '+', degrees, minutes);
     }
 }
 

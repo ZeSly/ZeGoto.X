@@ -21,7 +21,7 @@
 
 #include "mount.h"
 #include "HardwareProfile.h"
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIP_Stack/TCPIP.h"
 #include "main.h"
 
 mount_t Mount;

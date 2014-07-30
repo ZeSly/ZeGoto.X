@@ -92,7 +92,7 @@
 
 #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
 
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIP_Stack/TCPIP.h"
 
 
 // Defines which port the server will listen on

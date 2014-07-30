@@ -14,53 +14,53 @@
       <logicalFolder name="f2" displayName="TCPIP Config" projectFiles="true">
         <itemPath>Configs/TCPIP ENC28.h</itemPath>
       </logicalFolder>
-      <logicalFolder name="f4" displayName="TCPIP Stack" projectFiles="true">
-        <itemPath>TCPIP Stack/ARCFOUR.h</itemPath>
-        <itemPath>TCPIP Stack/ARP.h</itemPath>
-        <itemPath>TCPIP Stack/Announce.h</itemPath>
-        <itemPath>TCPIP Stack/AutoIP.h</itemPath>
-        <itemPath>TCPIP Stack/BerkeleyAPI.h</itemPath>
-        <itemPath>TCPIP Stack/BigInt.h</itemPath>
-        <itemPath>TCPIP Stack/DHCP.h</itemPath>
-        <itemPath>TCPIP Stack/DNS.h</itemPath>
-        <itemPath>TCPIP Stack/Delay.h</itemPath>
-        <itemPath>TCPIP Stack/DynDNS.h</itemPath>
-        <itemPath>TCPIP Stack/ENC28J60.h</itemPath>
-        <itemPath>TCPIP Stack/FTP.h</itemPath>
-        <itemPath>TCPIP Stack/FileSystem.h</itemPath>
-        <itemPath>TCPIP Stack/HTTP2.h</itemPath>
-        <itemPath>TCPIP Stack/Hashes.h</itemPath>
-        <itemPath>TCPIP Stack/Helpers.h</itemPath>
-        <itemPath>TCPIP Stack/ICMP.h</itemPath>
-        <itemPath>TCPIP Stack/IP.h</itemPath>
-        <itemPath>TCPIP Stack/MAC.h</itemPath>
-        <itemPath>TCPIP Stack/MPFS2.h</itemPath>
-        <itemPath>TCPIP Stack/NBNS.h</itemPath>
-        <itemPath>TCPIP Stack/RSA.h</itemPath>
-        <itemPath>TCPIP Stack/Random.h</itemPath>
-        <itemPath>TCPIP Stack/Reboot.h</itemPath>
-        <itemPath>TCPIP Stack/SMTP.h</itemPath>
-        <itemPath>TCPIP Stack/SNMP.h</itemPath>
-        <itemPath>TCPIP Stack/SNMPv3.h</itemPath>
-        <itemPath>TCPIP Stack/SNTP.h</itemPath>
-        <itemPath>TCPIP Stack/SSL.h</itemPath>
-        <itemPath>TCPIP Stack/SSLClientSize.h</itemPath>
-        <itemPath>TCPIP Stack/StackTsk.h</itemPath>
-        <itemPath>TCPIP Stack/TCP.h</itemPath>
-        <itemPath>TCPIP Stack/TCPIP.h</itemPath>
-        <itemPath>TCPIP Stack/TCPPerformanceTest.h</itemPath>
-        <itemPath>TCPIP Stack/TFTPc.h</itemPath>
-        <itemPath>TCPIP Stack/Telnet.h</itemPath>
-        <itemPath>TCPIP Stack/Tick.h</itemPath>
-        <itemPath>TCPIP Stack/UART.h</itemPath>
-        <itemPath>TCPIP Stack/UART2TCPBridge.h</itemPath>
-        <itemPath>TCPIP Stack/UDP.h</itemPath>
-        <itemPath>TCPIP Stack/UDPPerformanceTest.h</itemPath>
-        <itemPath>TCPIP Stack/XEEPROM.h</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfHelper.h</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfLinkLocal.h</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfMulticastDNS.h</itemPath>
-        <itemPath>TCPIP Stack/regdef.h</itemPath>
+      <logicalFolder name="f4" displayName="TCPIP_Stack" projectFiles="true">
+        <itemPath>TCPIP_Stack/ARCFOUR.h</itemPath>
+        <itemPath>TCPIP_Stack/ARP.h</itemPath>
+        <itemPath>TCPIP_Stack/Announce.h</itemPath>
+        <itemPath>TCPIP_Stack/AutoIP.h</itemPath>
+        <itemPath>TCPIP_Stack/BerkeleyAPI.h</itemPath>
+        <itemPath>TCPIP_Stack/BigInt.h</itemPath>
+        <itemPath>TCPIP_Stack/DHCP.h</itemPath>
+        <itemPath>TCPIP_Stack/DNS.h</itemPath>
+        <itemPath>TCPIP_Stack/Delay.h</itemPath>
+        <itemPath>TCPIP_Stack/DynDNS.h</itemPath>
+        <itemPath>TCPIP_Stack/ENC28J60.h</itemPath>
+        <itemPath>TCPIP_Stack/FTP.h</itemPath>
+        <itemPath>TCPIP_Stack/FileSystem.h</itemPath>
+        <itemPath>TCPIP_Stack/HTTP2.h</itemPath>
+        <itemPath>TCPIP_Stack/Hashes.h</itemPath>
+        <itemPath>TCPIP_Stack/Helpers.h</itemPath>
+        <itemPath>TCPIP_Stack/ICMP.h</itemPath>
+        <itemPath>TCPIP_Stack/IP.h</itemPath>
+        <itemPath>TCPIP_Stack/MAC.h</itemPath>
+        <itemPath>TCPIP_Stack/MPFS2.h</itemPath>
+        <itemPath>TCPIP_Stack/NBNS.h</itemPath>
+        <itemPath>TCPIP_Stack/RSA.h</itemPath>
+        <itemPath>TCPIP_Stack/Random.h</itemPath>
+        <itemPath>TCPIP_Stack/Reboot.h</itemPath>
+        <itemPath>TCPIP_Stack/SMTP.h</itemPath>
+        <itemPath>TCPIP_Stack/SNMP.h</itemPath>
+        <itemPath>TCPIP_Stack/SNMPv3.h</itemPath>
+        <itemPath>TCPIP_Stack/SNTP.h</itemPath>
+        <itemPath>TCPIP_Stack/SSL.h</itemPath>
+        <itemPath>TCPIP_Stack/SSLClientSize.h</itemPath>
+        <itemPath>TCPIP_Stack/StackTsk.h</itemPath>
+        <itemPath>TCPIP_Stack/TCP.h</itemPath>
+        <itemPath>TCPIP_Stack/TCPIP.h</itemPath>
+        <itemPath>TCPIP_Stack/TCPPerformanceTest.h</itemPath>
+        <itemPath>TCPIP_Stack/TFTPc.h</itemPath>
+        <itemPath>TCPIP_Stack/Telnet.h</itemPath>
+        <itemPath>TCPIP_Stack/Tick.h</itemPath>
+        <itemPath>TCPIP_Stack/UART.h</itemPath>
+        <itemPath>TCPIP_Stack/UART2TCPBridge.h</itemPath>
+        <itemPath>TCPIP_Stack/UDP.h</itemPath>
+        <itemPath>TCPIP_Stack/UDPPerformanceTest.h</itemPath>
+        <itemPath>TCPIP_Stack/XEEPROM.h</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfHelper.h</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfLinkLocal.h</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfMulticastDNS.h</itemPath>
+        <itemPath>TCPIP_Stack/regdef.h</itemPath>
       </logicalFolder>
       <logicalFolder name="f5" displayName="USB" projectFiles="true">
         <itemPath>USB/usb.h</itemPath>
@@ -100,55 +100,55 @@
     <logicalFolder name="SourceFiles"
                    displayName="Source Files"
                    projectFiles="true">
-      <logicalFolder name="f1" displayName="TCPIP Stack" projectFiles="true">
-        <itemPath>TCPIP Stack/ARCFOUR.c</itemPath>
-        <itemPath>TCPIP Stack/ARP.c</itemPath>
-        <itemPath>TCPIP Stack/Announce.c</itemPath>
-        <itemPath>TCPIP Stack/AutoIP.c</itemPath>
-        <itemPath>TCPIP Stack/BerkeleyAPI.c</itemPath>
-        <itemPath>TCPIP Stack/BigInt.c</itemPath>
-        <itemPath>TCPIP Stack/DHCP.c</itemPath>
-        <itemPath>TCPIP Stack/DHCPs.c</itemPath>
-        <itemPath>TCPIP Stack/DNS.c</itemPath>
-        <itemPath>TCPIP Stack/DNSs.c</itemPath>
-        <itemPath>TCPIP Stack/Delay.c</itemPath>
-        <itemPath>TCPIP Stack/DynDNS.c</itemPath>
-        <itemPath>TCPIP Stack/ENC28J60.c</itemPath>
-        <itemPath>TCPIP Stack/FTP.c</itemPath>
-        <itemPath>TCPIP Stack/FileSystem.c</itemPath>
-        <itemPath>TCPIP Stack/HTTP2.c</itemPath>
-        <itemPath>TCPIP Stack/Hashes.c</itemPath>
-        <itemPath>TCPIP Stack/Helpers.c</itemPath>
-        <itemPath>TCPIP Stack/ICMP.c</itemPath>
-        <itemPath>TCPIP Stack/IP.c</itemPath>
-        <itemPath>TCPIP Stack/MPFS2.c</itemPath>
-        <itemPath>TCPIP Stack/NBNS.c</itemPath>
-        <itemPath>TCPIP Stack/RSA.c</itemPath>
-        <itemPath>TCPIP Stack/Random.c</itemPath>
-        <itemPath>TCPIP Stack/Reboot.c</itemPath>
-        <itemPath>TCPIP Stack/SMTP.c</itemPath>
-        <itemPath>TCPIP Stack/SNMP.c</itemPath>
-        <itemPath>TCPIP Stack/SNMPv3.c</itemPath>
-        <itemPath>TCPIP Stack/SNMPv3USM.c</itemPath>
-        <itemPath>TCPIP Stack/SNTP.c</itemPath>
-        <itemPath>TCPIP Stack/SPIEEPROM.c</itemPath>
-        <itemPath>TCPIP Stack/SPIFlash.c</itemPath>
-        <itemPath>TCPIP Stack/SPIRAM.c</itemPath>
-        <itemPath>TCPIP Stack/SSL.c</itemPath>
-        <itemPath>TCPIP Stack/StackTsk.c</itemPath>
-        <itemPath>TCPIP Stack/TCP.c</itemPath>
-        <itemPath>TCPIP Stack/TCPPerformanceTest.c</itemPath>
-        <itemPath>TCPIP Stack/TFTPc.c</itemPath>
-        <itemPath>TCPIP Stack/Telnet.c</itemPath>
-        <itemPath>TCPIP Stack/Tick.c</itemPath>
-        <itemPath>TCPIP Stack/UART.c</itemPath>
-        <itemPath>TCPIP Stack/UART2TCPBridge.c</itemPath>
-        <itemPath>TCPIP Stack/UDP.c</itemPath>
-        <itemPath>TCPIP Stack/UDPPerformanceTest.c</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfHelper.c</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfLinkLocal.c</itemPath>
-        <itemPath>TCPIP Stack/ZeroconfMulticastDNS.c</itemPath>
-        <itemPath>TCPIP Stack/i2ceeprom.c</itemPath>
+      <logicalFolder name="f1" displayName="TCPIP_Stack" projectFiles="true">
+        <itemPath>TCPIP_Stack/ARCFOUR.c</itemPath>
+        <itemPath>TCPIP_Stack/ARP.c</itemPath>
+        <itemPath>TCPIP_Stack/Announce.c</itemPath>
+        <itemPath>TCPIP_Stack/AutoIP.c</itemPath>
+        <itemPath>TCPIP_Stack/BerkeleyAPI.c</itemPath>
+        <itemPath>TCPIP_Stack/BigInt.c</itemPath>
+        <itemPath>TCPIP_Stack/DHCP.c</itemPath>
+        <itemPath>TCPIP_Stack/DHCPs.c</itemPath>
+        <itemPath>TCPIP_Stack/DNS.c</itemPath>
+        <itemPath>TCPIP_Stack/DNSs.c</itemPath>
+        <itemPath>TCPIP_Stack/Delay.c</itemPath>
+        <itemPath>TCPIP_Stack/DynDNS.c</itemPath>
+        <itemPath>TCPIP_Stack/ENC28J60.c</itemPath>
+        <itemPath>TCPIP_Stack/FTP.c</itemPath>
+        <itemPath>TCPIP_Stack/FileSystem.c</itemPath>
+        <itemPath>TCPIP_Stack/HTTP2.c</itemPath>
+        <itemPath>TCPIP_Stack/Hashes.c</itemPath>
+        <itemPath>TCPIP_Stack/Helpers.c</itemPath>
+        <itemPath>TCPIP_Stack/ICMP.c</itemPath>
+        <itemPath>TCPIP_Stack/IP.c</itemPath>
+        <itemPath>TCPIP_Stack/MPFS2.c</itemPath>
+        <itemPath>TCPIP_Stack/NBNS.c</itemPath>
+        <itemPath>TCPIP_Stack/RSA.c</itemPath>
+        <itemPath>TCPIP_Stack/Random.c</itemPath>
+        <itemPath>TCPIP_Stack/Reboot.c</itemPath>
+        <itemPath>TCPIP_Stack/SMTP.c</itemPath>
+        <itemPath>TCPIP_Stack/SNMP.c</itemPath>
+        <itemPath>TCPIP_Stack/SNMPv3.c</itemPath>
+        <itemPath>TCPIP_Stack/SNMPv3USM.c</itemPath>
+        <itemPath>TCPIP_Stack/SNTP.c</itemPath>
+        <itemPath>TCPIP_Stack/SPIEEPROM.c</itemPath>
+        <itemPath>TCPIP_Stack/SPIFlash.c</itemPath>
+        <itemPath>TCPIP_Stack/SPIRAM.c</itemPath>
+        <itemPath>TCPIP_Stack/SSL.c</itemPath>
+        <itemPath>TCPIP_Stack/StackTsk.c</itemPath>
+        <itemPath>TCPIP_Stack/TCP.c</itemPath>
+        <itemPath>TCPIP_Stack/TCPPerformanceTest.c</itemPath>
+        <itemPath>TCPIP_Stack/TFTPc.c</itemPath>
+        <itemPath>TCPIP_Stack/Telnet.c</itemPath>
+        <itemPath>TCPIP_Stack/Tick.c</itemPath>
+        <itemPath>TCPIP_Stack/UART.c</itemPath>
+        <itemPath>TCPIP_Stack/UART2TCPBridge.c</itemPath>
+        <itemPath>TCPIP_Stack/UDP.c</itemPath>
+        <itemPath>TCPIP_Stack/UDPPerformanceTest.c</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfHelper.c</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfLinkLocal.c</itemPath>
+        <itemPath>TCPIP_Stack/ZeroconfMulticastDNS.c</itemPath>
+        <itemPath>TCPIP_Stack/i2ceeprom.c</itemPath>
       </logicalFolder>
       <logicalFolder name="f2" displayName="USB" projectFiles="true">
         <itemPath>USB/usb_device.c</itemPath>
@@ -185,9 +185,8 @@
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>TCPIP_Stack</Elem>
     <Elem>Configs</Elem>
-    <Elem>TCPIP Stack</Elem>
+    <Elem>TCPIP_Stack</Elem>
     <Elem>USB</Elem>
     <Elem>Application linker files</Elem>
   </sourceRootList>
@@ -209,6 +208,8 @@
           <linkerLibItems>
           </linkerLibItems>
         </linkerTool>
+        <archiverTool>
+        </archiverTool>
         <loading>
           <useAlternateLoadableFile>false</useAlternateLoadableFile>
           <parseOnProdLoad>true</parseOnProdLoad>

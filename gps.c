@@ -20,7 +20,7 @@
 #include <xc.h>
 #include "HardwareProfile.h"
 #include "TCPIPConfig.h"
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIP_Stack/TCPIP.h"
 #include "rtcc.h"
 
 #include <string.h>

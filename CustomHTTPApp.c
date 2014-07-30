@@ -57,7 +57,7 @@
 
 #if defined(STACK_USE_HTTP2_SERVER)
 
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIP_Stack/TCPIP.h"
 #include "main.h"		// Needed for SaveAppConfig() prototype
 #include "USB/usb.h"
 
@@ -831,8 +831,8 @@ void HTTPPrint_wikiskycoord(void)
     char wikiskycoord[32];
     double ra, dec;
 
-    ra = (double) RA.StepPosition / (double) Mount.Config.NbStepMax * 24.0;
-    dec = (double) Dec.StepPosition / (double) Mount.Config.NbStepMax * 360.0;
+    ra = (double) RA.StepPosition * 24.0 / (double) Mount.Config.NbStepMax;
+    dec = (double) Dec.StepPosition * 360.0 / (double) Mount.Config.NbStepMax;
 
     sprintf(wikiskycoord, "ra=%f&de=%f", ra, dec);
     TCPPutString(sktHTTP, (BYTE *) wikiskycoord);

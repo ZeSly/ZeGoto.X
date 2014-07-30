@@ -62,17 +62,17 @@
 #define THIS_IS_STACK_APPLICATION
 
 // Include all headers for any enabled TCPIP Stack functions
-#include "TCPIP Stack/TCPIP.h"
+#include "TCPIP_Stack/TCPIP.h"
 
 #include "usb_config.h"
 #include "USB/usb_device.h"
 #include "USB/usb.h"
 
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
-#include "TCPIP Stack/ZeroconfLinkLocal.h"
+#include "TCPIP_Stack/ZeroconfLinkLocal.h"
 #endif
 #if defined(STACK_USE_ZEROCONF_MDNS_SD)
-#include "TCPIP Stack/ZeroconfMulticastDNS.h"
+#include "TCPIP_Stack/ZeroconfMulticastDNS.h"
 #endif
 
 // Include functions specific to this stack application
