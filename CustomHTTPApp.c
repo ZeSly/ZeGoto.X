@@ -1001,6 +1001,7 @@ void HTTPPrint_svggpssignal()
     int i;
 
     p = str;
+    *p = '\0';
     for (i = 0; i < GPS.SatellitesInView; i++)
     {
         p += sprintf(p, "%s,%d,%d,%d,",
@@ -1009,7 +1010,7 @@ void HTTPPrint_svggpssignal()
                      GPS.Satellites[i].Azimuth,
                      GPS.Satellites[i].SNR);
     }
-    *--p = '\0';
+    if (i > 0) *--p = '\0';
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 

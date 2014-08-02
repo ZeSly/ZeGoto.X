@@ -380,22 +380,21 @@ void GPSDecodeFrame()
             }
             if (GPS.MSLAltitude[0])
             {
-                double f = 1;
                 int z;
 
                 Elevation = 0;
                 for (z = 0; GPS.MSLAltitude[z] && GPS.MSLAltitude[z] != '.'; z++)
                 {
-                    Elevation *= f;
+                    Elevation *= 10;
                     Elevation += GPS.MSLAltitude[z] - '0';
-                    f = 10;
                 }
                 if (GPS.MSLAltitude[z] == '.')
                 {
+                    double f = 10;
                     for (z += 1; GPS.MSLAltitude[z]; z++)
                     {
-                        Elevation += GPS.MSLAltitude[z] - '0';
-                        Elevation /= 10;
+                        Elevation += (GPS.MSLAltitude[z] - '0') / 10;
+                        f *= 10;
                     }
                 }
 
