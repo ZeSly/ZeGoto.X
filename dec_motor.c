@@ -40,42 +40,22 @@ static motor_state_t DecState = MOTOR_STOP;
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
-static uint16_t tmodulo;
-static uint16_t tlap;
-static uint16_t tint_cnt;
 static int32_t accel_decel_cnt;
 
-void Timer3Init(void)
+void Timer45Init(void)
 {
-    T3CON = 0x0000; // 16 bit time, 1:1 prescale, internal clock
-    IPC2bits.T3IP = 6; // Interrupt priority 6 (high)
-    IFS0bits.T3IF = 0;
-    IEC0bits.T3IE = 1;
+    T4CON = 0x0008;     // 32 bit time, 1:1 prescale, internal clock
+    T5CON = 0;
+    IPC7bits.T5IP = 6;  // Interrupt priority 6 (high)
+    IFS1bits.T5IF = 0;
+    IEC1bits.T5IE = 1;
 }
 
-void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
+void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
 {
     BOOL NewMotorPeriod = FALSE;
 
-    if (tmodulo != 0)
-    {
-        tint_cnt--;
-        if (tint_cnt == 0)
-        {
-            PR3 = tmodulo;
-        }
-        else if (tint_cnt == 0xFFFF)
-        {
-            DEC_STEP_IO ^= 1;
-
-            tint_cnt = tlap;
-            PR3 = 0xFFFF;
-        }
-    }
-    else
-    {
-        DEC_STEP_IO ^= 1;
-    }
+    DEC_STEP_IO ^= 1;
 
     if (DEC_STEP_IO == 1)
     {
@@ -98,7 +78,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         break;
 
     case MOTOR_ACCEL:
-        accel_decel_cnt -= PR3;
+        accel_decel_cnt -= MotorTimerPeriod;
         if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = Mount.AccelPeriod;
@@ -114,7 +94,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
         break;
 
     case MOTOR_DECEL:
-        accel_decel_cnt -= PR3;
+        accel_decel_cnt -= MotorTimerPeriod;
         if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = Dec.NumberStep ? Mount.AccelPeriod : Mount.DecelPeriod;
@@ -125,7 +105,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             {
                 DecState = MOTOR_STOP;
                 CurrentMove &= ~MOVE_DEC;
-                T3CONbits.TON = 0;
+                T4CONbits.TON = 0;
                 DEC_SLEEP_IO = 0;
                 DEC_FAULT_CN = 0;
             }
@@ -140,40 +120,20 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     if (NewMotorPeriod == TRUE)
     {
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
-        if (MotorTimerPeriod > 0xFFFF)
-        {
-            tlap = MotorTimerPeriod / 0xFFFF;
-            tint_cnt = tlap;
-            tmodulo = MotorTimerPeriod % 0xFFFF;
-            PR3 = 0xFFFF;
-        }
-        else
-        {
-            tint_cnt = 0;
-            tmodulo = 0;
-            PR3 = MotorTimerPeriod;
-        }
+        PR4 = MotorTimerPeriod & 0xFFFF;
+        PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
     }
 
     // Reset interrupt flag
-    IFS0bits.T3IF = 0;
+    IFS1bits.T5IF = 0;
 }
 
 static void UpdateMotorTimerPeriod()
 {
-    if (MotorTimerPeriod > 0xFFFF)
-    {
-        tlap = MotorTimerPeriod / 0xFFFF;
-        tint_cnt = tlap;
-        tmodulo = MotorTimerPeriod % 0xFFFF;
-        PR3 = 0xFFFF;
-    }
-    else
-    {
-        tint_cnt = 0;
-        tmodulo = 0;
-        PR3 = MotorTimerPeriod;
-    }
+    TMR5HLD = 0;
+    TMR4 = 0;
+    PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
+    PR4 = MotorTimerPeriod & 0xFFFF;
 }
 
 void DecMotorInit(void)
@@ -199,7 +159,7 @@ void DecMotorInit(void)
     Dec.StepStart = Dec.StepPosition;
     Dec.NorthPoleOVerflow = FALSE;
 
-    Timer3Init();
+    Timer45Init();
 
     if (Mount.Config.IsParked == 1)
     {
@@ -216,7 +176,7 @@ void DecStart(void)
     DEC_SLEEP_IO = 1;
     DEC_FAULT_CN = 1;
     CurrentSpeed = 1;
-    T3CONbits.TON = 1;
+    T4CONbits.TON = 1;
 }
 
 void DecAccelerate(void)
@@ -240,7 +200,7 @@ void DecAccelerate(void)
         accel_decel_cnt = Mount.AccelPeriod;
         DecState = MOTOR_ACCEL;
 
-        T3CONbits.TON = 1;
+        T4CONbits.TON = 1;
     }
 }
 
@@ -255,7 +215,7 @@ void DecDecelerate(void)
 
 void DecStop(void)
 {
-    T3CONbits.TON = 0;
+    T4CONbits.TON = 0;
     DEC_SLEEP_IO = 0;
     DEC_FAULT_CN = 0;
 }

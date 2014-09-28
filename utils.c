@@ -123,13 +123,22 @@ void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double 
  * Side Effects:    None
  * Overview:        Convert an angle as double to string
  *****************************************************************************/
-int Dec2DMS(double d, char *s)
+int _Dec2DMS(double d, char *s, int h)
 {
     double fract;
     double deg, min, sec;
+    int ret;
 
     fract = fabs(modf(d, &deg));
     fract = modf(fract * 60.0, &min);
     sec = fract * 60.0;
-    return sprintf(s, "%.0f&deg;%.0f'%.2f''", deg, min, sec);
+    if (h)
+    {
+        ret = sprintf(s, "%02.0f:%02.0f:%02.0f", deg, min, sec);
+    }
+    else
+    {
+        ret = sprintf(s, "%.0f&deg;%.0f'%.2f''", deg, min, sec);
+    }
+    return ret;
 }

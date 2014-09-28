@@ -324,7 +324,14 @@ void GetTelescopeAltitude()
  *****************************************************************************/
 void GetSideralTime()
 {
-    strcpy(LX200Response, "00:00:00#");
+    double st;
+    char *p;
+
+    p = LX200Response;
+    st = ComputeSideralTime();
+    p += Dec2HMS(st, p);
+    *p++ = '#';
+    *p = '\0';
 }
 
 /******************************************************************************

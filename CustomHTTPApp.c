@@ -896,6 +896,7 @@ void HTTPPrint_azimuthcoord(void)
     char *p;
     double Azimuth, Altitude;
     datetime_t datetime;
+    double st;
 
     ComputeAzimuthalCoord(&Altitude, &Azimuth);
 
@@ -909,6 +910,10 @@ void HTTPPrint_azimuthcoord(void)
     p += sprintf(p, "Local time: %02d/%02d/%04d %02d:%02d:%02d<br/>\n",
                  datetime.day, datetime.month, datetime.year,
                  datetime.hour, datetime.minute, datetime.second);
+    st = ComputeSideralTime();
+    p += sprintf(p, "Sideral time: ");
+    p += Dec2HMS(st, p);
+    p += sprintf(p, "<br/>\n");
 
     TCPPutString(sktHTTP, (BYTE *) str);
 }

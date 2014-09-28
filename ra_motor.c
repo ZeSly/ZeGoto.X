@@ -44,17 +44,15 @@ static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
-static uint16_t tmodulo;
-static uint16_t tlap;
-static uint16_t tint_cnt;
 static int32_t accel_decel_cnt;
 
-void Timer2Init(void)
+void Timer23Init(void)
 {
-    T2CON = 0x0000; // 16 bit time, 1:1 prescale, internal clock
-    IPC1bits.T2IP = 6; // Interrupt priority 6 (high)
-    IFS0bits.T2IF = 0;
-    IEC0bits.T2IE = 1;
+    T2CON = 0x0008;     // 32 bit time, 1:1 prescale, internal clock
+    T3CON = 0;
+    IPC2bits.T3IP = 6;  // Interrupt priority 6 (high)
+    IFS0bits.T3IF = 0;
+    IEC0bits.T3IE = 1;
 }
 
 //typedef struct s_speedlist
@@ -68,29 +66,11 @@ void Timer2Init(void)
 //t_speedlist *lastspeed = NULL;
 //t_speedlist *speedlist = NULL;
 
-void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
+void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 {
     BOOL NewMotorPeriod = FALSE;
 
-    if (tmodulo != 0)
-    {
-        tint_cnt--;
-        if (tint_cnt == 0)
-        {
-            PR2 = tmodulo;
-        }
-        else if (tint_cnt == 0xFFFF)
-        {
-            RA_STEP_IO ^= 1;
-
-            tint_cnt = tlap;
-            PR2 = 0xFFFF;
-        }
-    }
-    else
-    {
-        RA_STEP_IO ^= 1;
-    }
+    RA_STEP_IO ^= 1;
 
     if (RA_STEP_IO == 1)
     {
@@ -115,7 +95,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         break;
 
     case MOTOR_ACCEL:
-        accel_decel_cnt -= PR2;
+        accel_decel_cnt -= MotorTimerPeriod;
         if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = Mount.AccelPeriod;
@@ -139,7 +119,7 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
         break;
 
     case MOTOR_DECEL:
-        accel_decel_cnt -= PR2;
+        accel_decel_cnt -= MotorTimerPeriod;
         if (accel_decel_cnt <= 0)
         {
             accel_decel_cnt = RA.NumberStep ? Mount.AccelPeriod : Mount.DecelPeriod;
@@ -179,40 +159,20 @@ void __attribute__((interrupt, no_auto_psv)) _T2Interrupt(void)
     if (NewMotorPeriod == TRUE)
     {
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
-        if (MotorTimerPeriod > 0xFFFF)
-        {
-            tlap = MotorTimerPeriod / 0xFFFF;
-            tint_cnt = tlap;
-            tmodulo = MotorTimerPeriod % 0xFFFF;
-            PR2 = 0xFFFF;
-        }
-        else
-        {
-            tint_cnt = 0;
-            tmodulo = 0;
-            PR2 = MotorTimerPeriod;
-        }
+        PR2 = MotorTimerPeriod & 0xFFFF;
+        PR3 = (MotorTimerPeriod >> 16) & 0xFFFF;
     }
-
+    
     // Reset interrupt flag
-    IFS0bits.T2IF = 0;
+    IFS0bits.T3IF = 0;
 }
 
 static void UpdateMotorTimerPeriod()
 {
-    if (MotorTimerPeriod > 0xFFFF)
-    {
-        tlap = MotorTimerPeriod / 0xFFFF;
-        tint_cnt = tlap;
-        tmodulo = MotorTimerPeriod % 0xFFFF;
-        PR2 = 0xFFFF;
-    }
-    else
-    {
-        tint_cnt = 0;
-        tmodulo = 0;
-        PR2 = MotorTimerPeriod;
-    }
+    TMR3HLD = 0;
+    TMR2 = 0;
+    PR3 = (MotorTimerPeriod >> 16) & 0xFFFF;
+    PR2 = MotorTimerPeriod & 0xFFFF;
 }
 
 void RAMotorInit(void)
@@ -235,7 +195,7 @@ void RAMotorInit(void)
 
     RA.StepStart = RA.StepPosition;
 
-    Timer2Init();
+    Timer23Init();
 
     if (Mount.Config.IsParked == 1)
     {

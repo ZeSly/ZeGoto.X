@@ -3,7 +3,7 @@ setecho 0
 fileopen fhandle 'test-report.txt' 0
 
 ; set date
-cmd = ':SC05/06/14#'
+cmd = ':SC09/28/14#'
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
@@ -17,7 +17,7 @@ endif
 flushrecv
 
 ; set local time
-cmd = ':SL09:00:0#'
+cmd = ':SL16:17:0#'
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
