@@ -45,7 +45,8 @@ BOOL LX200Precise = FALSE;
  *****************************************************************************/
 void PrecisionToggle()
 {
-    LX200Precise = LX200Precise ? FALSE : TRUE;
+//    LX200Precise = LX200Precise ? FALSE : TRUE;
+    LX200Precise = TRUE;
 }
 
 void GetPrecision()

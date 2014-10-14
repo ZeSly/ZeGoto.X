@@ -63,7 +63,8 @@ typedef struct
 
 void DumpSpeedList();
 
-LX200Command LX200CommandTab[] ={
+LX200Command LX200CommandTab[] =
+{
     { "GR", 2, GetTelescopeRA},
     { "Gr", 2, GetCurrentTargetRA},
     { "GD", 2, GetTelescopeDeclination},
