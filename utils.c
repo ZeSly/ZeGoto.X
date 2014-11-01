@@ -27,6 +27,13 @@
 #include "rtcc.h"
 
 /******************************************************************************
+ * Macros
+ *****************************************************************************/
+
+#define PI 3.14159265358979323846
+#define DEGREES(a) (a * PI / 180.0)
+
+/******************************************************************************
  * Function:        int32_t int32abs(int32_t a)
  * PreCondition:    None
  * Input:           int32_t
@@ -38,13 +45,6 @@ inline int32_t int32abs(int32_t a)
 {
     return a < 0 ? -a : a;
 }
-
-/******************************************************************************
- * Constant for time and coordinate calculation
- *****************************************************************************/
-
-#define PI 3.14159265358979323846
-#define DEGREES(a) (a * PI / 180.0)
 
 /******************************************************************************
  * Function:        void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
@@ -81,13 +81,15 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
     double ra = (double) RA.StepPosition * 24.0 / (double) Mount.Config.NbStepMax;
     double dec = (double) Dec.StepPosition * 360.0 / (double) Mount.Config.NbStepMax;
 
+    double dec_rad = DEGREES(dec);
+
     double tsmh_h = ComputeSideralTime();
     double hour_angle = tsmh_h - ra;
 
-    double ah = hour_angle * 15.0;
-    double cos_z = sin(DEGREES(Mount.Config.Latitude)) * sin(DEGREES(dec)) + cos(DEGREES(Mount.Config.Latitude)) * cos(DEGREES(dec)) * cos(DEGREES(ah));
+    double ah = DEGREES(hour_angle * 15.0);
+    double cos_z = sin(DEGREES(Mount.Config.Latitude)) * sin(dec_rad) + cos(DEGREES(Mount.Config.Latitude)) * cos(dec_rad) * cos(ah);
     double z = acos(cos_z);
-    double sin_a = cos(DEGREES(dec)) * sin(DEGREES(ah)) / sin(z);
+    double sin_a = cos(dec_rad) * sin(ah) / sin(z);
 
     *Altitude = 90.0 - (z * 180.0 / PI);
     *Azimuth = asin(sin_a) * 180.0 / PI + 180.0;
@@ -103,11 +105,16 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
  *****************************************************************************/
 void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double *dec)
 {
-    double tsmh_h = ComputeSideralTime();
-
     Azimuth -= 180.0;
-    double sin_dec = sin(DEGREES(Mount.Config.Latitude)) * sin(DEGREES(Altitude)) - cos(DEGREES(Mount.Config.Latitude)) * cos(DEGREES(Altitude)) * cos(DEGREES(Azimuth));
-    double sin_ha = cos(DEGREES(Altitude)) * sin(DEGREES(Azimuth)) / cos(asin(sin_dec));
+
+    double tsmh_h = ComputeSideralTime();
+    
+    double alt_rad = DEGREES(Altitude);
+    double az_rad = DEGREES(Azimuth);
+    double lat_rad = DEGREES(Mount.Config.Latitude);
+
+    double sin_dec = sin(lat_rad) * sin(alt_rad) - cos(lat_rad) * cos(alt_rad) * cos(az_rad);
+    double sin_ha = cos(alt_rad) * sin(DEGREES(Azimuth)) / cos(asin(sin_dec));
 
     double hour_angle = asin(sin_ha) * 180.0 / PI;
     hour_angle /= 15.0;

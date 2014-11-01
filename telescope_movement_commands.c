@@ -280,37 +280,83 @@ void MoveWest()
  *****************************************************************************/
 void SlewToTarget()
 {
+    int32_t ra_n1 = 0;
+    int32_t ra_n2 = 0;
+    int32_t dec_n1 = 0;
+    int32_t dec_n2 = 0;
+    BOOL throw_the_pole = FALSE;
+
     if (Mount.Config.IsParked) return;
+
+    RA.NumberStep = 0;
+    Dec.NumberStep = 0;
 
     if (RA.StepTarget)
     {
-        RA.NumberStep = int32abs(RA.StepTarget - RA.StepPosition);
+        ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
+        ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
+        RA.NumberStep = MIN(ra_n1, ra_n2);
+    }
+    if (Dec.StepTarget)
+    {
+        Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
+
+        int32_t ninety_deg = Mount.Config.NbStepMax / 4;
+        dec_n1 = int32abs(Dec.StepTarget - Dec.StepPosition);
+        dec_n2 = (ninety_deg - Dec.StepTarget) + (ninety_deg - Dec.StepPosition);
+        if (RA.NumberStep > ninety_deg && dec_n2 < ninety_deg)
+        {
+            Dec.NumberStep = dec_n2;
+            RA.StepTarget += Mount.Config.NbStepMax / 2L;
+            RA.StepTarget %= Mount.Config.NbStepMax;
+
+            ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
+            ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
+            RA.NumberStep = MIN(ra_n1, ra_n2);
+            throw_the_pole = TRUE;
+        }
+        else
+        {
+            Dec.NumberStep = dec_n1;
+        }
+    }
+
+    if (RA.StepTarget)
+    {
+        if (ra_n1 <= ra_n2)
+        {
+            if (RA.StepPosition < RA.StepTarget)
+            {
+                MoveEast();
+            }
+            else if (RA.StepPosition > RA.StepTarget)
+            {
+                MoveWest();
+            }
+        }
+        else
+        {
+            if (RA.StepPosition < RA.StepTarget)
+            {
+                MoveWest();
+            }
+            else if (RA.StepPosition > RA.StepTarget)
+            {
+                MoveEast();
+            }
+        }
+
         RA.DecelPositon = RA.NumberStep / 2L;
         //        if (RA.NumberStep % 2L == 0)
         //        {
         //            RA.DecelPositon--;
         //        }
 
-        if (RA.StepPosition < RA.StepTarget)
-        {
-            MoveEast();
-        }
-        else if (RA.StepPosition > RA.StepTarget)
-        {
-            MoveWest();
-        }
     }
 
     if (Dec.StepTarget)
     {
-        Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
-        Dec.DecelPositon = Dec.NumberStep / 2L;
-        //        if (Dec.NumberStep % 2L == 0)
-        //        {
-        //            Dec.DecelPositon++;
-        //        }
-
-        if (Dec.StepPosition < Dec.StepTarget)
+        if (Dec.StepPosition < Dec.StepTarget || throw_the_pole == TRUE)
         {
             MoveNorth();
         }
@@ -318,6 +364,11 @@ void SlewToTarget()
         {
             MoveSouth();
         }
+        Dec.DecelPositon = Dec.NumberStep / 2L;
+        //        if (Dec.NumberStep % 2L == 0)
+        //        {
+        //            Dec.DecelPositon++;
+        //        }
     }
 
     LX200Response[0] = '0';

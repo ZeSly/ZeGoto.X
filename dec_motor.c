@@ -108,6 +108,7 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
                 T4CONbits.TON = 0;
                 DEC_SLEEP_IO = 0;
                 DEC_FAULT_CN = 0;
+                Dec.NorthPoleOVerflow = FALSE;
             }
 
         }

@@ -358,20 +358,27 @@ void UpdateRAStepPosition()
     }
 
     lst = ComputeSideralTime();
+    double lst_west = lst - 6.0;
+    if (lst_west < 0.0) lst_west += 24.0;
+    double lst_east = lst + 6.0;
+    if (lst_east > 24.0) lst_east -= 24.0;
+    double lst_mid = lst + 12;
+    if (lst_mid > 24.0) lst_mid -= 24.0;
+
     ra = (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
-    if (ra < lst + 6)
+    if (ra < lst_east && ra >= lst)
     {
         Mount.SideOfPier = PIER_WEST_POLL_WEST;
     }
-    if (ra < lst)
+    else if (ra >= lst_west)
     {
         Mount.SideOfPier = PIER_EAST_POLL_EAST;
     }
-    if (ra < lst - 6)
+    else if (ra >= lst_mid)
     {
         Mount.SideOfPier = PIER_WEST_POLL_EAST;
     }
-    if (ra < lst - 12 || ra >= lst + 12)
+    else
     {
         Mount.SideOfPier = PIER_EAST_POLL_WEST;
     }
