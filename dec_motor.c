@@ -277,7 +277,7 @@ inline int DecIsMotorStop()
 
 void DecGuideNorth()
 {
-    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
     UpdateMotorTimerPeriod();
     DEC_DIR_IO = Mount.NorthDirection;
     DecStart();
@@ -285,7 +285,7 @@ void DecGuideNorth()
 
 void DecGuideSouth()
 {
-    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed) / 10;
+    MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
     UpdateMotorTimerPeriod();
     DEC_DIR_IO = Mount.SouthDirection;
     DecStart();

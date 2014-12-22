@@ -25,4 +25,9 @@ void SetFindRate();
 void SetMaxRate();
 void SetSpecificRate();
 
+void GetCenteringRate();
+void GetGuidingRate();
+void GetCurrentMaxSpeed();
+void GetMaxSpeed();
+
 #endif	/* SLEW_RATE_COMMANDS_H */

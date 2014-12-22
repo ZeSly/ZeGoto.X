@@ -126,6 +126,11 @@ LX200Command LX200CommandTab[] =
     { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
     { "pS", 2, SideOfPier}, // ASTRO-PHYSICS GTO compatibility
 
+    { "rG", 2, GetGuidingRate},
+    { "rC", 2, GetCenteringRate},
+    { "rS", 2, GetCurrentMaxSpeed},
+    { "rM", 2, GetMaxSpeed},
+
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},
 

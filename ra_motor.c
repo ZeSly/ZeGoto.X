@@ -391,13 +391,13 @@ inline int RAIsMotorStop()
 
 void RAGuideWest()
 {
-    MotorTimerPeriod = Mount.SideralHalfPeriod * Mount.Config.GuideSpeed / 10;
+    MotorTimerPeriod += Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
     UpdateMotorTimerPeriod();
 }
 
 void RAGuideEast()
 {
-    MotorTimerPeriod = Mount.SideralHalfPeriod * (Mount.Config.GuideSpeed + 10) / 10;
+    MotorTimerPeriod -= Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
     UpdateMotorTimerPeriod();
 }
 
