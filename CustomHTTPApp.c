@@ -469,13 +469,8 @@ static HTTP_IO_RESULT HTTPPostMount(void)
     if (TCPIsGetReady(sktHTTP) < curHTTP.byteCount)
         return HTTP_IO_NEED_DATA;
 
-
-    // Use current config in non-volatile memory as defaults
-#if defined(EEPROM_CS_TRIS) || defined(EEPROM_I2CCON)
-    XEEReadArray(adrMountConfig, (BYTE*) & newMountConfig, sizeof (newMountConfig));
-#elif defined(SPIFLASH_CS_TRIS)
-    SPIFlashReadArray(adrMountConfig, (BYTE*) & newMountConfig, sizeof (newMountConfig));
-#endif
+    // Use current config
+    memcpy(&newMountConfig, &Mount.Config, sizeof (newMountConfig));
 
     // Read all browser POST data
     while (curHTTP.byteCount)
