@@ -23,17 +23,17 @@
             </tr>
             <tr>
                 <th></th>
-                <th id="btn5">?</th>
+                <th id="btn5" onmousedown="btndown('5')" onmouseup="btnup('5')">?</th>
                 <th></th>
             </tr>
             <tr>
-                <th id="btn3">?</th>
+                <th id="btn3" onmousedown="btndown('3')" onmouseup="btnup('3')">?</th>
                 <th></th>
-                <th id="btn4">?</th>
+                <th id="btn4" onmousedown="btndown('4')" onmouseup="btnup('4')">?</th>
             </tr>
             <tr>
                 <th></th>
-                <th id="btn6">?</th>
+                <th id="btn6" onmousedown="btndown('6')" onmouseup="btnup('6')">?</th>
                 <th></th>
             </tr>
             </table>
@@ -63,8 +63,19 @@
 </div>
 
 <script type="text/javascript">
+function btndown(btn)
+{
+    newAJAXCommand('btns.cgi?btn=' + btn + '1');
+    document.getElementById('btn' + btn).innerHTML = '_';
+}
+function btnup(btn)
+{
+    newAJAXCommand('btns.cgi?btn=' + btn + '0');
+    document.getElementById('btn' + btn).innerHTML = 'O';
+}
 // Parses the xmlResponse from status.xml and updates the status box
-function updateStatus(xmlData) {
+function updateStatus(xmlData)
+{
 	var mainstat = document.getElementById('display').style.display;
 	var loadstat = document.getElementById('loading').style.display;
 
@@ -85,8 +96,9 @@ function updateStatus(xmlData) {
 		document.getElementById('led' + i).style.color = (getXMLValue(xmlData, 'led' + i) == '1') ? '#f00' : '#ddd';
 
 	// Loop over all the buttons
-	for(i = 1; i <= 7; i++)
+	for(i = 1; i <= 6; i++)
 		document.getElementById('btn' + i).innerHTML = (getXMLValue(xmlData, 'btn' + i) == 'up') ? '_' : 'O';
+    document.getElementById('btn7').innerHTML = (getXMLValue(xmlData, 'btn7') == 'up') ? 'HS_' : '_NS';
 
     document.getElementById('datetime').innerHTML = getXMLValue(xmlData, 'datetime');
 }

@@ -20,6 +20,8 @@
 #ifndef TELESCOPE_MOVEMENT_COMMANDS_H
 #define	TELESCOPE_MOVEMENT_COMMANDS_H
 
+#include <GenericTypeDefs.h>
+
 #define MOVE_TO_EAST    0x1
 #define MOVE_TO_WEST    0x2
 #define MOVE_TO_NORTH   0x4

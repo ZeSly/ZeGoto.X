@@ -1,0 +1,72 @@
+~inc:header.inc~
+<h2>Mount Setting</h2>
+<div id="TEXT">
+<p><b>Directions</b></p>
+<p>Depending on the hemisphere the mount is situated and the cabling on the stepper motor, 
+you can invert directions. For the declination axis of a german mount it also depend on the 
+side of pier.</p>
+
+<form method="get" action="mount.htm">
+<fieldset>
+<div><input type="checkbox" class="chk" name="inverteddec" value="1" ~mountconfig_inverteddec~ /> Invert Dec axis</div>
+<div><input type="checkbox" class="chk" name="invertedra" value="1" ~mountconfig_invertedra~ /> Invert RA axis</div>
+<div><input type="submit" class="sm" value="Save" /></div>
+</fieldset>
+</form>
+
+<p><b>Mechanical setting</b></p>
+<div class="result ~result~" style="display:~status_fail~">
+~result_text~
+</div>
+<form method="post" action="mount.htm" name="mech">
+<fieldset>
+<div><label>Worm wheel reduction:</label>
+<input type="text" name="wwr" value="" onchange="MountSetting()"/></div>
+<div><label>Motor reduction:</label>
+<input type="text" name="mr" value="" onchange="MountSetting()"/></div>
+<div><label>Motor step:</label>
+<input type="text" name="step" value="" onchange="MountSetting()"/></div>
+<div><label>Number max steps:</label>
+<input type="text" name="nbmaxstep" value="~mountconfig_nbmaxstep~" disabled="true"/></div>
+<div><label>Step period:</label>
+<input type="text" name="period" value="~mountconfig_sideralperiod~" disabled="true"/></div>
+<div><label>Step frequency:</label>
+<input type="text" name="freq" disabled="true"/> Hz</div>
+<div><label>Max rate:</label>
+<input type="text" name="maxrate" value="~mountconfig_maxrate~"/> X sideral rate</div>
+<div><label>Centering rate:</label>
+<input type="text" name="centerrate" value="~mountconfig_centeringrate~"/> X sideral rate</div>
+<div><label>Guiding rate:</label>
+<input type="text" name="guiderate" value="~mountconfig_guidingrate~"/> X sideral rate</div>
+<div><input type="submit" class="sm" value="Save" onclick="MountSubmit()"/></div>
+</fieldset>
+</form>
+</div>
+
+<script type="text/javascript">
+<!--
+function MountSetting()
+{
+    m = document.forms.mech;
+    if (m.wwr.value != 0 &&
+        m.mr.value != 0 &&
+        m.step.value != 0)
+    {
+        ustep = m.step.value * 8;
+        m.nbmaxstep.value = m.wwr.value * m.mr.value * ustep;
+        m.freq.value = m.nbmaxstep.value / 86164;
+        m.period.value = Math.round(16000000 / m.freq.value);
+    }
+}
+function MountSubmit()
+{
+    m = document.forms.mech;
+    m.wwr.disabled=true;
+    m.mr.disabled=true;
+    m.step.disabled=true;
+    m.nbmaxstep.disabled=false;
+    m.period.disabled=false;
+}
+-->
+</script>
+~inc:footer.inc~

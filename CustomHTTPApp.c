@@ -51,6 +51,9 @@
  *~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  * Elliott Wood     	6/18/07	Original
  ********************************************************************/
+
+#include "telescope_movement_commands.h"
+
 #define __CUSTOMHTTPAPP_C
 
 #include "TCPIPConfig.h"
@@ -157,12 +160,70 @@ HTTP_IO_RESULT HTTPExecuteGet(void)
         switch (*ptr)
         {
         case '1':
-            LED1_IO ^= 1;
-            if (LED1_IO) ReticuleOn();
+            if (!OC5CON1bits.OCM) ReticuleOn();
             else ReticuleOff();
             break;
         case '2':
             LED2_IO ^= 1;
+            break;
+        }
+    }
+
+        // If it's the BTN updater file
+    else if (!memcmppgm2ram(filename, "btns.cgi", 8))
+    {
+        // Determine which btn is pressed or released
+        ptr = HTTPGetROMArg(curHTTP.data, (ROM BYTE *) "btn");
+
+        switch (*ptr)
+        {
+        case '3':
+            if (*(ptr + 1) == '1')
+            {
+                PadState.PAD_S3 = 1;
+                MoveWest();
+            }
+            else
+            {
+                PadState.PAD_S3 = 0;
+                Halt();
+            }
+            break;
+        case '4':
+            if (*(ptr + 1) == '1')
+            {
+                PadState.PAD_S4 = 1;
+                MoveEast();
+            }
+            else
+            {
+                PadState.PAD_S4 = 0;
+                Halt();
+            }
+            break;
+        case '5':
+            if (*(ptr + 1) == '1')
+            {
+                PadState.PAD_S5 = 1;
+                MoveNorth();
+            }
+            else
+            {
+                PadState.PAD_S5 = 0;
+                Halt();
+            }
+            break;
+        case '6':
+            if (*(ptr + 1) == '1')
+            {
+                PadState.PAD_S6 = 1;
+                MoveSouth();
+            }
+            else
+            {
+                PadState.PAD_S6 = 1;
+                Halt();
+            }
             break;
         }
     }
@@ -656,7 +717,7 @@ void HTTPPrint_led(WORD num)
     switch (num)
     {
     case 1:
-        num = LED1_IO;
+        num = OC5CON1bits.OCM ? 1 : 0;
         break;
     case 2:
         num = LED2_IO;
@@ -676,7 +737,7 @@ void HTTPPrint_ledSelected(WORD num, WORD state)
     switch (num)
     {
     case 1:
-        num = LED1_IO;
+        num = OC5CON1bits.OCM ? 1 : 0;
         break;
     case 2:
         num = LED2_IO;

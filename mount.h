@@ -70,6 +70,8 @@ typedef struct
     double Elevation;
 
     double UTCOffset;
+
+    unsigned int ReticuleBrightness;
 } mountconfig_t;
 
 typedef struct

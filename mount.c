@@ -64,6 +64,9 @@ void MountInit()
         Mount.Config.Elevation = 200.0;
         Mount.Config.UTCOffset = +2.0;
 
+        /* Reticule brightness */
+        Mount.Config.ReticuleBrightness = 615;
+
 
         wOriginalMountConfigChecksum = CalcIPChecksum((BYTE *) &Mount.Config, sizeof(Mount.Config));
 

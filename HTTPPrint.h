@@ -105,9 +105,6 @@ void HTTPPrint(DWORD callbackID)
         case 0x00000008:
 			HTTPPrint_builddate();
 			break;
-        case 0x00000009:
-			HTTPPrint_led(0);
-			break;
         case 0x0000000a:
 			HTTPPrint_led(1);
 			break;
