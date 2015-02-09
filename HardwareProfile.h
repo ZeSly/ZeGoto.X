@@ -167,6 +167,9 @@
 #define RA_SLEEP_TRIS       (TRISEbits.TRISE6)
 #define RA_SLEEP_IO         (LATEbits.LATE6)
 
+#define RA_DECAY_TRIS       (TRISEbits.TRISE7)
+#define RA_DECAY_IO         (LATEbits.LATE7)
+
 #define RA_DIR_TRIS         (TRISEbits.TRISE1)
 #define RA_DIR_IO           (LATEbits.LATE1)
 
@@ -188,6 +191,9 @@
 
 #define DEC_SLEEP_TRIS      (TRISFbits.TRISF1)
 #define DEC_SLEEP_IO        (LATFbits.LATF1)
+
+#define DEC_DECAY_TRIS       (TRISCbits.TRISC14)
+#define DEC_DECAY_IO         (LATCbits.LATC14)
 
 #define DEC_DIR_TRIS        (TRISDbits.TRISD4)
 #define DEC_DIR_IO          (LATDbits.LATD4)

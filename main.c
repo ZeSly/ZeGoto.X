@@ -74,6 +74,9 @@
 #if defined(STACK_USE_ZEROCONF_MDNS_SD)
 #include "TCPIP_Stack/ZeroconfMulticastDNS.h"
 #endif
+#if defined (STACK_USE_UPNP)
+#include "upnp.h"
+#endif
 
 // Include functions specific to this stack application
 #include "main.h"
@@ -213,6 +216,11 @@ int main(void)
         // This tasks invokes each of the core stack application tasks
         StackApplications();
 
+#if defined(STACK_USE_UPNP)
+        SSDPDiscoveryTask();
+        UPNPServer();
+#endif
+
 #if defined(STACK_USE_ZEROCONF_LINK_LOCAL)
         ZeroconfLLProcess();
 #endif
@@ -236,7 +244,7 @@ int main(void)
 
 #if defined(STACK_USE_GENERIC_TCP_SERVER_EXAMPLE)
         //        GenericTCPServer();
-        GPSTCPServer();
+        //GPSTCPServer();
 #endif
 
 #if defined(STACK_USE_SMTP_CLIENT)
@@ -293,6 +301,10 @@ int main(void)
 
 #if defined(STACK_USE_ANNOUNCE)
             AnnounceIP();
+#endif
+
+#if defined(STACK_USE_UPNP)
+            SSDPAnnounce();
 #endif
 
 #if defined(STACK_USE_ZEROCONF_MDNS_SD)

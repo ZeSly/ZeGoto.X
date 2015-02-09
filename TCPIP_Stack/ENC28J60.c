@@ -2180,7 +2180,7 @@ BYTE GetCLKOUT(void)
  *					This function is intended to be used when 
  *					ERXFCON.ANDOR == 0 (OR).
  *****************************************************************************/
-#if defined(STACK_USE_ZEROCONF_MDNS_SD)
+#if defined(STACK_USE_ZEROCONF_MDNS_SD) || defined(STACK_USE_UPNP)
 void SetRXHashTableEntry(MAC_ADDR DestMACAddr)
 {
     DWORD_VAL CRC = {0xFFFFFFFF};
