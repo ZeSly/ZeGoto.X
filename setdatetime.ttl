@@ -2,8 +2,9 @@ connect '/C=14'
 setecho 0
 fileopen fhandle 'test-report.txt' 0
 
+
 ; set date
-cmd = ':SC07/03/15#'
+getdate cmd ":SC%m/%d/%y#"
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
@@ -17,7 +18,7 @@ endif
 flushrecv
 
 ; set local time
-cmd = ':SL16:51:0#'
+gettime cmd ':SL%H:%M:%S#'
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
@@ -32,3 +33,4 @@ flushrecv
 
 fileclose fhandle
 disconnect
+end
