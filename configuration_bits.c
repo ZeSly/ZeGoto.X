@@ -55,7 +55,7 @@
 #pragma config FWPSA = PR128            // WDT Prescaler (Prescaler ratio of 1:128)
 #pragma config WINDIS = OFF             // Watchdog Timer Window (Standard Watchdog Timer enabled,(Windowed-mode is disabled))
 #pragma config FWDTEN = OFF              // Watchdog Timer Enable (Watchdog Timer is enabled)
-#pragma config ICS = PGx3               // Comm Channel Select (Emulator functions are shared with PGEC3/PGED3)
+#pragma config ICS = PGx1               // Comm Channel Select (Emulator functions are shared with PGEC3/PGED3)
 #pragma config GWRP = OFF               // General Code Segment Write Protect (Writes to program memory are allowed)
 #pragma config GCP = OFF                // General Code Segment Code Protect (Code protection is disabled)
 #pragma config JTAGEN = OFF             // JTAG Port Enable (JTAG port is disabled)

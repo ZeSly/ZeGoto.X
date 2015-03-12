@@ -509,6 +509,7 @@ static void InitializeBoard(void)
     RA_FAULT_TRIS = INPUT_PIN;
 
     RA_SLEEP_TRIS = OUTPUT_PIN;
+    RA_DECAY_TRIS = OUTPUT_PIN;
     RA_DIR_TRIS = OUTPUT_PIN;
     RA_STEP_TRIS = OUTPUT_PIN;
     RA_MODE_TRIS = OUTPUT_PIN;
@@ -521,6 +522,7 @@ static void InitializeBoard(void)
     DEC_FAULT_TRIS = INPUT_PIN;
 
     DEC_SLEEP_TRIS = OUTPUT_PIN;
+    DEC_DECAY_TRIS = OUTPUT_PIN;
     DEC_DIR_TRIS = OUTPUT_PIN;
     DEC_STEP_TRIS = OUTPUT_PIN;
     DEC_MODE_TRIS = OUTPUT_PIN;
@@ -534,7 +536,6 @@ static void InitializeBoard(void)
     LED2_TRIS = 0;
 
     XEEInit();
-    //RTCCInit();
 
     // Deassert all chip select lines so there isn't any problem with
     // initialization order.  Ex: When ENC28J60 is on SPI2 with Explorer 16,
@@ -631,7 +632,8 @@ static void InitializeBoard(void)
 
 static void InitAppConfig(void)
 {
-    BYTE RTCCMACAddress[6];
+    BYTE RTCCMACAddress[6] = {MY_DEFAULT_MAC_BYTE1, MY_DEFAULT_MAC_BYTE2, MY_DEFAULT_MAC_BYTE3, MY_DEFAULT_MAC_BYTE4, MY_DEFAULT_MAC_BYTE5, MY_DEFAULT_MAC_BYTE6};
+    RTCCInit();
     RTCCReadMacAddress(RTCCMACAddress);
 
 #if defined(EEPROM_CS_TRIS) || defined(SPIFLASH_CS_TRIS) || defined(EEPROM_I2CCON)

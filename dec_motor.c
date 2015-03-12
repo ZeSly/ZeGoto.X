@@ -107,7 +107,7 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
                 CurrentMove &= ~MOVE_DEC;
                 T4CONbits.TON = 0;
                 DEC_SLEEP_IO = 0;
-                DEC_FAULT_CN = 0;
+//                DEC_FAULT_CN = 0;
                 Dec.NorthPoleOVerflow = FALSE;
             }
 
@@ -143,6 +143,8 @@ void DecMotorInit(void)
     DEC_MODE_IO = 1; // 8 microsteps / step
     DEC_DIR_IO = 0;
     DEC_STEP_IO = 0;
+    DEC_DECAY_IO = 1; // fast decay by default
+    DEC_FAULT_CN = 1;
 
     MotorTimerPeriod = Mount.SideralHalfPeriod;
 
@@ -175,7 +177,6 @@ void DecMotorInit(void)
 void DecStart(void)
 {
     DEC_SLEEP_IO = 1;
-    DEC_FAULT_CN = 1;
     CurrentSpeed = 1;
     T4CONbits.TON = 1;
 }
@@ -192,7 +193,6 @@ void DecAccelerate(void)
         Dec.NorthPoleOVerflow = FALSE;
 
         DEC_SLEEP_IO = 1;
-        DEC_FAULT_CN = 1;
 
         CurrentSpeed = 1;
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
@@ -218,7 +218,6 @@ void DecStop(void)
 {
     T4CONbits.TON = 0;
     DEC_SLEEP_IO = 0;
-    DEC_FAULT_CN = 0;
 }
 
 void DecSetDirection(uint8_t dir)

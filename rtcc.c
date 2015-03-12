@@ -206,6 +206,25 @@ BOOL RTCCReadMacAddress(BYTE *MacAddress)
 
 }
 
+void RTCCInit()
+{
+    RTCWKDAYbits rtcwkday;
+    RTCSECbits rtcsec;
+
+    //if (RTCCReadArray(RTCSEC, &rtcsec.b, 1) == TRUE)
+    {
+        rtcsec.b = 0;
+        rtcsec.ST = 1;
+
+        RTCCWriteArray(RTCSEC, &rtcsec.b, 1);
+    }
+
+    RTCCReadArray(RTCWKDAY, (BYTE *) & rtcwkday, 1);
+    if (rtcwkday.VBATEN == 0)
+        rtcwkday.VBATEN = 1;
+    RTCCWriteArray(RTCWKDAY, (BYTE *) & rtcwkday, 1);
+}
+
 /******************************************************************************
  * Function:        BOOL RTCCGetTimekeeping(RTCCMapTimekeeping *timekeeping)
  * PreCondition:    I2C initialized

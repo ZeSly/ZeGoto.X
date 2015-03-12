@@ -188,6 +188,7 @@ void RTCCWriteArray(uint8_t address, uint8_t *val, WORD wLen);
 BOOL RTCCReadArray(uint8_t address, uint8_t *buffer, WORD length);
 BOOL RTCCReadMacAddress(uint8_t *MacAddress);
 
+void RTCCInit();
 BOOL RTCCGetTimekeeping(RTCCMapTimekeeping *timekeeping);
 BOOL RTCCSetTimekeeping(RTCCMapTimekeeping *timekeeping);
 

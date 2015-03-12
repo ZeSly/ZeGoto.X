@@ -144,7 +144,7 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
                     // stop motor after slewing to park position
                     T2CONbits.TON = 0;
                     RA_SLEEP_IO = 0;
-                    RA_FAULT_CN = 0;
+//                    RA_FAULT_CN = 0;
                 }
             }
 
@@ -181,6 +181,8 @@ void RAMotorInit(void)
     RA_MODE_IO = 1; // 8 microsteps / step
     RA_DIR_IO = Mount.Config.RADefaultDirection;
     RA_STEP_IO = 0;
+    RA_DECAY_IO = 1; // fast decay by default
+    RA_FAULT_CN = 1;
 
     MotorTimerPeriod = Mount.SideralHalfPeriod;
     UpdateMotorTimerPeriod();
@@ -211,7 +213,6 @@ void RAStart(void)
 {
     RA.IsParking = UNPARKED;
     RA_SLEEP_IO = 1;
-    RA_FAULT_CN = 1;
     CurrentSpeed = 1;
     T2CONbits.TON = 1;
 }
@@ -292,7 +293,7 @@ void RAStop(void)
 {
     T2CONbits.TON = 0;
     RA_SLEEP_IO = 0;
-    RA_FAULT_CN = 0;
+//    RA_FAULT_CN = 0;
 }
 
 void RASetDirection(uint8_t dir)

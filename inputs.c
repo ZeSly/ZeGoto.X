@@ -38,14 +38,14 @@ void InputsInit(void)
     TRISBbits.TRISB6 = 1;
     CNPU2bits.CN24PUE = 1; // pull-up
     // PAD_S2
-    TRISBbits.TRISB1 = 1;
-    CNPU1bits.CN3PUE = 1; // pull-up
+    TRISBbits.TRISB5 = 1;
+    CNPU1bits.CN7PUE = 1; // pull-up
     // PAD_S3
     TRISBbits.TRISB8 = 1;
     CNPU2bits.CN26PUE = 1; // pull-up
     // PAD_S4
-    TRISBbits.TRISB0 = 1;
-    CNPU1bits.CN2PUE = 1; // pull-up
+    TRISBbits.TRISB4 = 1;
+    CNPU1bits.CN6PUE = 1; // pull-up
     // PAD_S5
     TRISBbits.TRISB3 = 1;
     CNPU1bits.CN5PUE = 1; // pull-up
@@ -139,9 +139,9 @@ void UpdatePadState()
 
     readPadState.i = 0;
     if (!PORTBbits.RB6) readPadState.PAD_S1 = 1;
-    if (!PORTBbits.RB1) readPadState.PAD_S2 = 1;
+    if (!PORTBbits.RB5) readPadState.PAD_S2 = 1;
     if (!PORTBbits.RB8) readPadState.PAD_S3 = 1;
-    if (!PORTBbits.RB0) readPadState.PAD_S4 = 1;
+    if (!PORTBbits.RB4) readPadState.PAD_S4 = 1;
     if (!PORTBbits.RB3) readPadState.PAD_S5 = 1;
     if (!PORTBbits.RB7) readPadState.PAD_S6 = 1;
     if (!PORTBbits.RB2) readPadState.PAD_SWITCH = 1;

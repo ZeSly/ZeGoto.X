@@ -18,7 +18,12 @@
 
 /* Device header file */
 #include <xc.h>
+
+#include <TCPIP_Stack/TCPIP.h>
+#include <TCPIP_Stack/Helpers.h>
+
 #include "GenericTypeDefs.h"
+#include "HardwareProfile.h"
 #include "main.h"
 #include "Compiler.h"
 #include <string.h>
@@ -31,7 +36,7 @@
 #include "home_position_commands.h"
 #include "reticule.h"
 
-char LX200String[16];
+char LX200String[32];
 char LX200Response[64];
 
 void GetTelescopeFirmwareDate()
@@ -54,6 +59,141 @@ void GetTelescopeProductName()
     strcpy(LX200Response, "OpenGoto#");
 }
 
+static APP_CONFIG newAppConfig;
+static BOOL StartnewAppConfig = TRUE;
+
+void GetIPString(IP_ADDR ip, char *Str_P)
+{
+    int i;
+
+    for (i = 0; i < 4u; i++)
+    {
+        if (i)
+        {
+            *Str_P++ = '.';
+        }
+        uitoa(ip.v[i], (BYTE*) Str_P);
+        Str_P += strlen(Str_P);
+    }
+    *Str_P++ = '#';
+    *Str_P = '\0';
+}
+
+void GetIPConfig()
+{
+    if (strncmp(LX200String + 3, "ip", 2) == 0)
+    {
+        GetIPString(AppConfig.MyIPAddr, LX200Response);
+    }
+    else if (strncmp(LX200String + 3, "gw", 2) == 0)
+    {
+        GetIPString(AppConfig.MyGateway, LX200Response);
+    }
+    else if (strncmp(LX200String + 3, "sub", 3) == 0)
+    {
+        GetIPString(AppConfig.MyMask, LX200Response);
+    }
+    else if (strncmp(LX200String + 3, "dns1", 4) == 0)
+    {
+        GetIPString(AppConfig.PrimaryDNSServer, LX200Response);
+    }
+    else if (strncmp(LX200String + 3, "dns2", 4) == 0)
+    {
+        GetIPString(AppConfig.SecondaryDNSServer, LX200Response);
+    }
+    else if (strncmp(LX200String + 3, "dhcp", 4) == 0)
+    {
+        LX200Response[0] = AppConfig.Flags.bIsDHCPEnabled ? '1' : '0';
+        LX200Response[1] = '#';
+        LX200Response[2] = '\0';
+    }
+    else if (strncmp(LX200String + 3, "host", 4) == 0)
+    {
+        gethostname(LX200Response, 16);
+        strcat(LX200Response, "#");
+    }
+}
+
+void SetIPConfig()
+{
+    int i;
+
+    if (StartnewAppConfig == TRUE)
+    {
+        // Use current config in non-volatile memory as defaults
+#if defined(EEPROM_CS_TRIS) || defined(EEPROM_I2CCON)
+        XEEReadArray(sizeof (NVM_VALIDATION_STRUCT), (BYTE*) & newAppConfig, sizeof (newAppConfig));
+#elif defined(SPIFLASH_CS_TRIS)
+        SPIFlashReadArray(sizeof (NVM_VALIDATION_STRUCT), (BYTE*) & newAppConfig, sizeof (newAppConfig));
+#endif
+        StartnewAppConfig = FALSE;
+    }
+
+    for (i = 3 ; LX200String[i] != '\0' ; i++)
+    {
+        if (LX200String[i] == '#')
+        {
+            LX200String[i] = '\0';
+            break;
+        }
+    }
+
+    if (strncmp(LX200String + 3, "ip", 2) == 0)
+    {
+        if (!StringToIPAddress((BYTE*) LX200String + 5, &newAppConfig.MyIPAddr))
+            goto ConfigFailure;
+
+        newAppConfig.DefaultIPAddr.Val = newAppConfig.MyIPAddr.Val;
+    }
+    else if (strncmp(LX200String + 3, "gw", 2) == 0)
+    {
+        if (!StringToIPAddress((BYTE*) LX200String + 5, &newAppConfig.MyGateway))
+            goto ConfigFailure;
+    }
+    else if (strncmp(LX200String + 3, "sub", 3) == 0)
+    {
+        if (!StringToIPAddress((BYTE*) LX200String + 6, &newAppConfig.MyMask))
+            goto ConfigFailure;
+    }
+    else if (strncmp(LX200String + 3, "dns1", 4) == 0)
+    {
+        if (!StringToIPAddress((BYTE*) LX200String + 7, &newAppConfig.PrimaryDNSServer))
+            goto ConfigFailure;
+    }
+    else if (strncmp(LX200String + 3, "dns2", 4) == 0)
+    {
+        if (!StringToIPAddress((BYTE*) LX200String + 7, &newAppConfig.SecondaryDNSServer))
+            goto ConfigFailure;
+    }
+    else if (strncmp(LX200String + 3, "dhcp", 4) == 0)
+    {
+        if (LX200String[7] == '1')
+            newAppConfig.Flags.bIsDHCPEnabled = 1;
+        else
+            newAppConfig.Flags.bIsDHCPEnabled = 0;
+    }
+    else if (strncmp(LX200String + 3, "host", 4) == 0)
+    {
+        FormatNetBIOSName((BYTE*) LX200String + 7);
+        memcpy((void*) newAppConfig.NetBIOSName, (void*) LX200String + 7, 16);
+    }
+    else if (strncmp(LX200String + 3, "apply", 5) == 0)
+    {
+        StartnewAppConfig = TRUE;
+        SaveAppConfig(&newAppConfig);
+        Reset();
+    }
+
+    LX200Response[0] = '1';
+    LX200Response[1] = '\0';
+    return;
+
+ConfigFailure:
+    StartnewAppConfig = TRUE;
+    LX200Response[0] = '0';
+    LX200Response[1] = '\0';
+}
+
 typedef struct
 {
     char *Cmd;
@@ -63,8 +203,7 @@ typedef struct
 
 void DumpSpeedList();
 
-LX200Command LX200CommandTab[] =
-{
+LX200Command LX200CommandTab[] ={
     { "GR", 2, GetTelescopeRA},
     { "Gr", 2, GetCurrentTargetRA},
     { "GD", 2, GetTelescopeDeclination},
@@ -122,7 +261,7 @@ LX200Command LX200CommandTab[] =
     { "hS", 2, homeSetParkPosition},
     { "hP", 2, homeSlewToParkPosition},
     { "hW", 2, homeUnpark},
-    
+
     { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
     { "pS", 2, SideOfPier}, // ASTRO-PHYSICS GTO compatibility
 
@@ -145,7 +284,10 @@ LX200Command LX200CommandTab[] =
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
     { "V", 1, GetTelescopeFirmwareNumber},
-//    { "V", 1, AstroPhysicsVersion},   
+    //    { "V", 1, AstroPhysicsVersion},
+
+    { "GIP", 1, GetIPConfig},
+    { "SIP", 1, SetIPConfig},
 
     //    { "ZGs", 3, DumpSpeedList },
 

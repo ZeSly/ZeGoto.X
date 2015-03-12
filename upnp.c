@@ -21,6 +21,7 @@
 #if defined(STACK_USE_UPNP)
 
 #include "TCPIP_Stack/TCPIP.h"
+#include "TCPIP_Stack/BerkeleyAPI.h"
 
 #include "main.h"
 #include "upnp.h"
@@ -47,8 +48,13 @@
 "		<minor>0</minor>\r\n" \
 "	</specVersion>\r\n" \
 "	<device>\r\n" \
-"		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\r\n" \
-"		<friendlyName>OpenGoto</friendlyName>\r\n" \
+"		<deviceType>urn:schemas-upnp-org:device:Basic:1</deviceType>\r\n"
+
+
+#define DEVICE_XML_BODY_PART2 "" \
+"		<friendlyName>%s (OpenGoto)</friendlyName>\r\n"
+
+#define DEVICE_XML_BODY_PART3 "" \
 "		<manufacturer>Sylvain Girard</manufacturer>\r\n" \
 "		<manufacturerURL>http://www.zesly.net</manufacturerURL>\r\n" \
 "		<modelName>OpenGoto</modelName>\r\n" \
@@ -57,10 +63,10 @@
 "		<modelURL>http://www.zesly.net</modelURL>\r\n" \
 "		<serialNumber>ZESLY-123456</serialNumber>\r\n"
 
-#define DEVICE_XML_BODY_PART2 "" \
+#define DEVICE_XML_BODY_PART4 "" \
 "		<UDN>uuid:%s</UDN>\r\n"
 
-/*#define DEVICE_XML_BODY_PART3 "" \
+/*#define DEVICE_XML_BODY_PART5 "" \
 "		<serviceList>\r\n" \
 "			<service>\r\n" \
 "				<serviceType>urn:schemas-upnp-org:service:SwitchPower:1</serviceType>\r\n" \
@@ -71,10 +77,10 @@
 "			</service>\r\n" \
 "		</serviceList>\r\n"*/
 
-#define DEVICE_XML_BODY_PART4 "" \
+#define DEVICE_XML_BODY_PART6 "" \
 "		<presentationURL>http://%s</presentationURL>\r\n"
 
-#define DEVICE_XML_BODY_PART5 "" \
+#define DEVICE_XML_BODY_PART7 "" \
 "	</device>\r\n" \
 "</root>"
 
@@ -739,7 +745,7 @@ void SSDPDiscoveryTask(void)
 void UPNPServer(void)
 {
     WORD i;
-    BYTE AppBuffer[150];
+    BYTE AppBuffer[256], HostName[17];
     WORD wMaxGet;
     int length;
     static TCP_SOCKET MySocket;
@@ -839,11 +845,14 @@ void UPNPServer(void)
 #if defined(STACK_USE_UART)
             putrsUART("Got you device !!!!!!!!\r\n");
 #endif
+            gethostname((char*)HostName, sizeof HostName);
             i = strlen((char*) DEVICE_XML_BODY_PART1);
-            i += sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART2, upnp_id);
-            //i += strlen((char*) DEVICE_XML_BODY_PART3);
-            i += sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART4, localipstring);
-            i += strlen((char*) DEVICE_XML_BODY_PART5);
+            i += sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART2, HostName);
+            i += strlen((char*) DEVICE_XML_BODY_PART3);
+            i += sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART4, upnp_id);
+            //i += strlen((char*) DEVICE_XML_BODY_PART5);
+            i += sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART6, localipstring);
+            i += strlen((char*) DEVICE_XML_BODY_PART7);
             length = sprintf((char*) AppBuffer, HTTP_XML_HEADER, i);
             if (length > TCPIsPutReady(MySocket)) TCPFlush(MySocket);
             TCPPutArray(MySocket, AppBuffer, length);
@@ -857,12 +866,15 @@ void UPNPServer(void)
             TCPPutROMString(MySocket, (ROM BYTE*) "\r\n");
             if (i > TCPIsPutReady(MySocket)) TCPFlush(MySocket);
             TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART1, strlen((char*) DEVICE_XML_BODY_PART1));
-            length = sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART2, upnp_id);
+            length = sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART2, HostName);
             TCPPutArray(MySocket, AppBuffer, length);
-            //TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART3, strlen((char*) DEVICE_XML_BODY_PART3));
-            length = sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART4, localipstring);
+            TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART3, strlen((char*) DEVICE_XML_BODY_PART3));
+            length = sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART4, upnp_id);
             TCPPutArray(MySocket, AppBuffer, length);
-            TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART5, strlen((char*) DEVICE_XML_BODY_PART5));
+            //TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART3, strlen((char*) DEVICE_XML_BODY_PART5));
+            length = sprintf((char*) AppBuffer, DEVICE_XML_BODY_PART6, localipstring);
+            TCPPutArray(MySocket, AppBuffer, length);
+            TCPPutROMArray(MySocket, DEVICE_XML_BODY_PART7, strlen((char*) DEVICE_XML_BODY_PART7));
         }
 //        else if (UPNPMode == UPNP_SERVICE1)
 //        {

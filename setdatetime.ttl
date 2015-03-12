@@ -1,9 +1,9 @@
-connect '/C=13'
+connect '/C=14'
 setecho 0
 fileopen fhandle 'test-report.txt' 0
 
 ; set date
-cmd = ':SC09/28/14#'
+cmd = ':SC07/03/15#'
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
@@ -17,7 +17,7 @@ endif
 flushrecv
 
 ; set local time
-cmd = ':SL16:17:0#'
+cmd = ':SL16:51:0#'
 filewrite fhandle cmd
 send cmd
 wait '0' '1'
