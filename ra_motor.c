@@ -44,13 +44,15 @@ static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
+//static BOOL FullStep;
+
 static int32_t accel_decel_cnt;
 
 void Timer23Init(void)
 {
-    T2CON = 0x0008;     // 32 bit time, 1:1 prescale, internal clock
+    T2CON = 0x0008; // 32 bit time, 1:1 prescale, internal clock
     T3CON = 0;
-    IPC2bits.T3IP = 6;  // Interrupt priority 6 (high)
+    IPC2bits.T3IP = 6; // Interrupt priority 6 (high)
     IFS0bits.T3IF = 0;
     IEC0bits.T3IE = 1;
 }
@@ -84,7 +86,14 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
                     RAState = MOTOR_DECEL;
                     accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
                 }
-                RA.NumberStep--;
+//                if (FullStep == TRUE)
+//                {
+//                    RA.NumberStep -= 8;
+//                }
+//                else
+                {
+                    RA.NumberStep--;
+                }
             }
         }
     }
@@ -102,13 +111,13 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             CurrentSpeed++;
             NewMotorPeriod = TRUE;
 
-//            t_speedlist *newspeed = malloc(sizeof (*newspeed));
-//            newspeed->speed = CurrentSpeed;
-//            newspeed->position = RARelativeStepPosition;
-//            newspeed->MotorTimerPeriod = MotorTimerPeriod;
-//            newspeed->next = NULL;
-//            lastspeed->next = newspeed;
-//            lastspeed = newspeed;
+            //            t_speedlist *newspeed = malloc(sizeof (*newspeed));
+            //            newspeed->speed = CurrentSpeed;
+            //            newspeed->position = RARelativeStepPosition;
+            //            newspeed->MotorTimerPeriod = MotorTimerPeriod;
+            //            newspeed->next = NULL;
+            //            lastspeed->next = newspeed;
+            //            lastspeed = newspeed;
 
             if (CurrentSpeed >= Mount.CurrentMaxSpeed)
             {
@@ -126,13 +135,13 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
             CurrentSpeed--;
             NewMotorPeriod = TRUE;
 
-//            t_speedlist *newspeed = malloc(sizeof (*newspeed));
-//            newspeed->speed = CurrentSpeed;
-//            newspeed->position = RARelativeStepPosition;
-//            newspeed->MotorTimerPeriod = MotorTimerPeriod;
-//            newspeed->next = NULL;
-//            lastspeed->next = newspeed;
-//            lastspeed = newspeed;
+            //            t_speedlist *newspeed = malloc(sizeof (*newspeed));
+            //            newspeed->speed = CurrentSpeed;
+            //            newspeed->position = RARelativeStepPosition;
+            //            newspeed->MotorTimerPeriod = MotorTimerPeriod;
+            //            newspeed->next = NULL;
+            //            lastspeed->next = newspeed;
+            //            lastspeed = newspeed;
 
             if (CurrentSpeed == 1)
             {
@@ -144,11 +153,11 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
                     // stop motor after slewing to park position
                     T2CONbits.TON = 0;
                     RA_SLEEP_IO = 0;
-//                    RA_FAULT_CN = 0;
+                    //                    RA_FAULT_CN = 0;
                 }
             }
 
-            
+
         }
         break;
 
@@ -159,10 +168,24 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
     if (NewMotorPeriod == TRUE)
     {
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
+//        if (CurrentSpeed >= 4)
+//        {
+//            MotorTimerPeriod *= 8;
+//            if (FullStep == FALSE)
+//            {
+//                FullStep = TRUE;
+//                RA_MODE_IO = 0;
+//            }
+//        }
+//        else if (FullStep == TRUE)
+//        {
+//            FullStep = FALSE;
+//            RA_MODE_IO = 1;
+//        }
         PR2 = MotorTimerPeriod & 0xFFFF;
         PR3 = (MotorTimerPeriod >> 16) & 0xFFFF;
     }
-    
+
     // Reset interrupt flag
     IFS0bits.T3IF = 0;
 }
@@ -188,7 +211,7 @@ void RAMotorInit(void)
     UpdateMotorTimerPeriod();
     RA.StepPerSec = Mount.Config.NbStepMax / (24L * 3600L);
 
-    RTCCReadArray(RTCC_RAM, (BYTE *)&RA.StepPosition, sizeof (RA.StepPosition));
+    RTCCReadArray(RTCC_RAM, (BYTE *) & RA.StepPosition, sizeof (RA.StepPosition));
     if (RA.StepPosition < 0 || RA.StepPosition > Mount.Config.NbStepMax)
     {
         RA.StepPosition = 0; // Set default position to north celestial pole
@@ -199,7 +222,7 @@ void RAMotorInit(void)
 
     Timer23Init();
 
-    if (Mount.Config.IsParked == 1)
+    if (Mount.Config.IsParked)
     {
         RA.IsParking = PARKED;
     }
@@ -214,6 +237,7 @@ void RAStart(void)
     RA.IsParking = UNPARKED;
     RA_SLEEP_IO = 1;
     CurrentSpeed = 1;
+//    FullStep = FALSE;
     T2CONbits.TON = 1;
 }
 
@@ -234,19 +258,20 @@ void RAAccelerate(void)
         accel_decel_cnt = Mount.AccelPeriod;
         RAState = MOTOR_ACCEL;
 
-//        t_speedlist * p;
-//        for (p = speedlist ; p != NULL ; p = p->next)
-//            free(p);
-//
-//        speedlist = malloc(sizeof(*speedlist));
-//        speedlist->speed = CurrentSpeed;
-//        speedlist->position = RARelativeStepPosition;
-//        speedlist->MotorTimerPeriod = MotorTimerPeriod;
-//        speedlist->next = NULL;
-//        lastspeed = speedlist;
-        
+        //        t_speedlist * p;
+        //        for (p = speedlist ; p != NULL ; p = p->next)
+        //            free(p);
+        //
+        //        speedlist = malloc(sizeof(*speedlist));
+        //        speedlist->speed = CurrentSpeed;
+        //        speedlist->position = RARelativeStepPosition;
+        //        speedlist->MotorTimerPeriod = MotorTimerPeriod;
+        //        speedlist->next = NULL;
+        //        lastspeed = speedlist;
+
     }
 }
+
 /*
 void DumpSpeedList()
 {
@@ -293,7 +318,7 @@ void RAStop(void)
 {
     T2CONbits.TON = 0;
     RA_SLEEP_IO = 0;
-//    RA_FAULT_CN = 0;
+    //    RA_FAULT_CN = 0;
 }
 
 void RASetDirection(uint8_t dir)
@@ -311,11 +336,11 @@ void RAChangeDirection()
 
 void UpdateRAStepPosition()
 {
-    double ra, lst;
-
     static BOOL LastNorthPoleOVerflow = FALSE;
     int32_t p;
     static BOOL SavePosition = TRUE;
+
+    if (Mount.PierIsFlipping) return;
 
     if (RAState != MOTOR_STOP || Dec.NorthPoleOVerflow == TRUE)
     {
@@ -358,30 +383,35 @@ void UpdateRAStepPosition()
         }
     }
 
-    lst = ComputeSideralTime();
-    double lst_west = lst - 6.0;
-    if (lst_west < 0.0) lst_west += 24.0;
-    double lst_east = lst + 6.0;
-    if (lst_east > 24.0) lst_east -= 24.0;
-    double lst_mid = lst + 12;
-    if (lst_mid > 24.0) lst_mid -= 24.0;
+    if (Mount.AutomaticSideOfPier)
+    {
+        double ra, lst;
 
-    ra = (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
-    if (ra < lst_east && ra >= lst)
-    {
-        Mount.SideOfPier = PIER_WEST_POLL_WEST;
-    }
-    else if (ra >= lst_west)
-    {
-        Mount.SideOfPier = PIER_EAST_POLL_EAST;
-    }
-    else if (ra >= lst_mid)
-    {
-        Mount.SideOfPier = PIER_WEST_POLL_EAST;
-    }
-    else
-    {
-        Mount.SideOfPier = PIER_EAST_POLL_WEST;
+        lst = ComputeSideralTime();
+
+        ra = lst - (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
+        if (ra < 0.0) ra +=24.0;
+
+        if (ra > 18.0)
+        {
+            Mount.SideOfScope = PIER_WEST;
+            Mount.SideOfPier = PIER_WEST;
+        }
+        else if (ra > 12)
+        {
+            Mount.SideOfScope = PIER_EAST;
+            Mount.SideOfPier = PIER_WEST;
+        }
+        else if (ra > 6)
+        {
+            Mount.SideOfPier = PIER_EAST;
+            Mount.SideOfScope = PIER_WEST;
+        }
+        else
+        {
+            Mount.SideOfPier = PIER_EAST;
+            Mount.SideOfScope = PIER_EAST;
+        }
     }
 }
 

@@ -174,7 +174,7 @@ void UpdatePadState()
 
                 if (PadState.PAD_S1 == 0 && PadState.PAD_S2 == 0)
                 {
-                    if (Mount.Config.IsParked == 1 && PadState.PAD_SWITCH == 0)
+                    if (Mount.Config.IsParked && PadState.PAD_SWITCH == 0)
                     {
                         // Unpark when a directionnal key pad is pressed
                         homeUnpark();

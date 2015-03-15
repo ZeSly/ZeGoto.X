@@ -263,7 +263,9 @@ LX200Command LX200CommandTab[] ={
     { "hW", 2, homeUnpark},
 
     { "PO", 2, homeUnpark}, // ASTRO-PHYSICS GTO compatibility
-    { "pS", 2, SideOfPier}, // ASTRO-PHYSICS GTO compatibility
+    { "pS", 2, GetSideOfPier}, // ASTRO-PHYSICS GTO compatibility
+    { "ps", 2, SetSideOfPier},
+    { "pF", 2, FlipSideOfPier},
 
     { "rG", 2, GetGuidingRate},
     { "rC", 2, GetCenteringRate},

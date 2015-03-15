@@ -147,11 +147,13 @@ void Halt()
         }
 
     }
+
+    Mount.PierIsFlipping = 0;
 }
 
 void GuideNorth()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
@@ -164,7 +166,7 @@ void GuideNorth()
 
 void MoveNorth()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -181,7 +183,7 @@ void MoveNorth()
 
 void GuideSouth()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
@@ -194,7 +196,7 @@ void GuideSouth()
 
 void MoveSouth()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -211,7 +213,7 @@ void MoveSouth()
 
 void GuideEast()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
@@ -224,7 +226,7 @@ void GuideEast()
 
 void MoveEast()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -241,7 +243,7 @@ void MoveEast()
 
 void GuideWest()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
@@ -254,7 +256,7 @@ void GuideWest()
 
 void MoveWest()
 {
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -268,6 +270,39 @@ void MoveWest()
         RAGuideWest();
     }
 }
+
+BOOL IsPierFlipNeeded()
+{
+    double ra, lst;
+    int TargetSideOfPier;
+
+    lst = ComputeSideralTime();
+
+    ra = lst - (double) RA.StepTarget / (3600.0 * (double) RA.StepPerSec);
+    if (ra < 0.0) ra += 24.0;
+
+    if (ra > 18.0)
+    {
+        TargetSideOfPier = PIER_WEST;
+    }
+    else if (ra > 12)
+    {
+        TargetSideOfPier = PIER_WEST;
+    }
+    else if (ra > 6)
+    {
+        TargetSideOfPier = PIER_WEST;
+    }
+    else
+    {
+        TargetSideOfPier = PIER_EAST;
+    }
+
+    if (TargetSideOfPier != Mount.SideOfPier && Mount.AutomaticSideOfPier)
+        return TRUE;
+    return FALSE;
+}
+
 
 /******************************************************************************
  * Function:        void SlewToTarget()
@@ -286,25 +321,37 @@ void SlewToTarget()
     int32_t dec_n2 = 0;
     BOOL throw_the_pole = FALSE;
 
-    if (Mount.Config.IsParked) return;
+    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
     RA.NumberStep = 0;
     Dec.NumberStep = 0;
 
     if (RA.StepTarget)
     {
+        // number of step direct slewing
         ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
+
+        // number of step slewing through RA = 0
         ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
+
+        // shortest slewing in RA
         RA.NumberStep = MIN(ra_n1, ra_n2);
     }
     if (Dec.StepTarget)
     {
         Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
 
+        // number of step for 90° in dec
         int32_t ninety_deg = Mount.Config.NbStepMax / 4;
+
+        // number of step direct slewing
         dec_n1 = int32abs(Dec.StepTarget - Dec.StepPosition);
+
+
+        // number of step slewing through the pole (dec = 90°)
         dec_n2 = (ninety_deg - Dec.StepTarget) + (ninety_deg - Dec.StepPosition);
-        if (RA.NumberStep > ninety_deg && dec_n2 < ninety_deg)
+
+        if ((RA.NumberStep > ninety_deg && dec_n2 < ninety_deg) || IsPierFlipNeeded() == TRUE)
         {
             Dec.NumberStep = dec_n2;
             RA.StepTarget += Mount.Config.NbStepMax / 2L;
@@ -321,7 +368,7 @@ void SlewToTarget()
         }
     }
 
-    if (RA.StepTarget)
+    if (RA.NumberStep)
     {
         if (ra_n1 <= ra_n2)
         {
@@ -354,7 +401,7 @@ void SlewToTarget()
 
     }
 
-    if (Dec.StepTarget)
+    if (Dec.NumberStep)
     {
         if (Dec.StepPosition < Dec.StepTarget || throw_the_pole == TRUE)
         {

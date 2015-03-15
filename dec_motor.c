@@ -40,13 +40,15 @@ static motor_state_t DecState = MOTOR_STOP;
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
+//static BOOL FullStep;
+
 static int32_t accel_decel_cnt;
 
 void Timer45Init(void)
 {
-    T4CON = 0x0008;     // 32 bit time, 1:1 prescale, internal clock
+    T4CON = 0x0008; // 32 bit time, 1:1 prescale, internal clock
     T5CON = 0;
-    IPC7bits.T5IP = 6;  // Interrupt priority 6 (high)
+    IPC7bits.T5IP = 6; // Interrupt priority 6 (high)
     IFS1bits.T5IF = 0;
     IEC1bits.T5IE = 1;
 }
@@ -68,7 +70,14 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
                 DecState = MOTOR_DECEL;
                 accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
             }
-            Dec.NumberStep--;
+//            if (FullStep == TRUE)
+//            {
+//                Dec.NumberStep -= 8;
+//            }
+//            else
+            {
+                Dec.NumberStep--;
+            }
         }
     }
 
@@ -107,7 +116,7 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
                 CurrentMove &= ~MOVE_DEC;
                 T4CONbits.TON = 0;
                 DEC_SLEEP_IO = 0;
-//                DEC_FAULT_CN = 0;
+                //                DEC_FAULT_CN = 0;
                 Dec.NorthPoleOVerflow = FALSE;
             }
 
@@ -121,6 +130,20 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
     if (NewMotorPeriod == TRUE)
     {
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
+//        if (CurrentSpeed >= 4)
+//        {
+//            MotorTimerPeriod *= 8;
+//            if (FullStep == FALSE)
+//            {
+//                FullStep = TRUE;
+//                DEC_MODE_IO = 0;
+//            }
+//        }
+//        else if (FullStep == TRUE)
+//        {
+//            FullStep = FALSE;
+//            DEC_MODE_IO = 1;
+//        }
         PR4 = MotorTimerPeriod & 0xFFFF;
         PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
     }
@@ -164,7 +187,7 @@ void DecMotorInit(void)
 
     Timer45Init();
 
-    if (Mount.Config.IsParked == 1)
+    if (Mount.Config.IsParked)
     {
         Dec.IsParking = PARKED;
     }
@@ -178,6 +201,7 @@ void DecStart(void)
 {
     DEC_SLEEP_IO = 1;
     CurrentSpeed = 1;
+//    FullStep = FALSE;
     T4CONbits.TON = 1;
 }
 
@@ -186,7 +210,7 @@ void DecAccelerate(void)
     if (DecState == MOTOR_STOP)
     {
         DecDirection = DecNextDirection;
-        DEC_DIR_IO = DecNextDirection;
+        DEC_DIR_IO = DecNextDirection ^ Mount.SideOfPier;
 
         Dec.StepStart = Dec.StepPosition;
         DecRelativeStepPosition = 0;
@@ -195,6 +219,7 @@ void DecAccelerate(void)
         DEC_SLEEP_IO = 1;
 
         CurrentSpeed = 1;
+//        FullStep = FALSE;
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         UpdateMotorTimerPeriod();
 
@@ -231,41 +256,51 @@ void UpdateDecStepPosition()
     int32_t p;
     static BOOL SavePosition = TRUE;
 
-    if (DecState != MOTOR_STOP)
+    if (Mount.PierIsFlipping)
     {
-        Dec_DI;
-        p = DecRelativeStepPosition;
-        Dec_EI;
-
-        if (DecDirection == Mount.NorthDirection)
+        if (RAIsMotorStop() || DecIsMotorStop())
         {
-            if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart + p;
-            else Dec.StepPosition = Dec.StepStart + p;
-
+            Mount.PierIsFlipping = 0;
         }
-        else
-        {
-            if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart - p;
-            else Dec.StepPosition = Dec.StepStart + p;
-        }
-
-        if ((Dec.StepPosition < -Mount.Config.NbStepMax / 4L) || (Dec.StepPosition > Mount.Config.NbStepMax / 4L))
-        {
-            Dec.NorthPoleOVerflow = TRUE;
-            Dec.StepPosition = DecStepMax - (Dec.StepPosition - DecStepMax);
-        }
-
-        SavePosition = TRUE;
     }
-    else if (SavePosition == TRUE)
+    else
     {
-        RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & Dec.StepPosition, sizeof (Dec.StepPosition));
-        SavePosition = FALSE;
-    }
+        if (DecState != MOTOR_STOP)
+        {
+            Dec_DI;
+            p = DecRelativeStepPosition;
+            Dec_EI;
 
-    if (Dec.IsParking == PARKING && DecState == MOTOR_STOP)
-    {
-        Dec.IsParking = PARKED;
+            if (DecDirection == Mount.NorthDirection)
+            {
+                if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart + p;
+                else Dec.StepPosition = Dec.StepStart + p;
+
+            }
+            else
+            {
+                if (Dec.NorthPoleOVerflow == FALSE) Dec.StepPosition = Dec.StepStart - p;
+                else Dec.StepPosition = Dec.StepStart + p;
+            }
+
+            if ((Dec.StepPosition < -Mount.Config.NbStepMax / 4L) || (Dec.StepPosition > Mount.Config.NbStepMax / 4L))
+            {
+                Dec.NorthPoleOVerflow = TRUE;
+                Dec.StepPosition = DecStepMax - (Dec.StepPosition - DecStepMax);
+            }
+
+            SavePosition = TRUE;
+        }
+        else if (SavePosition == TRUE)
+        {
+            RTCCWriteArray(RTCC_RAM + sizeof (int32_t), (BYTE*) & Dec.StepPosition, sizeof (Dec.StepPosition));
+            SavePosition = FALSE;
+        }
+
+        if (Dec.IsParking == PARKING && DecState == MOTOR_STOP)
+        {
+            Dec.IsParking = PARKED;
+        }
     }
 }
 

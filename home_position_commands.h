@@ -22,6 +22,9 @@
 void homeSetParkPosition();
 void homeSlewToParkPosition();
 void homeUnpark();
-void SideOfPier();
+
+void GetSideOfPier();
+void SetSideOfPier();
+void FlipSideOfPier();
 
 #endif	/* HOME_POSITION_COMMANDS_H */

@@ -1131,19 +1131,23 @@ void HTTPPrint_mountconfig_guidingrate(void)
 
 void HTTPPrint_sideofpier(void)
 {
+    switch (Mount.SideOfScope)
+    {
+    case PIER_WEST:
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "Scope is on <em>west</em> side of mount,");
+        break;
+    case PIER_EAST:
+        TCPPutROMString(sktHTTP, (ROM BYTE*) "Scope is on <em>east</em> side of mount,");
+        break;
+    }
+
     switch (Mount.SideOfPier)
     {
-    case PIER_EAST_POLL_EAST :
-        TCPPutROMString(sktHTTP, (ROM BYTE*) "East side of mount, poll east");
+    case PIER_EAST :
+        TCPPutROMString(sktHTTP, (ROM BYTE*) " poll <i>east</i>");
         break;
-    case PIER_EAST_POLL_WEST :
-        TCPPutROMString(sktHTTP, (ROM BYTE*) "East side of mount, poll west");
-        break;
-    case PIER_WEST_POLL_EAST :
-        TCPPutROMString(sktHTTP, (ROM BYTE*) "West side of mount, poll east");
-        break;
-    case PIER_WEST_POLL_WEST :
-        TCPPutROMString(sktHTTP, (ROM BYTE*) "West side of mount, poll west");
+    case PIER_WEST :
+        TCPPutROMString(sktHTTP, (ROM BYTE*) " poll <i>west</i>");
         break;
     }
 }
