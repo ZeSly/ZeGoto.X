@@ -50,6 +50,56 @@ void homeSetParkPosition()
     SaveMountConfig(&Mount.Config);
 }
 
+
+/******************************************************************************
+ * Function:        void SetHomeTarget()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        set RA.StepTarget and Dec.StepTarget for park position
+ *                  according to current sideral time
+ *****************************************************************************/
+void SetHomeTarget()
+{
+    double ra, dec;
+
+    switch (Mount.Config.ParkPostion)
+    {
+    case 0:
+        // Set park position to alt/az position
+        ComputeEquatorialCoord(Mount.Config.ParkAltitude, Mount.Config.ParkAzimuth, &ra, &dec);
+        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+        Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
+        break;
+
+    case 1:
+        // Set park position : tube horizontal pointing in the direction of the pole
+        ra = ComputeSideralTime() + 12.0;
+        if (ra > 24.0) ra -= 24.0;
+        dec = 90.0 - Mount.Config.Latitude;
+        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+        Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
+        break;
+
+    case 2:
+        // Set park position : tube horizontal pointing east
+        ra = ComputeSideralTime() + 6.0;
+        if (ra > 24.0) ra -= 24.0;
+        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+        Dec.StepTarget = 0;
+        break;
+
+    case 3:
+        // Set park position to north celestial pole
+        ra = ComputeSideralTime() + 6.0;
+        if (ra > 24.0) ra -= 24.0;
+        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
+        Dec.StepTarget = Mount.Config.NbStepMax / 4;
+        break;
+    }
+}
+
 /******************************************************************************
  * Function:        void homeSlewToParkPosition()
  * PreCondition:    Mount is not parked, i.e. Mount.Config.IsParked is clear
@@ -61,23 +111,9 @@ void homeSetParkPosition()
  *****************************************************************************/
 void homeSlewToParkPosition()
 {
-    double ra, dec;
-
     if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
 
-    if (Mount.Config.ParkPostion == 0)
-    {
-        ComputeEquatorialCoord(Mount.Config.ParkAltitude, Mount.Config.ParkAzimuth, &ra, &dec);
-        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
-        Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
-    }
-    else if (Mount.Config.ParkPostion == 3)
-    {
-        // Set park position to north celestial pole
-        ra = ComputeSideralTime();
-        RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
-        Dec.StepTarget = Mount.Config.NbStepMax / 4;
-    }
+    SetHomeTarget();
     RA.IsParking = PARKING;
     Dec.IsParking = PARKING;
     SlewToTarget();
@@ -93,8 +129,6 @@ void homeSlewToParkPosition()
  *****************************************************************************/
 void homeUnpark()
 {
-    //    double ra, dec;
-
     if (Mount.Config.IsParked)
     {
         RA.IsParking = UNPARKED;
@@ -102,21 +136,9 @@ void homeUnpark()
         Mount.Config.IsParked = FALSE;
         SaveMountConfig(&Mount.Config);
 
-        //        if (Mount.Config.ParkPostion == 0)
-        //        {
-        //            ComputeEquatorialCoord(Mount.Config.ParkAltitude, Mount.Config.ParkAzimuth, &ra, &dec);
-        //            RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
-        //            Dec.StepTarget = (int32_t) (Mount.Config.NbStepMax * dec / 360.0);
-        //        }
-        //        else if (Mount.Config.ParkPostion == 3)
-        //        {
-        //            // Set park position to north celestial pole
-        //            ra = ComputeSideralTime();
-        //            RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
-        //            Dec.StepTarget = Mount.Config.NbStepMax / 4;
-        //        }
-        //        RA.StepPosition = RA.StepTarget;
-        //        Dec.StepPosition = Dec.StepTarget;
+        SetHomeTarget();
+        RA.StepPosition = RA.StepTarget;
+        Dec.StepPosition = Dec.StepTarget;
         RAStart();
     }
 }

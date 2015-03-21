@@ -153,7 +153,6 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
                     // stop motor after slewing to park position
                     T2CONbits.TON = 0;
                     RA_SLEEP_IO = 0;
-                    //                    RA_FAULT_CN = 0;
                 }
             }
 
@@ -404,13 +403,13 @@ void UpdateRAStepPosition()
         }
         else if (ra > 6)
         {
-            Mount.SideOfPier = PIER_EAST;
             Mount.SideOfScope = PIER_WEST;
+            Mount.SideOfPier = PIER_EAST;
         }
         else
         {
-            Mount.SideOfPier = PIER_EAST;
             Mount.SideOfScope = PIER_EAST;
+            Mount.SideOfPier = PIER_EAST;
         }
     }
 }

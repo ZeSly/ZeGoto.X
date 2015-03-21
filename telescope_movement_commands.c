@@ -291,7 +291,7 @@ BOOL IsPierFlipNeeded()
     }
     else if (ra > 6)
     {
-        TargetSideOfPier = PIER_WEST;
+        TargetSideOfPier = PIER_EAST;
     }
     else
     {
@@ -302,7 +302,6 @@ BOOL IsPierFlipNeeded()
         return TRUE;
     return FALSE;
 }
-
 
 /******************************************************************************
  * Function:        void SlewToTarget()
@@ -326,47 +325,52 @@ void SlewToTarget()
     RA.NumberStep = 0;
     Dec.NumberStep = 0;
 
-    if (RA.StepTarget)
+    /***************************************************************************
+     * Number of step in RA
+     **************************************************************************/
+    // number of step direct slewing
+    ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
+
+    // number of step slewing through RA = 0
+    ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
+
+    // shortest slewing in RA
+    RA.NumberStep = MIN(ra_n1, ra_n2);
+
+    /***************************************************************************
+     * Number of step in Dec
+     **************************************************************************/
+    Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
+
+    // number of step for 90° in dec
+    int32_t ninety_deg = Mount.Config.NbStepMax / 4;
+
+    // number of step direct slewing
+    dec_n1 = int32abs(Dec.StepTarget - Dec.StepPosition);
+
+
+    // number of step slewing through the pole (dec = 90°)
+    dec_n2 = (ninety_deg - Dec.StepTarget) + (ninety_deg - Dec.StepPosition);
+
+    if ((RA.NumberStep > ninety_deg && dec_n2 < ninety_deg) || IsPierFlipNeeded() == TRUE)
     {
-        // number of step direct slewing
+        Dec.NumberStep = dec_n2;
+        RA.StepTarget += Mount.Config.NbStepMax / 2L;
+        RA.StepTarget %= Mount.Config.NbStepMax;
+
         ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
-
-        // number of step slewing through RA = 0
         ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
-
-        // shortest slewing in RA
         RA.NumberStep = MIN(ra_n1, ra_n2);
+        throw_the_pole = TRUE;
     }
-    if (Dec.StepTarget)
+    else
     {
-        Dec.NumberStep = int32abs(Dec.StepTarget - Dec.StepPosition);
-
-        // number of step for 90° in dec
-        int32_t ninety_deg = Mount.Config.NbStepMax / 4;
-
-        // number of step direct slewing
-        dec_n1 = int32abs(Dec.StepTarget - Dec.StepPosition);
-
-
-        // number of step slewing through the pole (dec = 90°)
-        dec_n2 = (ninety_deg - Dec.StepTarget) + (ninety_deg - Dec.StepPosition);
-
-        if ((RA.NumberStep > ninety_deg && dec_n2 < ninety_deg) || IsPierFlipNeeded() == TRUE)
-        {
-            Dec.NumberStep = dec_n2;
-            RA.StepTarget += Mount.Config.NbStepMax / 2L;
-            RA.StepTarget %= Mount.Config.NbStepMax;
-
-            ra_n1 = int32abs(RA.StepTarget - RA.StepPosition);
-            ra_n2 = Mount.Config.NbStepMax - MAX(RA.StepPosition, RA.StepTarget) + MIN(RA.StepPosition, RA.StepTarget);
-            RA.NumberStep = MIN(ra_n1, ra_n2);
-            throw_the_pole = TRUE;
-        }
-        else
-        {
-            Dec.NumberStep = dec_n1;
-        }
+        Dec.NumberStep = dec_n1;
     }
+
+    /***************************************************************************
+     * Starts movements
+    **************************************************************************/
 
     if (RA.NumberStep)
     {

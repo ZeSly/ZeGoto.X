@@ -300,6 +300,11 @@ void UpdateDecStepPosition()
         if (Dec.IsParking == PARKING && DecState == MOTOR_STOP)
         {
             Dec.IsParking = PARKED;
+            if (RA.IsParking == PARKED)
+            {
+                Mount.Config.IsParked = TRUE;
+                SaveMountConfig(&Mount.Config);
+            }
         }
     }
 }

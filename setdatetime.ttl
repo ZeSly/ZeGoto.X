@@ -13,7 +13,7 @@ call setcmd
 
 ; set local time
 gettime cmd ':SL%H:%M:%S#'
-;cmd = ':SL04:30:30#'
+;cmd = ':SL10:30:00#'
 call setcmd
 
 fileclose fhandle
