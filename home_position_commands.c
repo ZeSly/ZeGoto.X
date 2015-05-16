@@ -153,13 +153,13 @@ void homeUnpark()
  *****************************************************************************/
 void GetSideOfPier()
 {
-    if (Mount.SideOfPier)
+    if (Mount.SideOfPier == PIER_WEST)
     {
-        strcpy(LX200Response, "West");
+        strcpy(LX200Response, "West#");
     }
     else
     {
-        strcpy(LX200Response, "East");
+        strcpy(LX200Response, "East#");
     }
 
 }
