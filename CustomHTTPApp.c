@@ -550,10 +550,20 @@ static HTTP_IO_RESULT HTTPPostMount(void)
             newMountConfig.NbStepMax = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.NbStepMax == 0) goto ConfigFailure;
         }
-        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "period"))
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "sideralperiod"))
         {
             newMountConfig.SideralPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.SideralPeriod == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "lunarperiod"))
+        {
+            newMountConfig.LunarPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.LunarPeriod == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "solarperiod"))
+        {
+            newMountConfig.SolarPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            if (newMountConfig.SolarPeriod == 0) goto ConfigFailure;
         }
         else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "maxrate"))
         {
@@ -1102,6 +1112,22 @@ void HTTPPrint_mountconfig_sideralperiod(void)
     char str[16];
 
     sprintf(str, "%lu", Mount.Config.SideralPeriod);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_lunarperiod(void)
+{
+    char str[16];
+
+    sprintf(str, "%lu", Mount.Config.LunarPeriod);
+    TCPPutString(sktHTTP, (BYTE *) str);
+}
+
+void HTTPPrint_mountconfig_solarperiod(void)
+{
+    char str[16];
+
+    sprintf(str, "%lu", Mount.Config.SolarPeriod);
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 

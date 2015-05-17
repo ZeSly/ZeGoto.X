@@ -82,6 +82,8 @@ void HTTPPrint_mountconfig_inverteddec(void);
 void HTTPPrint_mountconfig_invertedra(void);
 void HTTPPrint_mountconfig_nbmaxstep(void);
 void HTTPPrint_mountconfig_sideralperiod(void);
+void HTTPPrint_mountconfig_lunarperiod(void);
+void HTTPPrint_mountconfig_solarperiod(void);
 void HTTPPrint_mountconfig_maxrate(void);
 void HTTPPrint_mountconfig_centeringrate(void);
 void HTTPPrint_mountconfig_guidingrate(void);
@@ -227,6 +229,12 @@ void HTTPPrint(DWORD callbackID)
 			break;
         case 0x0000005f:
 			HTTPPrint_sideofpier();
+			break;
+        case 0x00000060:
+			HTTPPrint_mountconfig_lunarperiod();
+			break;
+        case 0x00000061:
+			HTTPPrint_mountconfig_solarperiod();
 			break;
 		default:
 			// Output notification for undefined values

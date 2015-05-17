@@ -2,7 +2,7 @@
  *
  *      ~ OpenGoto ~
  *
- *  LX200 : R ? Slew Rate Commands
+ *  LX200 : R - Slew Rate Commands
  *
  *********************************************************************
  * FileName:        slew_rate_commands.c

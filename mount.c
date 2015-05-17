@@ -39,6 +39,9 @@ void MountInit()
         /* Mecanic setting */
         Mount.Config.NbStepMax = 8640000UL;
         Mount.Config.SideralPeriod = 159563UL;
+        Mount.Config.LunarPeriod   = 163432UL;
+        Mount.Config.SolarPeriod   = 160000UL;
+        
         Mount.Config.MaxSpeed = 120;
         Mount.Config.CenteringSpeed = 10;
         Mount.Config.GuideSpeed = 5;    // 5 = 0.5x sideral rate on RA and 1.5x on dec

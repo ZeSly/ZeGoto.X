@@ -35,6 +35,7 @@
 #include "gps.h"
 #include "home_position_commands.h"
 #include "reticule.h"
+#include "tracking_commands.h"
 
 char LX200String[32];
 char LX200Response[64];
@@ -288,6 +289,11 @@ LX200Command LX200CommandTab[] ={
     { "V", 1, GetTelescopeFirmwareNumber},
     //    { "V", 1, AstroPhysicsVersion},
 
+    { "TL", 2, SelectLunarTracking},
+    { "TQ", 2, SelectSideralTracking},
+    { "TS", 2, SelectSolarTracking},
+    
+    
     { "GIP", 1, GetIPConfig},
     { "SIP", 1, SetIPConfig},
 

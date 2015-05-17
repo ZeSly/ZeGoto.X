@@ -179,6 +179,8 @@
       <itemPath>home_position_commands.c</itemPath>
       <itemPath>utils.c</itemPath>
       <itemPath>upnp.c</itemPath>
+      <itemPath>tracking_commands.c</itemPath>
+      <itemPath>tracking_commands.h</itemPath>
     </logicalFolder>
     <logicalFolder name="ExternalFiles"
                    displayName="Important Files"
@@ -390,6 +392,7 @@
         <property key="UART 3" value="true"/>
         <property key="UART 4" value="true"/>
         <property key="UCNFG1" value="true"/>
+        <property key="firmware.download.all" value="false"/>
         <property key="hwtoolclock.frcindebug" value="false"/>
         <property key="memories.aux" value="false"/>
         <property key="memories.bootflash" value="true"/>

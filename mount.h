@@ -45,6 +45,8 @@ typedef struct
     /* Mount specific settings */
     int32_t NbStepMax;
     uint32_t SideralPeriod;
+    uint32_t LunarPeriod;
+    uint32_t SolarPeriod;
     uint16_t MaxSpeed;
     uint16_t CenteringSpeed;
     uint16_t GuideSpeed;

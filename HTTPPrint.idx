@@ -94,3 +94,5 @@ svggpssignal(11)
 +result
 +result_text
 +sideofpier
++mountconfig_lunarperiod
++mountconfig_solarperiod

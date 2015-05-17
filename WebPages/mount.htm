@@ -28,10 +28,19 @@ side of pier.</p>
 <input type="text" name="step" value="" onchange="MountSetting()"/></div>
 <div><label>Number max steps:</label>
 <input type="text" name="nbmaxstep" value="~mountconfig_nbmaxstep~" disabled="true"/></div>
-<div><label>Step period:</label>
-<input type="text" name="period" value="~mountconfig_sideralperiod~" disabled="true"/></div>
-<div><label>Step frequency:</label>
-<input type="text" name="freq" disabled="true"/> Hz</div>
+<div>
+<label>Step periods: </label>
+<label style="margin-left: -65px">sideral</label>
+<input type="text" name="sideralperiod" value="~mountconfig_sideralperiod~" disabled="true"/><span id="sideral"></span>
+</div>
+<div>
+<label style="margin-left: -65px">lunar</label>
+<input type="text" name="lunarperiod" value="~mountconfig_lunarperiod~" disabled="true"/><span id="lunar"></span>
+</div>
+<div>
+<label style="margin-left: -65px">solar</label>
+<input type="text" name="solarperiod" value="~mountconfig_solarperiod~" disabled="true"/><span id="solar"></span>
+</div>
 <div><label>Max rate:</label>
 <input type="text" name="maxrate" value="~mountconfig_maxrate~"/> X sideral rate</div>
 <div><label>Centering rate:</label>
@@ -54,8 +63,15 @@ function MountSetting()
     {
         ustep = m.step.value * 8;
         m.nbmaxstep.value = m.wwr.value * m.mr.value * ustep;
-        m.freq.value = m.nbmaxstep.value / 86164;
-        m.period.value = Math.round(16000000 / m.freq.value);
+        var freq_sideral = m.nbmaxstep.value / 86164;
+        var freq_lunar = m.nbmaxstep.value / (360 * 60 * 60 / 14.685);
+        var freq_solar = m.nbmaxstep.value / 86400;
+        m.sideralperiod.value = Math.round(16000000 / freq_sideral);
+        m.lunarperiod.value = Math.round(16000000 / freq_lunar);
+        m.solarperiod.value = Math.round(16000000 / freq_solar);
+        document.getElementById('sideral').textContent = " @" + freq_sideral.toFixed(3) + "Hz";
+        document.getElementById('lunar').innerHTML = " @" + freq_lunar.toFixed(3) + "Hz";
+        document.getElementById('solar').innerHTML = " @" + freq_solar.toFixed(3) + "Hz";
     }
 }
 function MountSubmit()
@@ -65,7 +81,9 @@ function MountSubmit()
     m.mr.disabled=true;
     m.step.disabled=true;
     m.nbmaxstep.disabled=false;
-    m.period.disabled=false;
+    m.sideralperiod.disabled=false;
+    m.lunarperiod.disabled=false;
+    m.solarperiod.disabled=false;
 }
 -->
 </script>
