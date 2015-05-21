@@ -22,6 +22,7 @@
 void homeSetParkPosition();
 void homeSlewToParkPosition();
 void homeUnpark();
+void GetHomeData();
 
 void GetSideOfPier();
 void SetSideOfPier();

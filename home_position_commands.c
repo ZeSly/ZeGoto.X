@@ -19,6 +19,8 @@
 /* Device header file */
 #include <xc.h>
 #include <string.h>
+#include <stdio.h>
+#include <math.h>
 
 #include "utils.h"
 #include "mount.h"
@@ -49,7 +51,6 @@ void homeSetParkPosition()
     }
     SaveMountConfig(&Mount.Config);
 }
-
 
 /******************************************************************************
  * Function:        void SetHomeTarget()
@@ -141,6 +142,47 @@ void homeUnpark()
         Dec.StepPosition = Dec.StepTarget;
         RAStart();
     }
+}
+
+void GetHomeData()
+{
+    double degrees, minutes, seconds;
+    char *p;
+
+    switch (Mount.Config.ParkPostion)
+    {
+    case 0:
+        // Set park position to alt/az position
+        p = LX200Response;
+
+        degrees = floor(Mount.Config.ParkAzimuth);
+        minutes = (Mount.Config.ParkAzimuth - degrees) * 60.0;
+        seconds = (minutes - floor(minutes)) * 60.0;
+        p += sprintf(p, "Az%03.0f*%02.0f'%02.0f", degrees, minutes, seconds);
+
+        degrees = floor(fabs(Mount.Config.ParkAltitude));
+        minutes = (fabs(Mount.Config.ParkAltitude) - degrees) * 60.0;
+        seconds = (minutes - floor(minutes)) * 60.0;
+        sprintf(p, "Alt%c%02.0f*%02.0f'%02.0f#", Mount.Config.ParkAltitude < 0 ? '-' : '+', degrees, minutes, seconds);
+
+        break;
+
+    case 1:
+        // Set park position : tube horizontal pointing in the direction of the pole
+        strcpy(LX200Response, "Park1#");
+        break;
+
+    case 2:
+        // Set park position : tube horizontal pointing east
+        strcpy(LX200Response, "Park2#");
+        break;
+
+    case 3:
+        // Set park position to north celestial pole
+        strcpy(LX200Response, "Park3#");
+        break;
+    }
+
 }
 
 /******************************************************************************
