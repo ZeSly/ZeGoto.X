@@ -258,7 +258,7 @@ void UpdateDecStepPosition()
 
     if (Mount.PierIsFlipping)
     {
-        if (RAIsMotorStop() || DecIsMotorStop())
+        if (RAIsMotorStopped() || DecIsMotorStopped())
         {
             Mount.PierIsFlipping = 0;
         }
@@ -309,7 +309,7 @@ void UpdateDecStepPosition()
     }
 }
 
-inline int DecIsMotorStop()
+inline int DecIsMotorStopped()
 {
     return (DecState == MOTOR_STOP);
 }

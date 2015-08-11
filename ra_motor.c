@@ -414,7 +414,7 @@ void UpdateRAStepPosition()
     }
 }
 
-inline int RAIsMotorStop()
+inline int RAIsMotorStopped()
 {
     return (RAState == MOTOR_STOP);
 }

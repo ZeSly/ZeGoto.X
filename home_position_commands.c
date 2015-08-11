@@ -112,7 +112,7 @@ void SetHomeTarget()
  *****************************************************************************/
 void homeSlewToParkPosition()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     SetHomeTarget();
     RA.IsParking = PARKING;
@@ -257,11 +257,11 @@ void FlipSideOfPier()
     if (Mount.SideOfPier == PIER_EAST)
     {
         MoveWest();
-        MoveNorth(); // always move north, actul dec direction depend on RealSideOfPier
+        MoveNorth(); // always move north, actual dec direction depend on SideOfPier
     }
     else
     {
         MoveEast();
-        MoveNorth(); // always move north, actul dec direction depend on RealSideOfPier
+        MoveNorth(); // always move north, actual dec direction depend on SideOfPier
     }
 }

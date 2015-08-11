@@ -588,7 +588,7 @@ static HTTP_IO_RESULT HTTPPostMount(void)
         }
     }
 
-    if (!DecIsMotorStop() || !RAIsMotorStop())
+    if (!DecIsMotorStopped() || !RAIsMotorStopped())
     {
         lastResultMsg = 2;
         goto ConfigFailure;

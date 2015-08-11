@@ -153,7 +153,7 @@ void Halt()
 
 void GuideNorth()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
@@ -166,7 +166,7 @@ void GuideNorth()
 
 void MoveNorth()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -183,7 +183,7 @@ void MoveNorth()
 
 void GuideSouth()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
@@ -196,7 +196,7 @@ void GuideSouth()
 
 void MoveSouth()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -213,7 +213,7 @@ void MoveSouth()
 
 void GuideEast()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
@@ -226,7 +226,7 @@ void GuideEast()
 
 void MoveEast()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -243,7 +243,7 @@ void MoveEast()
 
 void GuideWest()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     RAPulseGuideTime = atoi(LX200String + 3);
     if (RAPulseGuideTime != 0)
@@ -256,7 +256,7 @@ void GuideWest()
 
 void MoveWest()
 {
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
 
     if (Mount.IsGuiding == FALSE)
     {
@@ -320,8 +320,25 @@ void SlewToTarget()
     int32_t dec_n2 = 0;
     BOOL throw_the_pole = FALSE;
 
-    if (Mount.Config.IsParked || Mount.PierIsFlipping) return;
+    if (DecIsMotorStopped() || RAIsMotorStopped())
+    {
+        strcpy(LX200Response, "3Mount is slewing#");
+        return;
+    }
 
+    if (Mount.Config.IsParked)
+    {
+        strcpy(LX200Response, "4Mount is parked#");
+        return;
+    }
+    
+    if (ComputeTargetAltitude() < 0.0)
+    {
+        strcpy(LX200Response, "1Target below horizon#");
+        return;
+    }
+            
+    
     RA.NumberStep = 0;
     Dec.NumberStep = 0;
 

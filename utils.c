@@ -82,12 +82,13 @@ void ComputeAzimuthalCoord(double *Altitude, double *Azimuth)
     double dec = (double) Dec.StepPosition * 360.0 / (double) Mount.Config.NbStepMax;
 
     double dec_rad = DEGREES(dec);
+    double lat_rad = DEGREES(Mount.Config.Latitude);
 
     double tsmh_h = ComputeSideralTime();
     double hour_angle = tsmh_h - ra;
 
     double ah = DEGREES(hour_angle * 15.0);
-    double cos_z = sin(DEGREES(Mount.Config.Latitude)) * sin(dec_rad) + cos(DEGREES(Mount.Config.Latitude)) * cos(dec_rad) * cos(ah);
+    double cos_z = sin(lat_rad) * sin(dec_rad) + cos(lat_rad) * cos(dec_rad) * cos(ah);
     double z = acos(cos_z);
     double sin_a = cos(dec_rad) * sin(ah) / sin(z);
 
@@ -120,6 +121,33 @@ void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double 
     hour_angle /= 15.0;
     *ra = fmod(tsmh_h - hour_angle, 24.0);
     *dec = asin(sin_dec) * 180.0 / PI;
+}
+
+/******************************************************************************
+ * Function:        ComputeTargetAltitude
+ * PreCondition:    RA.StepTarget and Dec.StepTarget set
+ * Input:           None
+ * Output:          Altitude
+ * Side Effects:    Update JulianDay
+ * Overview:        Compute altitude of the current target
+ *****************************************************************************/
+double ComputeTargetAltitude()
+{
+    double ra = (double) RA.StepTarget * 24.0 / (double) Mount.Config.NbStepMax;
+    double dec = (double) Dec.StepTarget * 360.0 / (double) Mount.Config.NbStepMax;
+
+    double dec_rad = DEGREES(dec);
+    double lat_rad = DEGREES(Mount.Config.Latitude);
+
+    double tsmh_h = ComputeSideralTime();
+    double hour_angle = tsmh_h - ra;
+
+    double ah = DEGREES(hour_angle * 15.0);
+    double cos_z = sin(lat_rad) * sin(dec_rad) + cos(lat_rad) * cos(dec_rad) * cos(ah);
+    double z = acos(cos_z);
+
+    double Altitude = 90.0 - (z * 180.0 / PI);
+    return Altitude;
 }
 
 /******************************************************************************

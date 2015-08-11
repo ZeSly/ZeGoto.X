@@ -32,7 +32,7 @@ void RAStop(void);
 void RASetDirection(uint8_t dir);
 void RAChangeDirection();
 void UpdateRAStepPosition();
-int RAIsMotorStop();
+int RAIsMotorStopped();
 
 void RAGuideWest();
 void RAGuideEast();

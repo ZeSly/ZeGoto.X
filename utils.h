@@ -26,6 +26,7 @@ int32_t int32abs(int32_t a);
 double ComputeSideralTime();
 void ComputeAzimuthalCoord(double *Altitude, double *Azimuth);
 void ComputeEquatorialCoord(double Altitude, double Azimuth, double *ra, double *dec);
+double ComputeTargetAltitude();
 
 int _Dec2DMS(double d, char *s, int h);
 

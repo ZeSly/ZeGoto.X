@@ -31,7 +31,7 @@ void DecDecelerate(void);
 void DecStop(void);
 void DecSetDirection(uint8_t dir);
 void UpdateDecStepPosition();
-int DecIsMotorStop();
+int DecIsMotorStopped();
 
 void DecGuideNorth();
 void DecGuideSouth();
