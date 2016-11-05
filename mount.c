@@ -121,7 +121,7 @@ void MountInit()
     Mount.NorthDirection = Mount.Config.DecDefaultDirection;
     Mount.SouthDirection = !Mount.Config.DecDefaultDirection;
 
-    Mount.AutomaticSideOfPier = 1;
+    Mount.AutomaticSideOfPier = 0;
     Mount.PierIsFlipping = 0;
 
     Mount.IsGuiding = FALSE;
