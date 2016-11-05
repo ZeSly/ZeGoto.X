@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  LX200 : M ? Telescope Movement Commands
  *          Q ? Movement Commands

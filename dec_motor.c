@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  Declination motor setup and control
  *

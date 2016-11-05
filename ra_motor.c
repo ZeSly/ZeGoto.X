@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  Right Ascension motor setup and control
  *

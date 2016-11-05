@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  LX200 : G - Get Telescope Information
  *
@@ -485,7 +485,7 @@ void GetCurrentSiteLatitude()
  * Input:           None
  * Output:          None
  * Side Effects:    None
- * Overview:        :Ge# Get Current Site Altitude ~ OpenGoto Specific ~
+ * Overview:        :Ge# Get Current Site Altitude ~ ZeGoto Specific ~
  *                  Returns: dddd#
  *****************************************************************************/
 void GetCurrentSiteAltitude()

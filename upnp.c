@@ -52,14 +52,14 @@
 
 
 #define DEVICE_XML_BODY_PART2 "" \
-"		<friendlyName>%s (OpenGoto)</friendlyName>\r\n"
+"		<friendlyName>%s (ZeGoto)</friendlyName>\r\n"
 
 #define DEVICE_XML_BODY_PART3 "" \
 "		<manufacturer>Sylvain Girard</manufacturer>\r\n" \
 "		<manufacturerURL>http://www.zesly.net</manufacturerURL>\r\n" \
-"		<modelName>OpenGoto</modelName>\r\n" \
-"		<modelDescription>OpenGoto Equatorial mount controller</modelDescription>\r\n" \
-"		<modelNumber>OpenGoto "VERSION"</modelNumber>\r\n" \
+"		<modelName>ZeGoto</modelName>\r\n" \
+"		<modelDescription>ZeGoto Equatorial mount controller</modelDescription>\r\n" \
+"		<modelNumber>ZeGoto "VERSION"</modelNumber>\r\n" \
 "		<modelURL>http://www.zesly.net</modelURL>\r\n" \
 "		<serialNumber>ZESLY-123456</serialNumber>\r\n"
 

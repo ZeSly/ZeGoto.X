@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  LX200 : S ? Telescope Set Commands
  *
@@ -323,7 +323,7 @@ void SetCurrentSiteLatitude()
  * Output:          None
  * Side Effects:    None
  * Overview:        :Sudddd#
- *                  Set current site altitude ~ OpenGoto Specific ~
+ *                  Set current site altitude ~ ZeGoto Specific ~
  *****************************************************************************/
 void SetCurrentSiteAltitude()
 {

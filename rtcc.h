@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  I2C access to the MCP79401 Real-Time Clock/Calendar with
  *  SRAM and Protected EEPROM MAC address

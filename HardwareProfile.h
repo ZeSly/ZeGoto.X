@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *	Hardware specific definitions for OpenGoto
+ *	Hardware specific definitions for ZeGoto
  *
  *********************************************************************
  * FileName:        HardwareProfile.h

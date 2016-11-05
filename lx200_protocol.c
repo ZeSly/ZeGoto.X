@@ -1,6 +1,6 @@
 /*********************************************************************
  *
- *      ~ OpenGoto ~
+ *      ~ ZeGoto ~
  *
  *  Processing LX200 commands
  *
@@ -57,7 +57,7 @@ void GetTelescopeFirmwareTime()
 
 void GetTelescopeProductName()
 {
-    strcpy(LX200Response, "OpenGoto#");
+    strcpy(LX200Response, "ZeGoto#");
 }
 
 static APP_CONFIG newAppConfig;
