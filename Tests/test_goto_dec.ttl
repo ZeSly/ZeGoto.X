@@ -1,0 +1,13 @@
+connect '/C=19'
+send ":Sr11:00:00#"
+wait '0' '1'
+send ":Sd+00:00:00#"
+wait '0' '1'
+send ":CM#"
+
+send ":Sd+08:00:00#"
+wait '0' '1'
+send ":MS#"
+wait '0' '1' '2'
+
+disconnect
