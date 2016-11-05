@@ -1,0 +1,118 @@
+connect '192.168.0.9:4030 /nossh /T=1'
+setecho 0
+fileopen fhandle 'test-report.txt' 0
+
+;
+; first read IP config
+;
+
+cmd = ':GIPip#'
+call LX200Cmd
+
+cmd = ':GIPgw#'
+call LX200Cmd
+
+cmd = ':GIPsub#'
+call LX200Cmd
+
+cmd = ':GIPdns1#'
+call LX200Cmd
+
+cmd = ':GIPdns2#'
+call LX200Cmd
+
+cmd = ':GIPdhcp#'
+call LX200Cmd
+
+cmd = ':GIPhost#'
+call LX200Cmd
+
+filewriteln fhandle ''
+;
+; Set new IP config
+;
+
+cmd = ':SIPip192.168.0.5#'
+call LX200Set
+
+; cmd = ':SIPgw123.123.0.1#'
+; call LX200Set
+
+; cmd = ':SIPsub255.255.0.0#'
+; call LX200Set
+
+; cmd = ':SIPdns1111.222.111.222#'
+; call LX200Set
+
+; cmd = ':SIPdns2222.222.111.111#'
+; call LX200Set
+
+; cmd = ':SIPdhcp1#'
+; call LX200Set
+
+; cmd = ':SIPhostG11#'
+; call LX200Set
+
+sendln ':SIPapply#'
+flushrecv
+
+disconnect
+pause 3
+connect '192.168.0.5:4030 /nossh /T=1'
+setecho 0
+
+filewriteln fhandle ''
+;
+; second read IPconfig
+;
+
+cmd = ':GIPip#'
+call LX200Cmd
+
+cmd = ':GIPgw#'
+call LX200Cmd
+
+cmd = ':GIPsub#'
+call LX200Cmd
+
+cmd = ':GIPdns1#'
+call LX200Cmd
+
+cmd = ':GIPdns2#'
+call LX200Cmd
+
+cmd = ':GIPdhcp#'
+call LX200Cmd
+
+cmd = ':GIPhost#'
+call LX200Cmd
+
+
+fileclose fhandle
+disconnect
+end
+
+:LX200Cmd
+filewrite fhandle cmd
+filewrite fhandle ' >>> '
+sendln cmd
+waitregex '#'
+filewriteln fhandle inputstr
+flushrecv
+return
+
+:LX200Set
+filewrite fhandle cmd
+filewrite fhandle ' >>> '
+sendln cmd
+wait '0' '1'
+if result=0 then
+    filewriteln fhandle ' timeout FAILED'
+elseif result=1 then
+    filewriteln fhandle ' 0 rejected FAILED'
+else
+    filewriteln fhandle ' 1 OK'
+endif
+flushrecv
+return
+

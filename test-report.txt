@@ -1,0 +1,4 @@
+:SG+01.0# 0 rejected FAILED
+:Sg-05:38:00# 0 rejected FAILED
+:St45:16:00# 1 OK
+:Su0200# 0 rejected FAILED
