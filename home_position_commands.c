@@ -112,7 +112,7 @@ void SetHomeTarget()
  *****************************************************************************/
 void homeSlewToParkPosition()
 {
-    if (Mount.Config.IsParked || DecIsMotorStopped() || RAIsMotorStopped()) return;
+    if (Mount.Config.IsParked || !DecIsMotorStopped() || !RAIsMotorStopped()) return;
 
     SetHomeTarget();
     RA.IsParking = PARKING;
