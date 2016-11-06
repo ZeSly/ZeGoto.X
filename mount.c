@@ -57,7 +57,7 @@ void MountInit()
         /* Park coordinates */
         Mount.Config.IsParked = 0;
         Mount.Config.ParkEast = 0;
-        Mount.Config.ParkPostion = 3;   // default parl position is Astro-Physics Park Position 3: pointing the pole
+        Mount.Config.ParkPostion = 3;   // default park position is Astro-Physics Park Position 3: pointing the pole
         Mount.Config.ParkAltitude = 0;
         Mount.Config.ParkAzimuth = 0;
 
