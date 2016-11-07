@@ -304,15 +304,14 @@ BOOL IsPierFlipNeeded()
 }
 
 /******************************************************************************
- * Function:        void SlewToTarget()
+ * Function:        void Slew()
  * PreCondition:    None
  * Input:           None
  * Output:          None
  * Side Effects:    None
  * Overview:        Slew to RA and dec target position
- *                  LX200 MS and hP (park) command
  *****************************************************************************/
-void SlewToTarget()
+void Slew()
 {
     int32_t ra_n1 = 0;
     int32_t ra_n2 = 0;
@@ -320,25 +319,6 @@ void SlewToTarget()
     int32_t dec_n2 = 0;
     BOOL throw_the_pole = FALSE;
 
-    if (!DecIsMotorStopped() || !RAIsMotorStopped())
-    {
-        strcpy(LX200Response, "3Mount is slewing#");
-        return;
-    }
-
-    if (Mount.Config.IsParked)
-    {
-        strcpy(LX200Response, "4Mount is parked#");
-        return;
-    }
-    
-    if (ComputeTargetAltitude() < 0.0)
-    {
-        strcpy(LX200Response, "1Target below horizon#");
-        return;
-    }
-            
-    
     RA.NumberStep = 0;
     Dec.NumberStep = 0;
 
@@ -387,7 +367,7 @@ void SlewToTarget()
 
     /***************************************************************************
      * Starts movements
-    **************************************************************************/
+     **************************************************************************/
 
     if (RA.NumberStep)
     {
@@ -438,6 +418,39 @@ void SlewToTarget()
         //            Dec.DecelPositon++;
         //        }
     }
+
+}
+
+/******************************************************************************
+ * Function:        void SlewToTarget()
+ * PreCondition:    None
+ * Input:           None
+ * Output:          None
+ * Side Effects:    None
+ * Overview:        Slew to RA and dec target position
+ *                  LX200 MS and hP (park) command
+ *****************************************************************************/
+void SlewToTarget()
+{
+    if (!DecIsMotorStopped() || !RAIsMotorStopped())
+    {
+        strcpy(LX200Response, "3Mount is slewing#");
+        return;
+    }
+
+    if (Mount.Config.IsParked)
+    {
+        strcpy(LX200Response, "4Mount is parked#");
+        return;
+    }
+    
+    if (ComputeTargetAltitude() < 0.0)
+    {
+        strcpy(LX200Response, "1Target below horizon#");
+        return;
+    }
+            
+    Slew();
 
     LX200Response[0] = '0';
     LX200Response[1] = '#';

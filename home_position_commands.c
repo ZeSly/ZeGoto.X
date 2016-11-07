@@ -117,7 +117,7 @@ void homeSlewToParkPosition()
     SetHomeTarget();
     RA.IsParking = PARKING;
     Dec.IsParking = PARKING;
-    SlewToTarget();
+    Slew();
 }
 
 /******************************************************************************
