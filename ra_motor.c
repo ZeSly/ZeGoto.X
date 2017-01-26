@@ -31,6 +31,7 @@
 #include "lx200_protocol.h"
 #include "telescope_movement_commands.h"
 #include "utils.h"
+#include "home_position_commands.h"
 
 /* Position structure */
 ra_t RA;
@@ -338,6 +339,8 @@ void UpdateRAStepPosition()
     static BOOL LastNorthPoleOVerflow = FALSE;
     int32_t p;
     static BOOL SavePosition = TRUE;
+    double ra, lst;
+    unsigned char SideOfPierBefore = Mount.SideOfPier;
 
     if (Mount.PierIsFlipping) return;
 
@@ -382,35 +385,44 @@ void UpdateRAStepPosition()
         }
     }
 
+    lst = ComputeSideralTime();
+
+    ra = lst - (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
+    if (ra < 0.0) ra +=24.0;
+
+    if (ra > 18.0)
+    {
+        Mount.SideOfScope = PIER_WEST;
+        Mount.CalculatedSideOfPier = PIER_WEST;
+    }
+    else if (ra > 12)
+    {
+        Mount.SideOfScope = PIER_EAST;
+        Mount.CalculatedSideOfPier = PIER_WEST;
+    }
+    else if (ra > 6)
+    {
+        Mount.SideOfScope = PIER_WEST;
+        Mount.CalculatedSideOfPier = PIER_EAST;
+    }
+    else
+    {
+        Mount.SideOfScope = PIER_EAST;
+        Mount.CalculatedSideOfPier = PIER_EAST;
+    }
+
     if (Mount.AutomaticSideOfPier)
     {
-        double ra, lst;
-
-        lst = ComputeSideralTime();
-
-        ra = lst - (double)RA.StepPosition / (3600.0 * (double)RA.StepPerSec);
-        if (ra < 0.0) ra +=24.0;
-
-        if (ra > 18.0)
+        Mount.SideOfPier = Mount.CalculatedSideOfPier;
+    
+        if (Mount.SideOfPier != SideOfPierBefore)
         {
-            Mount.SideOfScope = PIER_WEST;
-            Mount.SideOfPier = PIER_WEST;
+            //FlipSideOfPier();
         }
-        else if (ra > 12)
-        {
-            Mount.SideOfScope = PIER_EAST;
-            Mount.SideOfPier = PIER_WEST;
-        }
-        else if (ra > 6)
-        {
-            Mount.SideOfScope = PIER_WEST;
-            Mount.SideOfPier = PIER_EAST;
-        }
-        else
-        {
-            Mount.SideOfScope = PIER_EAST;
-            Mount.SideOfPier = PIER_EAST;
-        }
+    }
+    else if (Mount.CalculatedSideOfPier != Mount.SideOfPier)
+    {
+        Mount.SideOfScope = Mount.SideOfScope == PIER_EAST ? PIER_WEST : PIER_EAST;
     }
 }
 

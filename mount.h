@@ -92,6 +92,7 @@ typedef struct
     unsigned SouthDirection : 1;
 
     unsigned SideOfPier : 1;
+    unsigned CalculatedSideOfPier : 1;
     unsigned SideOfScope : 1;
     unsigned AutomaticSideOfPier : 1;
     unsigned PierIsFlipping : 1;

@@ -257,11 +257,10 @@ void FlipSideOfPier()
     if (Mount.SideOfPier == PIER_EAST)
     {
         MoveWest();
-        MoveNorth(); // always move north, actual dec direction depend on SideOfPier
     }
     else
     {
         MoveEast();
-        MoveNorth(); // always move north, actual dec direction depend on SideOfPier
     }
+    MoveNorth(); // always move north, actual dec direction depend on SideOfPier
 }
