@@ -34,7 +34,7 @@ void SetCenteringRate()
     {
         Mount.Config.CenteringSpeed = s;
     }
-    Mount.CurrentMaxSpeed = Mount.Config.CenteringSpeed;
+//    Mount.CurrentMaxSpeed = Mount.Config.CenteringSpeed;
 }
 
 void SetGuidingRate()

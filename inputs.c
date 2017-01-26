@@ -165,7 +165,7 @@ void UpdatePadState()
             }
             else
             {
-                ManualMaxSpeed = 10; // Centering speed
+                ManualMaxSpeed = Mount.Config.CenteringSpeed;
             }
 
             if (!CurrentMove)
