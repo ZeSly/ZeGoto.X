@@ -1,0 +1,4 @@
+connect '/C=8'
+send 4
+
+end

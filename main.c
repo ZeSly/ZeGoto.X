@@ -429,7 +429,12 @@ static void ProcessIO(void)
 
             for (i = 0; i < numBytesRead; i++)
             {
-                if (USB_Out_Buffer[i] == 6) // NACK
+                if (USB_Out_Buffer[i] == 4) // EOT
+                {
+                    RCONbits.POR = 1;
+                    Reset();
+                }
+                else if (USB_Out_Buffer[i] == 6) // NACK
                 {
                     USB_In_Buffer[0] = 'P';
                     numBytesWrite = 1;
