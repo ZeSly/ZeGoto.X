@@ -58,10 +58,47 @@
 #if defined(STACK_USE_BERKELEY_API)
 
 #include "TCPIP_Stack/TCPIP.h"
+#include "gps.h"
 
 
 #define PORTNUM 4030
 #define MAX_CLIENT (1) // Maximum number of simultanous connections accepted by the server.
+
+void GPSForwardFrame(SOCKET ClientSock)
+{
+    static char frame[GPS_BUFFERSIZE];
+
+    static int l = 0;
+    static int j = 0;
+
+    char *p = GPSGetFrame();
+    if (p != NULL)
+    {
+        //strcpy(frame, "Vol. 12 Epic Legendary Intense Massive Heroic Vengeful Dramatic Music Mix - 2 Hours Long\r\n");
+        strncpy(frame, p, GPS_BUFFERSIZE);
+        l = strlen(frame);
+        j = 0;
+    }
+    if (l >= 24)
+    {
+        int s = send(ClientSock, &frame[j], 24, 0);
+        if (s != SOCKET_ERROR)
+        {
+            j += s;
+            l -= s;
+        }
+    }
+    else if (l > 0)
+    {
+        int s = send(ClientSock, &frame[j], l, 0);
+        if (s != SOCKET_ERROR)
+        {
+            j += s;
+            l -= s;
+        }
+    }
+
+}
 
 /*********************************************************************
  * Function:        void BerkeleyTCPServerLX200(void)
@@ -159,12 +196,7 @@ void BerkeleyTCPServerLX200(void)
 
                 // For all connected sockets, receive and send back the data
                 length = recv(ClientSock[i], TCP_Out_Buffer, sizeof (TCP_Out_Buffer), 0);
-//                if (length > 0)
-//                {
-//                    TCP_Out_Buffer[length] = '\0';
-//                    send(ClientSock[i], TCP_Out_Buffer, strlen(TCP_Out_Buffer), 0);
-//                }
-//                else
+
                 if (length < 0)
                 {
                     closesocket(ClientSock[i]);
@@ -208,10 +240,14 @@ void BerkeleyTCPServerLX200(void)
                     }
 
                 }
-
+                
                 if (len_to_send)
                 {
                     send(ClientSock[i], TCP_In_Buffer, len_to_send, 0);
+                }
+                if (GPS.Forward)
+                {
+                    GPSForwardFrame(ClientSock[i]);
                 }
             }
         }

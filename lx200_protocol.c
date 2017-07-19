@@ -276,6 +276,7 @@ LX200Command LX200CommandTab[] ={
 
     { "g+", 2, GPSon},
     { "g-", 2, GPSoff},
+    { "gps", 2, GPSforward},
 
     { "B+", 2, IncreaseReticuleBrightness},
     { "B-", 2, DecreaseReticuleBrightness},
@@ -312,6 +313,7 @@ void LX200ProcessCommand(char *LX200Cmd_P)
     {
         if (strncmp(LX200Cmd_P, LX200CommandTab[i].Cmd, LX200CommandTab[i].Length) == 0)
         {
+            GPS.Forward = 0;
             strncpy(LX200String, LX200Cmd_P, sizeof (LX200String));
             LX200CommandTab[i].f();
             trouve = TRUE;

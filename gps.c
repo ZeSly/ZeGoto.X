@@ -36,7 +36,6 @@
 #include "gps.h"
 
 #define GPS_BAUDRATE    9600ul
-#define GPS_BUFFERSIZE  128
 
 int frame_rcv = 0;
 int frame_complete = -1;
@@ -67,6 +66,8 @@ void GPSStart()
     IFS0bits.U1RXIF = 0; // clear interrupt flag
 
     GPS.ON = 1;
+    GPS.Available = 0;
+    GPS.Forward = 0;
     //    frame_complete = 0;
     //    strcpy(GPSRxData[frame_complete], "$GPGSV,3,1,12,24,79,359,22,12,55,241,33,15,42,176,44,17,30,053,25*7E");
     //    GPSDecodeFrame();
@@ -452,6 +453,22 @@ void GPSoff()
 {
     GPS.ON = 0;
     GPS.Available = 0;
+    GPS.Forward = 0;
+}
+
+void GPSforward()
+{
+    GPS.Forward = 1;
+}
+
+char *GPSGetFrame()
+{
+    if (frame_complete == 0 || frame_complete == 1)
+    {
+        return GPSRxData[frame_complete];
+    }
+    
+    return NULL;
 }
 
 #if defined(USE_GENERIC_TCP_SERVER_GPS)

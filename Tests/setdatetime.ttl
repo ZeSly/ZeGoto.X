@@ -4,7 +4,7 @@ setecho 0
 fileopen fhandle 'test-report.txt' 0
 
 ; set UTC offset
-cmd = ':SG+01.0#'
+cmd = ':SG+02.0#'
 call setcmd
 
 ; set date

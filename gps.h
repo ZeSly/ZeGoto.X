@@ -19,6 +19,8 @@
 #ifndef GPS_H
 #define	GPS_H
 
+#define GPS_BUFFERSIZE  128
+
 typedef struct
 {
     int Elevation;
@@ -31,6 +33,7 @@ typedef struct
 {
     char ON;
     char Available;
+    char Forward;
     char UTCTime[13];
     char Latitude[11];
     char NSIndicator;
@@ -54,6 +57,8 @@ int DMSToDec(double *dec, char *str);
 
 void GPSon();
 void GPSoff();
+void GPSforward();
+char *GPSGetFrame();
 
 #if defined(USE_GENERIC_TCP_SERVER_GPS)
 void GPSTCPServer(void);
