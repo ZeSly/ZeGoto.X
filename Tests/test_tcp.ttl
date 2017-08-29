@@ -1,4 +1,4 @@
-connect 'opengoto:4030 /nossh /T=1'
+connect 'em200:4030 /nossh /T=1'
 sendln '#:Sz225:00:00#'
 wait '0' '1'
 
@@ -12,6 +12,5 @@ waitregex '#'
 sendln ':Gd#'
 waitregex '#'
 
-sendln ':CM#'
-
-disconnect
+sendln ':GPV#'
+waitregex '#'

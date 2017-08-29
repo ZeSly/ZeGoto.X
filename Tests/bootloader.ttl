@@ -1,4 +1,4 @@
 connect '/C=3'
 send 4
 
-end
+disconnect 0
