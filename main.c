@@ -275,7 +275,7 @@ int main(void)
 
 #if defined(STACK_USE_BERKELEY_API)
         BerkeleyTCPServerLX200();
-        BerkeleyTCPServerGPS();
+        //BerkeleyTCPServerGPS();
 #endif
 
         GPSDecodeFrame();
@@ -394,6 +394,7 @@ int main(void)
 
 static void ProcessIO(void)
 {
+    static DWORD reset_tick = 0;
     static BYTE nb_blink = 6;
     static DWORD t = 0;
     BYTE numBytesRead;
@@ -405,6 +406,15 @@ static void ProcessIO(void)
         t = TickGet();
         LED2_IO ^= 1;
         nb_blink--;
+    }
+    
+    if (reset_tick)
+    {
+        if (TickGet() - reset_tick >= TICK_SECOND)
+        {
+            RCONbits.POR = 1;
+            Reset();
+        }
     }
 
     UpdateRAStepPosition();
@@ -431,8 +441,7 @@ static void ProcessIO(void)
             {
                 if (USB_Out_Buffer[i] == 4) // EOT
                 {
-                    RCONbits.POR = 1;
-                    Reset();
+                    reset_tick = TickGet();
                 }
                 else if (USB_Out_Buffer[i] == 6) // NACK
                 {
@@ -477,6 +486,7 @@ static void ProcessIO(void)
     }
 
     CDCTxService();
+    
 }
 
 /****************************************************************************
