@@ -408,6 +408,7 @@ static void ProcessIO(void)
         nb_blink--;
     }
     
+    // 1 second delay before reset to let the client enough time to close the port
     if (reset_tick)
     {
         if (TickGet() - reset_tick >= TICK_SECOND)
@@ -478,8 +479,8 @@ static void ProcessIO(void)
             
             if (numBytesWrite)
             {
-                int32_t d = GetInstructionClock() / 1000 * 200;
-                __delay32(d);   // skychart compatibility
+                //int32_t d = GetInstructionClock() / 1000 * 200;
+                //__delay32(d);   // skychart compatibility
                 putUSBUSART(USB_In_Buffer, numBytesWrite);
             }
         }
