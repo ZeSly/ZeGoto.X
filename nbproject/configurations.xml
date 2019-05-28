@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<configurationDescriptor version="62">
+<configurationDescriptor version="65">
   <logicalFolder name="root" displayName="root" projectFiles="true">
     <logicalFolder name="HeaderFiles"
                    displayName="Header Files"
@@ -72,7 +72,6 @@
         <itemPath>USB/usb_hal.h</itemPath>
         <itemPath>USB/usb_hal_pic24.h</itemPath>
       </logicalFolder>
-      <itemPath>HTTPPrint.h</itemPath>
       <itemPath>HardwareProfile.h</itemPath>
       <itemPath>TCPIPConfig.h</itemPath>
       <itemPath>usb_config.h</itemPath>
@@ -92,6 +91,7 @@
       <itemPath>home_position_commands.h</itemPath>
       <itemPath>utils.h</itemPath>
       <itemPath>upnp.h</itemPath>
+      <itemPath>HTTPPrint.h</itemPath>
     </logicalFolder>
     <logicalFolder name="LinkerScript"
                    displayName="Linker Files"
@@ -187,14 +187,11 @@
                    projectFiles="false">
       <itemPath>Makefile</itemPath>
       <itemPath>device_config.mcc</itemPath>
+      <itemPath>MyConfig.mc3</itemPath>
     </logicalFolder>
   </logicalFolder>
   <sourceRootList>
-    <Elem>Configs</Elem>
-    <Elem>TCPIP_Stack</Elem>
-    <Elem>USB</Elem>
-    <Elem>Application linker files</Elem>
-    <Elem>Application_linker_files</Elem>
+    <Elem>.</Elem>
   </sourceRootList>
   <projectmakefile>Makefile</projectmakefile>
   <confs>
@@ -206,9 +203,12 @@
         <targetPluginBoard></targetPluginBoard>
         <platformTool>PICkit3PlatformTool</platformTool>
         <languageToolchain>XC16</languageToolchain>
-        <languageToolchainVersion>1.25</languageToolchainVersion>
+        <languageToolchainVersion>1.36</languageToolchainVersion>
         <platform>3</platform>
       </toolsSet>
+      <packs>
+        <pack name="PIC24F-GA-GB_DFP" vendor="Microchip" version="1.0.58"/>
+      </packs>
       <compileType>
         <linkerTool>
           <linkerLibItems>
