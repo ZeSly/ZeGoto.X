@@ -159,7 +159,7 @@ void GuideNorth()
     if (DecPulseGuideTime != 0)
     {
         OC3CON1bits.OCM = 3;
-        DecGuideNorth();
+        DecGuide(Mount.NorthDirection);
         TEST_PIN_OUT = 1;
     }
 }
@@ -177,7 +177,7 @@ void MoveNorth()
     }
     else
     {
-        DecGuideNorth();
+        DecGuide(Mount.NorthDirection);
     }
 }
 
@@ -189,7 +189,7 @@ void GuideSouth()
     if (DecPulseGuideTime != 0)
     {
         OC3CON1bits.OCM = 3;
-        DecGuideSouth();
+        DecGuide(Mount.SouthDirection);
         TEST_PIN_OUT = 1;
     }
 }
@@ -207,7 +207,7 @@ void MoveSouth()
     }
     else
     {
-        DecGuideSouth();
+        DecGuide(Mount.SouthDirection);
     }
 }
 

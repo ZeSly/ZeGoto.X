@@ -28,14 +28,14 @@
 void DecMotorInit(void);
 void DecAccelerate(void);
 void DecDecelerate(void);
-void DecStop(void);
+void DecGuideStop(void);
 void DecSetDirection(uint8_t dir);
 void UpdateDecStepPosition();
 int DecIsMotorStopped();
 
-void DecGuideNorth();
-void DecGuideSouth();
-#define DecGuideStop DecStop
+void DecGuide(BYTE dir);
+
+void GetDecRelativeStepPosition(void);
 
 typedef struct
 {

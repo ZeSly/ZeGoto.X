@@ -257,53 +257,8 @@ void RAAccelerate(void)
 
         accel_decel_cnt = Mount.AccelPeriod;
         RAState = MOTOR_ACCEL;
-
-        //        t_speedlist * p;
-        //        for (p = speedlist ; p != NULL ; p = p->next)
-        //            free(p);
-        //
-        //        speedlist = malloc(sizeof(*speedlist));
-        //        speedlist->speed = CurrentSpeed;
-        //        speedlist->position = RARelativeStepPosition;
-        //        speedlist->MotorTimerPeriod = MotorTimerPeriod;
-        //        speedlist->next = NULL;
-        //        lastspeed = speedlist;
-
-    }
+   }
 }
-
-/*
-void DumpSpeedList()
-{
-//    t_speedlist *p;
-
-    do
-    {
-        CDCTxService();
-    }
-    while (!USBUSARTIsTxTrfReady());
-    strcpy(LX200Response, "speed;postion\r\n");
-    putUSBUSART(LX200Response, strlen(LX200Response));
-    
-
-//    for (p = speedlist; p != NULL; p = p->next)
-//    {
-//        do
-//        {
-//            CDCTxService();
-//        }
-//        while (!USBUSARTIsTxTrfReady());
-//        sprintf(LX200Response, "%li;%li;%lu\r\n", p->speed, p->position, p->MotorTimerPeriod);
-//        putUSBUSART(LX200Response, strlen(LX200Response));
-//
-//    }
-
-    do
-    {
-        CDCTxService();
-    }
-    while (!USBUSARTIsTxTrfReady());
-}*/
 
 void RADecelerate(void)
 {

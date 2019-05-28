@@ -51,6 +51,9 @@ typedef struct
     uint16_t CenteringSpeed;
     uint16_t GuideSpeed;
 
+    int32_t RAStepBacklash;
+    int32_t DecStepBacklash;
+
     /* Acceleration/decelation settings */
     int32_t AccelTime; // seconds
     int32_t DecelTime; // seconds

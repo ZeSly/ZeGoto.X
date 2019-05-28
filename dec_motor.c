@@ -28,6 +28,7 @@
 #include "rtcc.h"
 #include "telescope_movement_commands.h"
 #include "ra_motor.h"
+#include "lx200_protocol.h"
 
 dec_t Dec;
 
@@ -40,6 +41,8 @@ static motor_state_t DecState = MOTOR_STOP;
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
+static int32_t Backlash;
+static BOOL DirectionChanged;
 //static BOOL FullStep;
 
 static int32_t accel_decel_cnt;
@@ -61,21 +64,25 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
 
     if (DEC_STEP_IO == 1)
     {
-
-        DecRelativeStepPosition++;
-        if (Dec.NumberStep)
+        if (Backlash != 0)
         {
-            if (Dec.NumberStep <= Dec.DecelPositon && DecState != MOTOR_DECEL)
+            Backlash--;
+            if (Backlash == 0)
             {
-                DecState = MOTOR_DECEL;
-                accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
+                T4CONbits.TON = 0;
+                DEC_SLEEP_IO = 0;            
             }
-//            if (FullStep == TRUE)
-//            {
-//                Dec.NumberStep -= 8;
-//            }
-//            else
+        }
+        else
+        {
+            DecRelativeStepPosition++;
+            if (Dec.NumberStep)
             {
+                if (Dec.NumberStep <= Dec.DecelPositon && DecState != MOTOR_DECEL)
+                {
+                    DecState = MOTOR_DECEL;
+                    accel_decel_cnt = Mount.AccelPeriod - accel_decel_cnt;
+                }
                 Dec.NumberStep--;
             }
         }
@@ -130,20 +137,6 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
     if (NewMotorPeriod == TRUE)
     {
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
-//        if (CurrentSpeed >= 4)
-//        {
-//            MotorTimerPeriod *= 8;
-//            if (FullStep == FALSE)
-//            {
-//                FullStep = TRUE;
-//                DEC_MODE_IO = 0;
-//            }
-//        }
-//        else if (FullStep == TRUE)
-//        {
-//            FullStep = FALSE;
-//            DEC_MODE_IO = 1;
-//        }
         PR4 = MotorTimerPeriod & 0xFFFF;
         PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
     }
@@ -195,13 +188,15 @@ void DecMotorInit(void)
     {
         Dec.IsParking = UNPARKED;
     }
+    
+    Backlash = 0;
+    DirectionChanged = FALSE;
 }
 
 void DecStart(void)
 {
     DEC_SLEEP_IO = 1;
     CurrentSpeed = 1;
-//    FullStep = FALSE;
     T4CONbits.TON = 1;
 }
 
@@ -219,7 +214,6 @@ void DecAccelerate(void)
         DEC_SLEEP_IO = 1;
 
         CurrentSpeed = 1;
-//        FullStep = FALSE;
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         UpdateMotorTimerPeriod();
 
@@ -239,10 +233,18 @@ void DecDecelerate(void)
     }
 }
 
-void DecStop(void)
+void DecGuideStop(void)
 {
-    T4CONbits.TON = 0;
-    DEC_SLEEP_IO = 0;
+    if (DirectionChanged && Mount.Config.DecStepBacklash != 0)
+    {
+        Backlash = Mount.Config.DecStepBacklash;
+        DirectionChanged = FALSE;
+    }
+    else
+    {
+        T4CONbits.TON = 0;
+        DEC_SLEEP_IO = 0;
+    }
 }
 
 void DecSetDirection(uint8_t dir)
@@ -314,18 +316,21 @@ inline int DecIsMotorStopped()
     return (DecState == MOTOR_STOP);
 }
 
-void DecGuideNorth()
+void DecGuide(BYTE dir)
 {
+    // = 0;
     MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
     UpdateMotorTimerPeriod();
-    DEC_DIR_IO = Mount.NorthDirection;
+    if (DEC_DIR_IO != dir)
+    {
+        DirectionChanged = TRUE;        
+    }
+    DEC_DIR_IO = dir;
     DecStart();
 }
-
-void DecGuideSouth()
-{
-    MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
-    UpdateMotorTimerPeriod();
-    DEC_DIR_IO = Mount.SouthDirection;
-    DecStart();
-}
+//
+//extern char LX200Response[];
+//void GetDecRelativeStepPosition(void)
+//{
+//    sprintf(LX200Response, "%li#", DecRelativeStepPosition);
+//}

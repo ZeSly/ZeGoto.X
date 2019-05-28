@@ -81,15 +81,17 @@ void HTTPPrint_gpssatellitesused(void);
 void HTTPPrint_mountconfig_inverteddec(void);
 void HTTPPrint_mountconfig_invertedra(void);
 void HTTPPrint_mountconfig_nbmaxstep(void);
-void HTTPPrint_mountconfig_sideralperiod(void);
-void HTTPPrint_mountconfig_lunarperiod(void);
-void HTTPPrint_mountconfig_solarperiod(void);
 void HTTPPrint_mountconfig_maxrate(void);
 void HTTPPrint_mountconfig_centeringrate(void);
 void HTTPPrint_mountconfig_guidingrate(void);
 void HTTPPrint_result(void);
 void HTTPPrint_result_text(void);
 void HTTPPrint_sideofpier(void);
+void HTTPPrint_mountconfig_rabacklash(void);
+void HTTPPrint_mountconfig_decbacklash(void);
+void HTTPPrint_mountconfig_sideralp(void);
+void HTTPPrint_mountconfig_lunarp(void);
+void HTTPPrint_mountconfig_solarp(void);
 
 void HTTPPrint(DWORD callbackID)
 {
@@ -209,9 +211,6 @@ void HTTPPrint(DWORD callbackID)
         case 0x00000058:
 			HTTPPrint_mountconfig_nbmaxstep();
 			break;
-        case 0x00000059:
-			HTTPPrint_mountconfig_sideralperiod();
-			break;
         case 0x0000005a:
 			HTTPPrint_mountconfig_maxrate();
 			break;
@@ -230,11 +229,20 @@ void HTTPPrint(DWORD callbackID)
         case 0x0000005f:
 			HTTPPrint_sideofpier();
 			break;
-        case 0x00000060:
-			HTTPPrint_mountconfig_lunarperiod();
+        case 0x00000062:
+			HTTPPrint_mountconfig_rabacklash();
 			break;
-        case 0x00000061:
-			HTTPPrint_mountconfig_solarperiod();
+        case 0x00000063:
+			HTTPPrint_mountconfig_decbacklash();
+			break;
+        case 0x00000064:
+			HTTPPrint_mountconfig_sideralp();
+			break;
+        case 0x00000065:
+			HTTPPrint_mountconfig_lunarp();
+			break;
+        case 0x00000066:
+			HTTPPrint_mountconfig_solarp();
 			break;
 		default:
 			// Output notification for undefined values

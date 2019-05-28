@@ -1,6 +1,9 @@
 ~inc:header.inc~
 <h2>Mount Setting</h2>
 <div id="TEXT">
+<div class="result ~result~" style="display:~status_fail~">
+~result_text~
+</div>
 <p><b>Directions</b></p>
 <p>Depending on the hemisphere the mount is situated and the cabling on the stepper motor, 
 you can invert directions. For the declination axis of a german mount it also depend on the 
@@ -14,10 +17,18 @@ side of pier.</p>
 </fieldset>
 </form>
 
+<p><b>Backlash</b></p>
+<form method="post" action="mount.htm" name="blsh">
+<fieldset>
+<div><label>RA backlash:</label>
+<input type="text" name="rabklh" value="~mountconfig_rabacklash~"/> steps</div>
+<div><label>Dec backlash:</label>
+<input type="text" name="decbklh" value="~mountconfig_decbacklash~"/> steps</div>
+<div><input type="submit" class="sm" value="Save" onclick="MountSubmit()"/></div>
+</fieldset>
+</form>
+
 <p><b>Mechanical setting</b></p>
-<div class="result ~result~" style="display:~status_fail~">
-~result_text~
-</div>
 <form method="post" action="mount.htm" name="mech">
 <fieldset>
 <div><label>Worm wheel reduction:</label>
@@ -31,15 +42,15 @@ side of pier.</p>
 <div>
 <label>Step periods: </label>
 <label style="margin-left: -65px">sideral</label>
-<input type="text" name="sideralperiod" value="~mountconfig_sideralperiod~" disabled="true"/><span id="sideral"></span>
+<input type="text" name="sideralp" value="~mountconfig_sideralp~" disabled="true"/><span id="sideral"></span>
 </div>
 <div>
 <label style="margin-left: -65px">lunar</label>
-<input type="text" name="lunarperiod" value="~mountconfig_lunarperiod~" disabled="true"/><span id="lunar"></span>
+<input type="text" name="lunarp" value="~mountconfig_lunarp~" disabled="true"/><span id="lunar"></span>
 </div>
 <div>
 <label style="margin-left: -65px">solar</label>
-<input type="text" name="solarperiod" value="~mountconfig_solarperiod~" disabled="true"/><span id="solar"></span>
+<input type="text" name="solarp" value="~mountconfig_solarp~" disabled="true"/><span id="solar"></span>
 </div>
 <div><label>Max rate:</label>
 <input type="text" name="maxrate" value="~mountconfig_maxrate~"/> X sideral rate</div>
@@ -66,9 +77,9 @@ function MountSetting()
         var freq_sideral = m.nbmaxstep.value / 86164;
         var freq_lunar = m.nbmaxstep.value / (360 * 60 * 60 / 14.685);
         var freq_solar = m.nbmaxstep.value / 86400;
-        m.sideralperiod.value = Math.round(16000000 / freq_sideral);
-        m.lunarperiod.value = Math.round(16000000 / freq_lunar);
-        m.solarperiod.value = Math.round(16000000 / freq_solar);
+        m.sideralp.value = Math.round(16000000 / freq_sideral);
+        m.lunarp.value = Math.round(16000000 / freq_lunar);
+        m.solarp.value = Math.round(16000000 / freq_solar);
         document.getElementById('sideral').textContent = " @" + freq_sideral.toFixed(3) + "Hz";
         document.getElementById('lunar').innerHTML = " @" + freq_lunar.toFixed(3) + "Hz";
         document.getElementById('solar').innerHTML = " @" + freq_solar.toFixed(3) + "Hz";
@@ -81,9 +92,9 @@ function MountSubmit()
     m.mr.disabled=true;
     m.step.disabled=true;
     m.nbmaxstep.disabled=false;
-    m.sideralperiod.disabled=false;
-    m.lunarperiod.disabled=false;
-    m.solarperiod.disabled=false;
+    m.sideralp.disabled=false;
+    m.lunarp.disabled=false;
+    m.solarp.disabled=false;
 }
 -->
 </script>

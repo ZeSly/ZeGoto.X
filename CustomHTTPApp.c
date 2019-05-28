@@ -550,17 +550,17 @@ static HTTP_IO_RESULT HTTPPostMount(void)
             newMountConfig.NbStepMax = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.NbStepMax == 0) goto ConfigFailure;
         }
-        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "sideralperiod"))
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "sideralp"))
         {
             newMountConfig.SideralPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.SideralPeriod == 0) goto ConfigFailure;
         }
-        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "lunarperiod"))
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "lunarp"))
         {
             newMountConfig.LunarPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.LunarPeriod == 0) goto ConfigFailure;
         }
-        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "solarperiod"))
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "solarp"))
         {
             newMountConfig.SolarPeriod = strtoul((char*) curHTTP.data + 12, &ptr, 10);
             if (newMountConfig.SolarPeriod == 0) goto ConfigFailure;
@@ -585,6 +585,16 @@ static HTTP_IO_RESULT HTTPPostMount(void)
                 if (!isdigit(*p)) goto ConfigFailure;
                 newMountConfig.GuideSpeed += (*p - '0');
             }
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "rabklh"))
+        {
+            newMountConfig.RAStepBacklash = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            //if (newMountConfig.RAStepBacklash == 0) goto ConfigFailure;
+        }
+        else if (!strcmppgm2ram((char*) curHTTP.data, (ROM char*) "decbklh"))
+        {
+            newMountConfig.DecStepBacklash = strtoul((char*) curHTTP.data + 12, &ptr, 10);
+            //if (newMountConfig.CenteringSpeed == 0) goto ConfigFailure;
         }
     }
 
@@ -1107,7 +1117,7 @@ void HTTPPrint_mountconfig_nbmaxstep(void)
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 
-void HTTPPrint_mountconfig_sideralperiod(void)
+void HTTPPrint_mountconfig_sideralp(void)
 {
     char str[16];
 
@@ -1115,7 +1125,7 @@ void HTTPPrint_mountconfig_sideralperiod(void)
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 
-void HTTPPrint_mountconfig_lunarperiod(void)
+void HTTPPrint_mountconfig_lunarp(void)
 {
     char str[16];
 
@@ -1123,7 +1133,7 @@ void HTTPPrint_mountconfig_lunarperiod(void)
     TCPPutString(sktHTTP, (BYTE *) str);
 }
 
-void HTTPPrint_mountconfig_solarperiod(void)
+void HTTPPrint_mountconfig_solarp(void)
 {
     char str[16];
 
@@ -1176,6 +1186,22 @@ void HTTPPrint_sideofpier(void)
         TCPPutROMString(sktHTTP, (ROM BYTE*) " poll <i>west</i>");
         break;
     }
+}
+
+void HTTPPrint_mountconfig_rabacklash(void)
+{
+    char str[16];
+
+    sprintf(str, "%li", Mount.Config.RAStepBacklash);
+    TCPPutString(sktHTTP, (BYTE *) str);    
+}
+
+void HTTPPrint_mountconfig_decbacklash(void)
+{
+    char str[16];
+
+    sprintf(str, "%li", Mount.Config.DecStepBacklash);
+    TCPPutString(sktHTTP, (BYTE *) str);    
 }
 
 #endif

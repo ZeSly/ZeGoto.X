@@ -113,11 +113,11 @@ void __attribute__((interrupt, no_auto_psv)) _CNInterrupt(void)
 
         if (GUIDE_DECP_IO == 0)
         {
-            DecGuideNorth();
+            DecGuide(Mount.NorthDirection);
         }
         if (GUIDE_DECM_IO == 0)
         {
-            DecGuideSouth();
+            DecGuide(Mount.SouthDirection);
         }
         if (GUIDE_DECP_IO == 1 && GUIDE_DECM_IO == 1)
         {

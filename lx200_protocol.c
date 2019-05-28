@@ -40,6 +40,8 @@
 char LX200String[32];
 char LX200Response[64];
 
+//void GetDecRelativeStepPosition(void);
+
 void GetTelescopeFirmwareDate()
 {
     strcpy(LX200Response, __DATE__"#");
@@ -315,6 +317,7 @@ LX200Command LX200CommandTab[] ={
     { "ZGD", 3, GetStepDeclination},
     { "ZGr", 3, GetStepTargetRA},
     { "ZGd", 3, GetStepTargetDeclination},
+//    { "ZRD", 3, GetDecRelativeStepPosition},
 
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
