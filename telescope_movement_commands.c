@@ -311,13 +311,15 @@ BOOL IsPierFlipNeeded()
  * Side Effects:    None
  * Overview:        Slew to RA and dec target position
  *****************************************************************************/
-void Slew()
+int Slew()
 {
+    int r = 0;
     int32_t ra_n1 = 0;
     int32_t ra_n2 = 0;
     int32_t dec_n1 = 0;
     int32_t dec_n2 = 0;
     BOOL throw_the_pole = FALSE;
+    BOOL is_pier_flip_needed;
 
     RA.NumberStep = 0;
     Dec.NumberStep = 0;
@@ -349,7 +351,8 @@ void Slew()
     // number of step slewing through the pole (dec = 90°)
     dec_n2 = (ninety_deg - Dec.StepTarget) + (ninety_deg - Dec.StepPosition);
 
-    if ((RA.NumberStep > ninety_deg && dec_n2 < ninety_deg) || IsPierFlipNeeded() == TRUE)
+    is_pier_flip_needed = IsPierFlipNeeded();
+    if ((RA.NumberStep > ninety_deg && dec_n2 < ninety_deg) || is_pier_flip_needed == TRUE)
     {
         Dec.NumberStep = dec_n2;
         RA.StepTarget += Mount.Config.NbStepMax / 2L;
@@ -418,7 +421,11 @@ void Slew()
         //            Dec.DecelPositon++;
         //        }
     }
-
+    
+    if (throw_the_pole == TRUE) r |= 0x0f;
+    if (is_pier_flip_needed == TRUE) r |= 0xff;
+    
+    return r;
 }
 
 /******************************************************************************
@@ -432,6 +439,7 @@ void Slew()
  *****************************************************************************/
 void SlewToTarget()
 {
+    int r;
     if (!DecIsMotorStopped() || !RAIsMotorStopped())
     {
         strcpy(LX200Response, "3Mount is slewing#");
@@ -450,9 +458,16 @@ void SlewToTarget()
         return;
     }
             
-    Slew();
-
     LX200Response[0] = '0';
-    LX200Response[1] = '#';
-    LX200Response[2] = '\0';
+    LX200Response[1] = '\0';
+    r = Slew();
+    if (r & 0x0f)
+        strcat(LX200Response,"throw_pole ");
+    if (r & 0xf0)
+        strcat(LX200Response,"flip ");
+
+    strcat(LX200Response,"#");
+//    LX200Response[0] = '0';
+//    LX200Response[1] = '#';
+//    LX200Response[2] = '\0';
 }

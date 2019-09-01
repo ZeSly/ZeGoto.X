@@ -45,6 +45,7 @@ static motor_state_t RAState = MOTOR_STOP; // = sideral rate for RA motor
 
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
+static BOOL JustStarted;
 //static BOOL FullStep;
 
 static int32_t accel_decel_cnt;
@@ -239,6 +240,7 @@ void RAStart(void)
     CurrentSpeed = 1;
 //    FullStep = FALSE;
     T2CONbits.TON = 1;
+    JustStarted = TRUE;
 }
 
 void RAAccelerate(void)
@@ -295,9 +297,9 @@ void UpdateRAStepPosition()
     int32_t p;
     static BOOL SavePosition = TRUE;
     double ra, lst;
-    unsigned char SideOfPierBefore = Mount.SideOfPier;
+    //unsigned char SideOfPierBefore = Mount.SideOfPier;
 
-    if (Mount.PierIsFlipping) return;
+    //if (Mount.PierIsFlipping) return;
 
     if (RAState != MOTOR_STOP || Dec.NorthPoleOVerflow == TRUE)
     {
@@ -366,14 +368,15 @@ void UpdateRAStepPosition()
         Mount.CalculatedSideOfPier = PIER_EAST;
     }
 
-    if (Mount.AutomaticSideOfPier)
+    if (Mount.AutomaticSideOfPier == 1 && (JustStarted || !RAIsMotorStopped() || !DecIsMotorStopped()))
     {
         Mount.SideOfPier = Mount.CalculatedSideOfPier;
+        JustStarted = FALSE;
     
-        if (Mount.SideOfPier != SideOfPierBefore)
+        /*if (Mount.SideOfPier != SideOfPierBefore)
         {
-            //FlipSideOfPier();
-        }
+            FlipSideOfPier();
+        }*/
     }
     else if (Mount.CalculatedSideOfPier != Mount.SideOfPier)
     {

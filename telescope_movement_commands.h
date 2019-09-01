@@ -43,7 +43,7 @@ void GuideSouth();
 void GuideEast();
 void GuideWest();
 
-void Slew();
+int Slew();
 void SlewToTarget();
 
 extern char CurrentMove;

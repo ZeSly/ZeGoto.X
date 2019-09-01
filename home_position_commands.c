@@ -64,10 +64,13 @@ void homeSetParkPosition()
 void SetHomeTarget()
 {
     double ra, dec;
+    
+    LX200Response[0] = '\0';
 
     switch (Mount.Config.ParkPostion)
     {
     case 0:
+        strcat(LX200Response, "0");
         // Set park position to alt/az position
         ComputeEquatorialCoord(Mount.Config.ParkAltitude, Mount.Config.ParkAzimuth, &ra, &dec);
         RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
@@ -75,6 +78,7 @@ void SetHomeTarget()
         break;
 
     case 1:
+        strcat(LX200Response, "1");
         // Set park position : tube horizontal pointing in the direction of the pole
         ra = ComputeSideralTime() + 12.0;
         if (ra > 24.0) ra -= 24.0;
@@ -84,6 +88,7 @@ void SetHomeTarget()
         break;
 
     case 2:
+        strcat(LX200Response, "2");
         // Set park position : tube horizontal pointing east
         ra = ComputeSideralTime() + 6.0;
         if (ra > 24.0) ra -= 24.0;
@@ -93,12 +98,25 @@ void SetHomeTarget()
 
     case 3:
         // Set park position to north celestial pole
-        ra = ComputeSideralTime() + 6.0;
+        if (Mount.SideOfPier == Mount.CalculatedSideOfPier)
+        {
+            strcat(LX200Response, "_");
+            ra = ComputeSideralTime() + 6.0;
+        }
+        else
+        {
+            strcat(LX200Response, "*");
+            ra = ComputeSideralTime() - 6.0;
+        }
         if (ra > 24.0) ra -= 24.0;
         RA.StepTarget = (int32_t) (Mount.Config.NbStepMax * ra / 24.0);
         Dec.StepTarget = Mount.Config.NbStepMax / 4;
         break;
     }
+    
+    sprintf(LX200Response + 1, "%f#", ra);
+
+    Mount.AutomaticSideOfPier = 1;
 }
 
 /******************************************************************************
@@ -197,13 +215,21 @@ void GetSideOfPier()
 {
     if (Mount.SideOfPier == PIER_WEST)
     {
-        strcpy(LX200Response, "West#");
+        strcpy(LX200Response, "West");
     }
     else
     {
-        strcpy(LX200Response, "East#");
+        strcpy(LX200Response, "East");
     }
 
+    int p = 4;
+    if (Mount.SideOfPier !=  Mount.CalculatedSideOfPier)
+        LX200Response[p++] = '*';
+    if (Mount.AutomaticSideOfPier == 1)
+        LX200Response[p++] = 'A';
+
+    LX200Response[p++] = '#';
+    LX200Response[p++] = '\0';
 }
 
 /******************************************************************************
@@ -229,6 +255,7 @@ void SetSideOfPier()
     else if (LX200String[2] == 'A')
     {
         Mount.AutomaticSideOfPier = 1;
+        Mount.SideOfPier = Mount.CalculatedSideOfPier;
     }
 }
 
