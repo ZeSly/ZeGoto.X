@@ -26,6 +26,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <math.h>
 
 // Defines which port the server will listen on
 #define GPS_SERVER_PORT	9300
@@ -279,13 +280,13 @@ void GPSDecodeFrame()
     if (frame_complete == 0 || frame_complete == 1)
     {
         strncpy(frame, GPSRxData[frame_complete], GPS_BUFFERSIZE);
-        i = 0;
+        i = 1;
         j = 0;
         chk = 0;
         fields[j++] = frame;
         while (i < GPS_BUFFERSIZE && j < 32)
         {
-            chk += frame[i];
+            chk ^= frame[i];
             if (frame[i] == ',')
             {
                 frame[i] = '\0';
@@ -293,9 +294,8 @@ void GPSDecodeFrame()
             }
             else if (frame[i] == '*')
             {
-                char *e;
                 frame[i] = '\0';
-                checksum = (char) strtol(&frame[i + 1], &e, 16);
+                checksum = (char) strtol(&frame[i + 1], NULL, 16);
             }
             i++;
         }
@@ -408,6 +408,7 @@ void GPSDecodeFrame()
             if (GPS.UTCTime[0] && GPS.Date[0])
             {
                 datetime_t utctime, systemdate;
+                double utc_julian, system_julian;
                 int p;
 
                 p = 0;
@@ -431,7 +432,18 @@ void GPSDecodeFrame()
                 utctime.second = (GPS.UTCTime[p++] - '0') * 10;
                 utctime.second += (GPS.UTCTime[p++] - '0');
 
+                GPS.UTCTime[0] = 0;
+                GPS.Date[0] = 0;
+                
                 GetUTCDateTime(&systemdate);
+                utc_julian = DateToJulianDay(&utctime);
+                system_julian = DateToJulianDay(&systemdate);
+                if (fabs(utc_julian - system_julian) > 1.0)
+                {
+                    utctime.day = systemdate.day;
+                    utctime.month = systemdate.month;
+                    utctime.year = systemdate.year;
+                }
                 if (memcmp(&utctime, &systemdate, sizeof(utctime)) != 0)
                 {
                     SetUTCDateTime(&utctime);

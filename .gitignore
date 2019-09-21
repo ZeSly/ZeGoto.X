@@ -7,3 +7,5 @@ nbproject/Makefile-impl.mk
 nbproject/Makefile-local-default.mk
 nbproject/Makefile-variables.mk
 *.bak
+/release/
+/*mpfs*/
