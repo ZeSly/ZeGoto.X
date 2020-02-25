@@ -76,7 +76,7 @@
 #elif (defined(__PIC24F__) || defined(__PIC24FK__)) && defined(__C30__)	// Microchip C30 compiler
 	// PIC24F processor
     #define COMPILER_MPLAB_C30
-	#include <p24Fxxxx.h>
+	#include <xc.h>
 #elif defined(__PIC24H__) && defined(__C30__)	// Microchip C30 compiler
 	// PIC24H processor
     #define COMPILER_MPLAB_C30

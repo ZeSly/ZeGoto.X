@@ -1,5 +1,5 @@
-;connect '/C=13'
-connect 'opengoto:4300 /nossh /T=1'
+connect '/C=12'
+;connect 'zegoto:4030 /nossh /T=1'
 setecho 0
 fileopen fhandle 'test-report.txt' 0
 
