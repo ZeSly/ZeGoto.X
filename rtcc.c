@@ -335,7 +335,7 @@ void JulianDayToDate(double jj, datetime_t *datetime)
 
     datetime->day = floor(jdec);
     datetime->month = e < 13.5 ? e - 1 : e - 13;
-    datetime->year = datetime->month >= 2 ? c - 4716 : c - 4715;
+    datetime->year = datetime->month > 2 ? c - 4716 : c - 4715;
     datetime->hour = floor(f * 24);
     double mindec = (f * 24 - datetime->hour) * 60;
     datetime->minute = floor(mindec);
