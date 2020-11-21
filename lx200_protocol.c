@@ -36,11 +36,11 @@
 #include "home_position_commands.h"
 #include "reticule.h"
 #include "tracking_commands.h"
+#include "mount.h"
+#include "ra_motor.h"
 
 char LX200String[32];
 char LX200Response[64];
-
-//void GetDecRelativeStepPosition(void);
 
 void GetTelescopeFirmwareDate()
 {
@@ -317,7 +317,6 @@ LX200Command LX200CommandTab[] ={
     { "ZGD", 3, GetStepDeclination},
     { "ZGr", 3, GetStepTargetRA},
     { "ZGd", 3, GetStepTargetDeclination},
-//    { "ZRD", 3, GetDecRelativeStepPosition},
 
     { "U", 1, PrecisionToggle},
     { "P", 1, GetPrecision},
@@ -327,12 +326,11 @@ LX200Command LX200CommandTab[] ={
     { "TL", 2, SelectLunarTracking},
     { "TQ", 2, SelectSideralTracking},
     { "TS", 2, SelectSolarTracking},
+    { "TH", 2, RAStop},
     
     
-    { "GIP", 1, GetIPConfig},
-    { "SIP", 1, SetIPConfig},
-
-    //    { "ZGs", 3, DumpSpeedList },
+    { "GIP", 3, GetIPConfig},
+    { "SIP", 3, SetIPConfig},
 
     { NULL, 0, NULL}
 };
