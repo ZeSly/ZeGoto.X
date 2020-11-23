@@ -185,6 +185,8 @@ void __attribute__((interrupt, no_auto_psv)) _T3Interrupt(void)
 //        }
         PR2 = MotorTimerPeriod & 0xFFFF;
         PR3 = (MotorTimerPeriod >> 16) & 0xFFFF;
+        TMR2 = 0;
+        TMR3 = 0;
     }
 
     // Reset interrupt flag
@@ -197,6 +199,8 @@ static void UpdateMotorTimerPeriod()
     TMR2 = 0;
     PR3 = (MotorTimerPeriod >> 16) & 0xFFFF;
     PR2 = MotorTimerPeriod & 0xFFFF;
+    TMR2 = 0;
+    TMR3 = 0;
 }
 
 void RAMotorInit(void)

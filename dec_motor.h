@@ -22,8 +22,8 @@
 #include "mount.h"
 
 
-#define Dec_EI (IEC0bits.T3IE = 1)
-#define Dec_DI (IEC0bits.T3IE = 0)
+#define Dec_EI (IEC1bits.T5IE = 1)
+#define Dec_DI (IEC1bits.T5IE = 0)
 
 void DecMotorInit(void);
 void DecAccelerate(void);

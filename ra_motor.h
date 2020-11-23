@@ -21,8 +21,8 @@
 
 #include <stdint.h>
 
-#define RA_EI (IEC0bits.T2IE = 1)
-#define RA_DI (IEC0bits.T2IE = 0)
+#define RA_EI (IEC0bits.T3IE = 1)
+#define RA_DI (IEC0bits.T3IE = 0)
 
 void RAMotorInit(void);
 void RAStart(void);

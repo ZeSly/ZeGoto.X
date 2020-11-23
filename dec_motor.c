@@ -139,6 +139,8 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
         MotorTimerPeriod = Mount.SideralHalfPeriod / CurrentSpeed;
         PR4 = MotorTimerPeriod & 0xFFFF;
         PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
+        TMR4 = 0;
+        TMR5 = 0;        
     }
 
     // Reset interrupt flag
@@ -151,6 +153,8 @@ static void UpdateMotorTimerPeriod()
     TMR4 = 0;
     PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
     PR4 = MotorTimerPeriod & 0xFFFF;
+    TMR4 = 0;
+    TMR5 = 0;        
 }
 
 void DecMotorInit(void)
