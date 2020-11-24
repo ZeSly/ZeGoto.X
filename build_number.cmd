@@ -2,7 +2,7 @@ REM echo off
 setlocal enabledelayedexpansion
 
 set version_major=0
-set version_minor=3
+set version_minor=4
 set buildnum=
 
 for /f "tokens=3" %%i in (build_number.h) do set buildnum=%%i
