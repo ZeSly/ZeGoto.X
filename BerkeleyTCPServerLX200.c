@@ -122,9 +122,13 @@ void BerkeleyTCPServerLX200(void)
     struct sockaddr_in addr;
     struct sockaddr_in addRemote;
     int addrlen = sizeof (struct sockaddr_in);
-    char TCP_In_Buffer[15];
+    //char TCP_In_Buffer[15];
     char TCP_Out_Buffer[15];
-    int length, len_to_send;
+    int length;
+
+    static int len_to_send = 0;
+    static char *p_to_send;
+
     int i;
 
     static enum
@@ -193,57 +197,70 @@ void BerkeleyTCPServerLX200(void)
             // If this socket is not connected then no need to process anything
             if (ClientSock[i] != INVALID_SOCKET)
             {
-
-                // For all connected sockets, receive and send back the data
-                length = recv(ClientSock[i], TCP_Out_Buffer, sizeof (TCP_Out_Buffer), 0);
-
-                if (length < 0)
+                if (len_to_send == 0)
                 {
-                    closesocket(ClientSock[i]);
-                    ClientSock[i] = INVALID_SOCKET;
+                    // For all connected sockets, receive and send back the data
+                    length = recv(ClientSock[i], TCP_Out_Buffer, sizeof (TCP_Out_Buffer), 0);
+
+                    if (length < 0)
+                    {
+                        closesocket(ClientSock[i]);
+                        ClientSock[i] = INVALID_SOCKET;
+                    }
+
+                    for (k = 0; k < length; k++)
+                    {
+                        if (TCP_Out_Buffer[k] == 6) // NACK
+                        {
+                            char to_send = 'P';
+                            send(ClientSock[i], &to_send, 1, 0);
+                        }
+                        else if (TCP_Out_Buffer[k] == ':' && getting_cmd == FALSE) // start of a LX200 command
+                        {
+                            j = 0;
+                            getting_cmd = TRUE;
+                        }
+                        else if (TCP_Out_Buffer[k] == '#') // end of a LX200 command
+                        {
+                            if (j > 0)
+                            {
+                                LX200Cmd[j++] = '#';
+                                LX200Cmd[j] = '\0';
+                                LX200Response[0] = '\0';
+                                LX200ProcessCommand(LX200Cmd);
+                                if (LX200Response[0] != '\0')
+                                {
+                                    p_to_send = LX200Response;
+                                    len_to_send = strlen(LX200Response);
+                                }
+                            }
+                            j = 0;
+                            getting_cmd = FALSE;
+                        }
+                        else
+                        {
+                            LX200Cmd[j++] = TCP_Out_Buffer[k];
+                        }
+
+                    }
                 }
 
-                len_to_send = 0;
-
-                for (k = 0; k < length; k++)
+                if (len_to_send)
                 {
-                    if (TCP_Out_Buffer[k] == 6) // NACK
+                    int sent;
+                    if (len_to_send > 24)
                     {
-                        TCP_In_Buffer[0] = 'P';
-                        len_to_send = 1;
-                    }
-                    else if (TCP_Out_Buffer[k] == ':' && getting_cmd == FALSE) // start of a LX200 command
-                    {
-                        j = 0;
-                        getting_cmd = TRUE;
-                    }
-                    else if (TCP_Out_Buffer[k] == '#') // end of a LX200 command
-                    {
-                        if (j > 0)
-                        {
-                            LX200Cmd[j++] = '#';
-                            LX200Cmd[j] = '\0';
-                            LX200ProcessCommand(LX200Cmd);
-                            if (LX200Response[0] != '\0')
-                            {
-                                strcpy(TCP_In_Buffer, LX200Response);
-                                len_to_send = strlen(TCP_In_Buffer);
-                            }
-                            LX200Response[0] = '\0';
-                        }
-                        j = 0;
-                        getting_cmd = FALSE;
+                        sent = send(ClientSock[i], p_to_send, 24, 0);
                     }
                     else
                     {
-                        LX200Cmd[j++] = TCP_Out_Buffer[k];
+                        sent = send(ClientSock[i], p_to_send, len_to_send, 0);
                     }
-
-                }
-                
-                if (len_to_send)
-                {
-                    send(ClientSock[i], TCP_In_Buffer, len_to_send, 0);
+                    if (sent > 0)
+                    {
+                        len_to_send -= sent;
+                        p_to_send += sent;
+                    }
                 }
                 if (GPS.Forward)
                 {
