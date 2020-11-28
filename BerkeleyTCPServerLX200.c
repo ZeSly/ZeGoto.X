@@ -79,18 +79,17 @@ void GPSForwardFrame(SOCKET ClientSock)
         l = strlen(frame);
         j = 0;
     }
-    if (l >= 24)
+    if (l > 0)
     {
-        int s = send(ClientSock, &frame[j], 24, 0);
-        if (s != SOCKET_ERROR)
+        int s;
+        if (l > 24)
         {
-            j += s;
-            l -= s;
+            s = send(ClientSock, &frame[j], 24, 0);
         }
-    }
-    else if (l > 0)
-    {
-        int s = send(ClientSock, &frame[j], l, 0);
+        else
+        {
+            s = send(ClientSock, &frame[j], l, 0);
+        }
         if (s != SOCKET_ERROR)
         {
             j += s;

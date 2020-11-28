@@ -1,4 +1,4 @@
-#define VERSION "0.4.6" 
+#define VERSION "0.4.8" 
 #define VERSION_MAJOR 0 
 #define VERSION_MINOR 4 
-#define BUILD_NUMBER 6 
+#define BUILD_NUMBER 8 
