@@ -42,7 +42,6 @@ static motor_state_t DecState = MOTOR_STOP;
 static uint32_t MotorTimerPeriod;
 static uint16_t CurrentSpeed;
 static int32_t Backlash;
-static BOOL DirectionChanged;
 //static BOOL FullStep;
 
 static int32_t accel_decel_cnt;
@@ -69,8 +68,11 @@ void __attribute__((interrupt, no_auto_psv)) _T5Interrupt(void)
             Backlash--;
             if (Backlash == 0)
             {
-                T4CONbits.TON = 0;
-                DEC_SLEEP_IO = 0;            
+                OC3CON1bits.OCM = 3;
+                PR4 = MotorTimerPeriod & 0xFFFF;
+                PR5 = (MotorTimerPeriod >> 16) & 0xFFFF;
+                TMR4 = 0;
+                TMR5 = 0;        
             }
         }
         else
@@ -194,7 +196,6 @@ void DecMotorInit(void)
     }
     
     Backlash = 0;
-    DirectionChanged = FALSE;
 }
 
 void DecStart(void)
@@ -234,20 +235,6 @@ void DecDecelerate(void)
     {
         accel_decel_cnt = Mount.DecelPeriod;
         DecState = MOTOR_DECEL;
-    }
-}
-
-void DecGuideStop(void)
-{
-    if (DirectionChanged && Mount.Config.DecStepBacklash != 0)
-    {
-        Backlash = Mount.Config.DecStepBacklash;
-        DirectionChanged = FALSE;
-    }
-    else
-    {
-        T4CONbits.TON = 0;
-        DEC_SLEEP_IO = 0;
     }
 }
 
@@ -322,19 +309,25 @@ inline int DecIsMotorStopped()
 
 void DecGuide(BYTE dir)
 {
-    // = 0;
-    MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
-    UpdateMotorTimerPeriod();
-    if (DEC_DIR_IO != dir)
+    if (DEC_DIR_IO != dir && Mount.Config.DecStepBacklash != 0)
     {
-        DirectionChanged = TRUE;        
+        Backlash = Mount.Config.DecStepBacklash;
+        MotorTimerPeriod = Mount.SideralHalfPeriod / 10;
+        UpdateMotorTimerPeriod();
+        MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
+    }
+    else
+    {
+        MotorTimerPeriod = Mount.SideralHalfPeriod * 10 / Mount.Config.GuideSpeed;
+        UpdateMotorTimerPeriod();
+        OC3CON1bits.OCM = 3;
     }
     DEC_DIR_IO = dir;
     DecStart();
 }
-//
-//extern char LX200Response[];
-//void GetDecRelativeStepPosition(void)
-//{
-//    sprintf(LX200Response, "%li#", DecRelativeStepPosition);
-//}
+
+void DecGuideStop(void)
+{   
+    T4CONbits.TON = 0;
+    DEC_SLEEP_IO = 0;
+}

@@ -158,7 +158,6 @@ void GuideNorth()
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
-        OC3CON1bits.OCM = 3;
         DecGuide(Mount.NorthDirection);
         TEST_PIN_OUT = 1;
     }
@@ -188,7 +187,6 @@ void GuideSouth()
     DecPulseGuideTime = atoi(LX200String + 3);
     if (DecPulseGuideTime != 0)
     {
-        OC3CON1bits.OCM = 3;
         DecGuide(Mount.SouthDirection);
         TEST_PIN_OUT = 1;
     }
